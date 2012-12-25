@@ -1,0 +1,14 @@
+digraph ngx_buf {
+   rankdir=TB;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   ngx_buf_t [label="{ngx_buf_t|{<start>start|<pos>pos|<last>last|<end>end|<fpos>file_pos|<flast>file_last}}"];
+   memory [label="<c>cusumed|<b>buffered|<e>empty", height=0.4];
+   ngx_buf_t:start -> memory:c:nw;
+   ngx_buf_t:end -> memory:e:ne;
+   ngx_buf_t:pos -> memory:c:ne;
+   ngx_buf_t:last -> memory:b:ne;
+
+   file [label="file", height=0.4];
+   ngx_buf_t:fpos -> file:n;
+   ngx_buf_t:flast -> file:ne;
+}

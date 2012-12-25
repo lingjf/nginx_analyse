@@ -1,0 +1,200 @@
+#include "h2unit.h"
+
+extern "C" {
+#include <ngx_config.h>
+#include <ngx_core.h>
+}
+
+ngx_uint_t ut_normal_hash_key(u_char *data, size_t len)
+{
+   return (ngx_uint_t)data[0];
+}
+
+H2UNIT(ngx_hash_normal)
+{
+   ngx_pool_t * pool;
+   void setup()
+   {
+      ngx_cacheline_size = 16;
+      pool = ngx_create_pool(4000, NULL);
+   }
+
+   void teardown()
+   {
+      ngx_destroy_pool(pool);
+   }
+};
+
+
+H2CASE(ngx_hash_normal,"init")
+{
+   ngx_hash_init_t hinit;
+   hinit.hash = NULL;
+   hinit.max_size = 2;
+   hinit.bucket_size = 20;
+   hinit.key = ut_normal_hash_key;
+   hinit.name = (char*)"hash ut";
+   hinit.pool = pool;
+   hinit.temp_pool = NULL;
+   ngx_hash_key_t names[] = {
+      { {2, (u_char*)"a"}, ut_normal_hash_key((u_char*)"a", 2), (void*) "A" },
+      { {2, (u_char*)"b"}, ut_normal_hash_key((u_char*)"b", 2), (void*) "B" },
+      { {2, (u_char*)"c"}, ut_normal_hash_key((u_char*)"c", 2), (void*) "C" }
+   };
+
+   int rv = ngx_hash_init(&hinit, names, sizeof(names) / sizeof(names[0]));
+   H2EQUAL(NGX_OK, rv);
+
+   H2EQUAL_STRCMP("ngx_hash_t{2, 0)b:B 1)a:A c:C } ", jeff_hash_tustring(hinit.hash, (u_char*(*)(void*))jeff_tustring));
+
+   void * data = ngx_hash_find(hinit.hash,ut_normal_hash_key((u_char*)"c", 2), (u_char*)"c", 2);
+   H2EQUAL_STRCMP((char*)"C", (char*)data);
+}
+
+H2UNIT(ngx_hash_wildcard)
+{
+   ngx_pool_t * pool;
+   void setup()
+   {
+      ngx_cacheline_size = 16;
+      pool = ngx_create_pool(4000, NULL);
+   }
+
+   void teardown()
+   {
+      ngx_destroy_pool(pool);
+   }
+};
+
+ngx_uint_t ut_wildcard_hash_key(u_char *data, size_t len)
+{
+   return (ngx_uint_t)data[0];
+}
+
+H2CASE(ngx_hash_wildcard,"init 1")
+{
+   ngx_hash_init_t hinit;
+   hinit.hash = NULL;
+   hinit.max_size = 4;
+   hinit.bucket_size = 30;
+   hinit.key = ut_wildcard_hash_key;
+   hinit.name = (char*)"hash ut";
+   hinit.pool = pool;
+   hinit.temp_pool = pool;
+
+   // value should be aligned
+   u_char abc_com[8] = "abc.com";
+   u_char A[4] = "A";
+
+   ngx_hash_key_t names[] = {
+      { {7, abc_com}, ut_wildcard_hash_key(abc_com, 7), (void*) A },
+   };
+   int rv = ngx_hash_wildcard_init(&hinit, names, sizeof(names) / sizeof(names[0]));
+   H2EQUAL_STRCMP("ngx_hash_wildcard_t{0)abc:{0)com:A } } ",
+      jeff_hash_wildcard_tustring((ngx_hash_wildcard_t *)hinit.hash, (u_char*(*)(void*))jeff_tustring));
+}
+
+H2CASE(ngx_hash_wildcard,"init 2")
+{
+   ngx_hash_init_t hinit;
+   hinit.hash = NULL;
+   hinit.max_size = 4;
+   hinit.bucket_size = 30;
+   hinit.key = ut_wildcard_hash_key;
+   hinit.name = (char*)"hash ut";
+   hinit.pool = pool;
+   hinit.temp_pool = pool;
+
+   // value should be aligned
+   u_char abc_com[8] = "abc.com";
+   u_char A[4] = "A";
+   u_char abc_dot[8] = "abc.dot";
+   u_char B[4] = "B";
+   u_char bbc_dot[8] = "bbc.dot";
+   u_char C[4] = "C";
+   u_char cbc_edu[8] = "cbc.edu";
+   u_char D[4] = "D";
+
+   ngx_hash_key_t names[] = {
+      { {7, abc_com}, ut_wildcard_hash_key(abc_com, 7), (void*) A },
+      { {7, abc_dot}, ut_wildcard_hash_key(abc_dot, 7), (void*) B },
+      { {7, bbc_dot}, ut_wildcard_hash_key(bbc_dot, 7), (void*) C },
+      { {7, cbc_edu}, ut_wildcard_hash_key(cbc_edu, 7), (void*) D },
+   };
+   int rv = ngx_hash_wildcard_init(&hinit, names, sizeof(names) / sizeof(names[0]));
+   H2EQUAL_STRCMP("ngx_hash_wildcard_t{0)bbc:{0)dot:C } 1)abc:{0)com:A dot:B } cbc:{0)edu:D } } ",
+      jeff_hash_wildcard_tustring((ngx_hash_wildcard_t *)hinit.hash, (u_char*(*)(void*))jeff_tustring));
+}
+
+H2CASE(ngx_hash_wildcard,"init 3")
+{
+   ngx_hash_init_t hinit;
+   hinit.hash = NULL;
+   hinit.max_size = 4;
+   hinit.bucket_size = 30;
+   hinit.key = ut_wildcard_hash_key;
+   hinit.name = (char*)"hash ut";
+   hinit.pool = pool;
+   hinit.temp_pool = pool;
+
+   // value should be aligned
+   u_char abc_com[8] = "abc.com";
+   u_char A[4] = "A";
+   u_char abc_com_cn[12] = "abc.com.cn";
+   u_char B[4] = "B";
+
+   ngx_hash_key_t names[] = {
+      { {7, abc_com}, ut_wildcard_hash_key(abc_com, 7), (void*) A },
+      { {10, abc_com_cn}, ut_wildcard_hash_key(abc_com_cn, 10), (void*) B },
+   };
+   int rv = ngx_hash_wildcard_init(&hinit, names, sizeof(names) / sizeof(names[0]));
+   H2EQUAL_STRCMP("ngx_hash_wildcard_t{0)abc:{0)com:A {0)cn:B } } } ",
+      jeff_hash_wildcard_tustring((ngx_hash_wildcard_t *)hinit.hash, (u_char*(*)(void*))jeff_tustring));
+}
+
+H2CASE(ngx_hash_wildcard,"find head")
+{
+   ngx_hash_init_t hinit;
+   hinit.hash = NULL;
+   hinit.max_size = 4;
+   hinit.bucket_size = 30;
+   hinit.key = ngx_hash_key;
+   hinit.name = (char*)"hash ut";
+   hinit.pool = pool;
+   hinit.temp_pool = pool;
+
+   // value should be aligned
+   u_char abc_com[8] = "com.abc";
+   u_char A[4] = "A";
+   u_char men_abc_com[12] = "com.abc.men";
+   u_char B[4] = "B";
+   u_char _xyz_com[12] = "com.xyz.";
+   u_char C[4] = "C";
+   u_char bbc_dot[8] = "dot.bbc";
+   u_char D[4] = "D";
+   u_char cnn_edu[8] = "edu.cnn";
+   u_char E[4] = "E";
+
+   ngx_hash_key_t names[] = {
+      { {7, abc_com}, ngx_hash_key(abc_com, 7), (void*) A },
+      { {11, men_abc_com}, ngx_hash_key(men_abc_com, 11), (void*) B },
+      { {8, _xyz_com}, ngx_hash_key(_xyz_com, 8), (void*) C },
+      { {7, bbc_dot}, ngx_hash_key(bbc_dot, 7), (void*) D },
+      { {7, cnn_edu}, ngx_hash_key(cnn_edu, 7), (void*) E },
+   };
+   int rv = ngx_hash_wildcard_init(&hinit, names, sizeof(names) / sizeof(names[0]));
+   H2EQUAL_INTEGER(NGX_OK, rv);
+   void *data1 = ngx_hash_find_wc_head((ngx_hash_wildcard_t *)hinit.hash, (u_char*)"abc.com", 7);
+   H2EQUAL_STRCMP((char*)A, (char*)data1);
+   void *data2 = ngx_hash_find_wc_head((ngx_hash_wildcard_t *)hinit.hash, (u_char*)"men.abc.com", 11);
+   H2EQUAL_STRCMP((char*)B, (char*)data2);
+   void *data3 = ngx_hash_find_wc_head((ngx_hash_wildcard_t *)hinit.hash, (u_char*)"xyz.com", 7);
+   H2CHECK(data3 == NULL);
+   void *data4 = ngx_hash_find_wc_head((ngx_hash_wildcard_t *)hinit.hash, (u_char*)"boy.xyz.com", 11);
+   H2EQUAL_STRCMP((char*)C, (char*)data4);
+   void *data5 = ngx_hash_find_wc_head((ngx_hash_wildcard_t *)hinit.hash, (u_char*)"bbc.dot", 7);
+   H2EQUAL_STRCMP((char*)D, (char*)data5);
+   void *data6 = ngx_hash_find_wc_head((ngx_hash_wildcard_t *)hinit.hash, (u_char*)"cat.bbc.dot", 11);
+   H2EQUAL_STRCMP((char*)D, (char*)data6);
+}
+

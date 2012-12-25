@@ -1,0 +1,23 @@
+digraph ngx_hash {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [fontname="Verdana", fontsize=8];
+   ngx_hash_t [label="ngx_hash_t|<buckets>buckets|<size>size|"];
+
+   buckets_normal [label="<n1>ngx_hash_elt_t *|<n2>ngx_hash_elt_t *|<n3>ngx_hash_elt_t *|<n4>ngx_hash_elt_t *|..."];
+   ngx_hash_t:buckets -> buckets_normal:nw;
+
+   elts_simple1 [label="{ngx_hash_elt_t|ngx_hash_elt_t|...}", height=0.1];
+   buckets_normal:n1 -> elts_simple1:nw;
+
+   elts_simple2 [label="{<e1>ngx_hash_elt_t|<e2>ngx_hash_elt_t|...}", height=0.1];
+   buckets_normal:n2 -> elts_simple2:nw;
+
+   elts_simple3 [label="{<e1>ngx_hash_elt_t|<e2>ngx_hash_elt_t|...}", height=0.1];
+   buckets_normal:n3 -> elts_simple3:nw;
+
+   elts_complex [label="{<e1>1|{{value|len}|name[...]}}|{<e2>2|{{value|len}|name[...]}}|......|{n|{{value\n=null|len}|name[...]}}"];
+   //buckets_normal:n3 -> elts_complex:nw;
+   elts_simple3:e1:s -> elts_complex:e1 [style=dashed, arrowhead=onormal];
+   elts_simple3:e2:s -> elts_complex:e2 [style=dashed, arrowhead=onormal];
+}
