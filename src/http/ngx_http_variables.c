@@ -288,12 +288,10 @@ ngx_http_get_flushed_variable(ngx_http_request_t *r, ngx_uint_t index)
     ngx_http_variable_value_t  *v;
 
     v = &r->variables[index];
-
     if (v->valid || v->not_found) {
         if (!v->no_cacheable) {
             return v;
         }
-
         v->valid = 0;
         v->not_found = 0;
     }
@@ -312,19 +310,14 @@ ngx_http_get_variable(ngx_http_request_t *r, ngx_str_t *name, ngx_uint_t key)
     cmcf = ngx_http_get_module_main_conf(r, ngx_http_core_module);
 
     v = ngx_hash_find(&cmcf->variables_hash, key, name->data, name->len);
-
     if (v) {
         if (v->flags & NGX_HTTP_VAR_INDEXED) {
             return ngx_http_get_flushed_variable(r, v->index);
-
         } else {
-
             vv = ngx_palloc(r->pool, sizeof(ngx_http_variable_value_t));
-
             if (vv && v->get_handler(r, vv, v->data) == NGX_OK) {
                 return vv;
             }
-
             return NULL;
         }
     }
@@ -335,52 +328,40 @@ ngx_http_get_variable(ngx_http_request_t *r, ngx_str_t *name, ngx_uint_t key)
     }
 
     if (ngx_strncmp(name->data, "http_", 5) == 0) {
-
         if (ngx_http_variable_unknown_header_in(r, vv, (uintptr_t) name) == NGX_OK) {
             return vv;
         }
-
         return NULL;
     }
 
     if (ngx_strncmp(name->data, "sent_http_", 10) == 0) {
-
         if (ngx_http_variable_unknown_header_out(r, vv, (uintptr_t) name) == NGX_OK) {
             return vv;
         }
-
         return NULL;
     }
 
     if (ngx_strncmp(name->data, "upstream_http_", 14) == 0) {
-
         if (ngx_http_upstream_header_variable(r, vv, (uintptr_t) name) == NGX_OK) {
             return vv;
         }
-
         return NULL;
     }
 
     if (ngx_strncmp(name->data, "cookie_", 7) == 0) {
-
         if (ngx_http_variable_cookie(r, vv, (uintptr_t) name) == NGX_OK) {
             return vv;
         }
-
         return NULL;
     }
 
     if (ngx_strncmp(name->data, "arg_", 4) == 0) {
-
         if (ngx_http_variable_argument(r, vv, (uintptr_t) name) == NGX_OK) {
             return vv;
         }
-
         return NULL;
     }
-
     vv->not_found = 1;
-
     return vv;
 }
 
@@ -627,8 +608,7 @@ ngx_http_variable_unknown_header(ngx_http_variable_value_t *v, ngx_str_t *var, n
 
 
 static ngx_int_t
-ngx_http_variable_request_line(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data)
+ngx_http_variable_request_line(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data)
 {
     u_char  *p, *s;
 
@@ -663,8 +643,7 @@ ngx_http_variable_request_line(ngx_http_request_t *r,
 
 
 static ngx_int_t
-ngx_http_variable_cookie(ngx_http_request_t *r, ngx_http_variable_value_t *v,
-    uintptr_t data)
+ngx_http_variable_cookie(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data)
 {
     ngx_str_t *name = (ngx_str_t *) data;
 
@@ -691,8 +670,7 @@ ngx_http_variable_cookie(ngx_http_request_t *r, ngx_http_variable_value_t *v,
 
 
 static ngx_int_t
-ngx_http_variable_argument(ngx_http_request_t *r, ngx_http_variable_value_t *v,
-    uintptr_t data)
+ngx_http_variable_argument(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data)
 {
     ngx_str_t *name = (ngx_str_t *) data;
 
@@ -721,8 +699,7 @@ ngx_http_variable_argument(ngx_http_request_t *r, ngx_http_variable_value_t *v,
 #if (NGX_HAVE_TCP_INFO)
 
 static ngx_int_t
-ngx_http_variable_tcpinfo(ngx_http_request_t *r, ngx_http_variable_value_t *v,
-    uintptr_t data)
+ngx_http_variable_tcpinfo(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data)
 {
     struct tcp_info  ti;
     socklen_t        len;
@@ -1834,7 +1811,6 @@ ngx_http_variables_add_core_vars(ngx_conf_t *cf)
 
     cmcf->variables_keys->pool = cf->pool;
     cmcf->variables_keys->temp_pool = cf->pool;
-
     if (ngx_hash_keys_array_init(cmcf->variables_keys, NGX_HASH_SMALL) != NGX_OK) {
         return NGX_ERROR;
     }
@@ -1848,11 +1824,9 @@ ngx_http_variables_add_core_vars(ngx_conf_t *cf)
         *v = *cv;
 
         rc = ngx_hash_add_key(cmcf->variables_keys, &v->name, v, NGX_HASH_READONLY_KEY);
-
         if (rc == NGX_OK) {
             continue;
         }
-
         if (rc == NGX_BUSY) {
             ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "conflicting variable name \"%V\"", &v->name);
         }
@@ -1881,11 +1855,8 @@ ngx_http_variables_init_vars(ngx_conf_t *cf)
     key = cmcf->variables_keys->keys.elts;
 
     for (i = 0; i < cmcf->variables.nelts; i++) {
-
         for (n = 0; n < cmcf->variables_keys->keys.nelts; n++) {
-
             av = key[n].value;
-
             if (av->get_handler && v[i].name.len == key[n].key.len && ngx_strncmp(v[i].name.data, key[n].key.data, v[i].name.len) == 0) {
                 v[i].get_handler = av->get_handler;
                 v[i].data = av->data;
