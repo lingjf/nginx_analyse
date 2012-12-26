@@ -576,7 +576,7 @@ ngx_hash_add_key(ngx_hash_keys_arrays_t *ha, ngx_str_t *key, void *value, ngx_ui
         n = 0;
         for (i = 0; i < key->len; i++) {
             if (key->data[i] == '*') {
-                if (++n > 1) {
+                if (++n > 1) { /* 不能有2个星 */
                     return NGX_DECLINED;
                 }
             }
@@ -605,7 +605,7 @@ ngx_hash_add_key(ngx_hash_keys_arrays_t *ha, ngx_str_t *key, void *value, ngx_ui
             }
         }
 
-        if (n) {
+        if (n) { /* 中间有*的情况 */
             return NGX_DECLINED;
         }
     }
@@ -784,8 +784,7 @@ wildcard:
         }
 
     } else {
-        if (ngx_array_init(keys, ha->temp_pool, 4, sizeof(ngx_str_t)) != NGX_OK)
-        {
+        if (ngx_array_init(keys, ha->temp_pool, 4, sizeof(ngx_str_t)) != NGX_OK) {
             return NGX_ERROR;
         }
     }
@@ -897,5 +896,60 @@ u_char *jeff_hash_wildcard_tustring(ngx_hash_wildcard_t *w, u_char*(*e)(void*))
    if (!w) return "NULL";
    ngx_snstrcatf(buffer, sizeof(buffer), "ngx_hash_wildcard_t");
    __jeff_hash_wildcard_tustring(buffer, sizeof(buffer), w, e);
+   return buffer;
+}
+
+u_char *jeff_hash_keys_arrays_tustring(ngx_hash_keys_arrays_t *s, u_char*(*e)(void*))
+{
+   static u_char buffer[1024 * 8];
+   memset(buffer, 0, sizeof(buffer));
+   if (!s) return "NULL";
+   ngx_snstrcatf(buffer, sizeof(buffer), "ngx_hash_keys_arrays_t{hsize=%d", s->hsize);
+
+   int i, j, c;
+
+   /* keys -- keys_hash */
+   if (s->keys.nelts > 0) {
+      ngx_snstrcatf(buffer, sizeof(buffer), ", keys=%s", jeff_array_tustring(&s->keys, e));
+   }
+   for (i = 0; i < s->hsize; i++) {
+      ngx_array_t * a = &s->keys_hash[i];
+      if (a->nelts > 0) {
+         ngx_snstrcatf(buffer, sizeof(buffer), ", keys_hash:%d=", i);
+         for (j = 0; j < a->nelts; j++) {
+            ngx_snstrcatf(buffer, sizeof(buffer), "%V", &a->elts[j]);
+         }
+      }
+   }
+
+   /* dns_wc_head -- dns_wc_head_hash */
+   if (s->dns_wc_head.nelts > 0) {
+      ngx_snstrcatf(buffer, sizeof(buffer), ", dns_wc_head=%s", jeff_array_tustring(&s->dns_wc_head, e));
+   }
+   for (i = 0, c = 0; i < s->hsize; i++) {
+      ngx_array_t * a = &s->dns_wc_head_hash[i];
+      if (a->nelts > 0) {
+         ngx_snstrcatf(buffer, sizeof(buffer), ", dns_wc_head_hash:%d=", i);
+         for (j = 0; j < a->nelts; j++) {
+            ngx_snstrcatf(buffer, sizeof(buffer), "%V", &a->elts[j]);
+         }
+      }
+   }
+
+   /* dns_wc_tail -- dns_wc_tail_hash */
+   if (s->dns_wc_tail.nelts > 0) {
+      ngx_snstrcatf(buffer, sizeof(buffer), ", dns_wc_tail=%s", jeff_array_tustring(&s->dns_wc_tail, e));
+   }
+   for (i = 0, c = 0; i < s->hsize; i++) {
+      ngx_array_t * a = &s->dns_wc_tail_hash[i];
+      if (a->nelts > 0) {
+         ngx_snstrcatf(buffer, sizeof(buffer), ", dns_wc_tail_hash:%d=", i);
+         for (j = 0; j < a->nelts; j++) {
+            ngx_snstrcatf(buffer, sizeof(buffer), "%V", &a->elts[j]);
+         }
+      }
+   }
+
+   ngx_snstrcatf(buffer, sizeof(buffer), "} ");
    return buffer;
 }

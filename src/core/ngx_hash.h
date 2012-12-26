@@ -116,5 +116,7 @@ u_char *jeff_hash_key_tustring(ngx_hash_key_t *k, u_char*(*e)(void*));
 u_char *jeff_hash_elt_tustring(ngx_hash_elt_t *l, u_char*(*e)(void*));
 u_char *jeff_hash_tustring(ngx_hash_t *h, u_char*(*e)(void*));
 u_char *jeff_hash_wildcard_tustring(ngx_hash_wildcard_t *w, u_char*(*e)(void*));
+u_char *jeff_hash_keys_arrays_tustring(ngx_hash_keys_arrays_t *s, u_char*(*e)(void*));
+
 
 #endif /* _NGX_HASH_H_INCLUDED_ */

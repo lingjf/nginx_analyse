@@ -44,7 +44,7 @@ fi
 
 cat << END > Makefile
 
-default:	build
+default:	ut
 
 clean:
 	rm -rf Makefile $NGX_OBJS

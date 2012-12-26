@@ -222,6 +222,6 @@ void ngx_sort(void *base, size_t n, size_t size, ngx_int_t (*cmp)(const void *, 
 #define ngx_value(n)          ngx_value_helper(n)
 
 u_char * jeff_str_tustring(ngx_str_t *s);
-u_char * jeff_tustring(char *s);
+u_char * jeff_tustring(void *s);
 
 #endif /* _NGX_STRING_H_INCLUDED_ */

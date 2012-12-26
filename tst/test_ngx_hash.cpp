@@ -198,3 +198,136 @@ H2CASE(ngx_hash_wildcard,"find head")
    H2EQUAL_STRCMP((char*)D, (char*)data6);
 }
 
+H2UNIT(ngx_hash_keys_arrays)
+{
+   ngx_pool_t * pool;
+   ngx_hash_keys_arrays_t ka;
+   void setup()
+   {
+      ngx_cacheline_size = 16;
+      pool = ngx_create_pool(4000, NULL);
+
+
+      ka.pool = pool;
+      ka.temp_pool = pool;
+      int rv = ngx_hash_keys_array_init(&ka, 0);
+      H2EQUAL_INTEGER(NGX_OK, rv);
+   }
+
+   void teardown()
+   {
+      ngx_destroy_pool(pool);
+   }
+};
+
+u_char *___test_hash_key_tustring(ngx_hash_key_t *k)
+{
+   static u_char buffer[1024];
+   memset(buffer, 0, sizeof(buffer));
+   if (!k) return (u_char*)"NULL";
+   ngx_snprintf(buffer, sizeof(buffer), "{%s:%s}",
+                jeff_str_tustring(&k->key), jeff_tustring(k->value));
+   return buffer;
+}
+
+H2CASE(ngx_hash_keys_arrays,"init")
+{
+   H2EQUAL_STRCMP("ngx_hash_keys_arrays_t{hsize=10007} ",
+                  jeff_hash_keys_arrays_tustring(&ka, (u_char*(*)(void*))___test_hash_key_tustring));
+}
+
+H2CASE(ngx_hash_keys_arrays,"add key exact")
+{
+   char c1[4] = "abc";
+   ngx_str_t v1 = {3, (u_char*)c1};
+   char d1[4] = "ABC";
+
+   int rv = ngx_hash_add_key(&ka, &v1, d1, 0);
+   H2EQUAL_INTEGER(NGX_OK, rv);
+
+   H2EQUAL_STRCMP("ngx_hash_keys_arrays_t{hsize=10007, keys=ngx_array_t{size=16,nelts/alloc=1/16384,{abc:ABC}}, keys_hash:6291=abc} ",
+                  jeff_hash_keys_arrays_tustring(&ka, (u_char*(*)(void*))___test_hash_key_tustring));
+}
+
+H2CASE(ngx_hash_keys_arrays,"add key wildcard .abc.com")
+{
+   char c1[12] = ".abc.com";
+   ngx_str_t v1 = {8, (u_char*)c1};
+   char d1[12] = ".ABC.COM";
+
+   int rv = ngx_hash_add_key(&ka, &v1, d1, NGX_HASH_WILDCARD_KEY);
+   H2EQUAL_INTEGER(NGX_OK, rv);
+
+   H2EQUAL_STRCMP("ngx_hash_keys_arrays_t{hsize=10007, keys_hash:6159=abc.com, dns_wc_head=ngx_array_t{size=16,nelts/alloc=1/16384,{com.abc:.ABC.COM}}, dns_wc_head_hash:6159=abc.com} ",
+                  jeff_hash_keys_arrays_tustring(&ka, (u_char*(*)(void*))___test_hash_key_tustring));
+}
+
+H2CASE(ngx_hash_keys_arrays,"add key wildcard *.abc.com")
+{
+   char c1[12] = "*.abc.com";
+   ngx_str_t v1 = {9, (u_char*)c1};
+   char d1[12] = "*.ABC.COM";
+
+   int rv = ngx_hash_add_key(&ka, &v1, d1, NGX_HASH_WILDCARD_KEY);
+   H2EQUAL_INTEGER(NGX_OK, rv);
+
+   H2EQUAL_STRCMP("ngx_hash_keys_arrays_t{hsize=10007, dns_wc_head=ngx_array_t{size=16,nelts/alloc=1/16384,{com.abc.:*.ABC.COM}}, dns_wc_head_hash:6159=abc.com} ",
+                  jeff_hash_keys_arrays_tustring(&ka, (u_char*(*)(void*))___test_hash_key_tustring));
+}
+
+H2CASE(ngx_hash_keys_arrays,"add key wildcard abc.com consider as exact hash")
+{
+   char c1[8] = "abc.com";
+   ngx_str_t v1 = {7, (u_char*)c1};
+   char d1[8] = "ABC.COM";
+
+   int rv = ngx_hash_add_key(&ka, &v1, d1, NGX_HASH_WILDCARD_KEY);
+   H2EQUAL_INTEGER(NGX_OK, rv);
+
+   H2EQUAL_STRCMP("ngx_hash_keys_arrays_t{hsize=10007, keys=ngx_array_t{size=16,nelts/alloc=1/16384,{abc.com:ABC.COM}}, keys_hash:6159=abc.com} ",
+                  jeff_hash_keys_arrays_tustring(&ka, (u_char*(*)(void*))___test_hash_key_tustring));
+}
+
+H2CASE(ngx_hash_keys_arrays,"add key wildcard www.abc.*")
+{
+   char c1[12] = "www.abc.*";
+   ngx_str_t v1 = {9, (u_char*)c1};
+   char d1[12] = "WWW.ABC.*";
+
+   int rv = ngx_hash_add_key(&ka, &v1, d1, NGX_HASH_WILDCARD_KEY);
+   H2EQUAL_INTEGER(NGX_OK, rv);
+
+   H2EQUAL_STRCMP("ngx_hash_keys_arrays_t{hsize=10007, dns_wc_tail=ngx_array_t{size=16,nelts/alloc=1/16384,{www.abc:WWW.ABC.*}}, dns_wc_tail_hash:1315=www.abc.} ",
+                  jeff_hash_keys_arrays_tustring(&ka, (u_char*(*)(void*))___test_hash_key_tustring));
+}
+
+H2CASE(ngx_hash_keys_arrays,"error case : add key wildcard www.*.com")
+{
+   char c1[12] = "www.*.com";
+   ngx_str_t v1 = {9, (u_char*)c1};
+   char d1[12] = "WWW.*.COM";
+
+   int rv = ngx_hash_add_key(&ka, &v1, d1, NGX_HASH_WILDCARD_KEY);
+   H2EQUAL_INTEGER(NGX_DECLINED, rv);
+}
+
+H2CASE(ngx_hash_keys_arrays,"error case : add key wildcard www.*.*")
+{
+   char c1[8] = "www.*.*";
+   ngx_str_t v1 = {7, (u_char*)c1};
+   char d1[8] = "WWW.*.*";
+
+   int rv = ngx_hash_add_key(&ka, &v1, d1, NGX_HASH_WILDCARD_KEY);
+   H2EQUAL_INTEGER(NGX_DECLINED, rv);
+}
+
+H2CASE(ngx_hash_keys_arrays,"error case : add key wildcard *..com")
+{
+   char c1[8] = "*..com";
+   ngx_str_t v1 = {6, (u_char*)c1};
+   char d1[8] = "*..COM";
+
+   int rv = ngx_hash_add_key(&ka, &v1, d1, NGX_HASH_WILDCARD_KEY);
+   H2EQUAL_INTEGER(NGX_DECLINED, rv);
+}
+

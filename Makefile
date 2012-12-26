@@ -1,24 +1,24 @@
 
-default:	build
+default:	ut
 
 clean:
-	rm -rf Makefile /home/lingjf/running
+	rm -rf Makefile objs
 
 build:
-	$(MAKE) -f /home/lingjf/running/Makefile
-	$(MAKE) -f /home/lingjf/running/Makefile manpage
+	$(MAKE) -f objs/Makefile
+	$(MAKE) -f objs/Makefile manpage
 
 ut:
-	$(MAKE) -f /home/lingjf/running/Unitest.mk
+	$(MAKE) -f objs/Unitest.mk
 	
 install:
-	$(MAKE) -f /home/lingjf/running/Makefile install
+	$(MAKE) -f objs/Makefile install
 
 upgrade:
-	/home/lingjf/running/sbin/nginx -t
+	/media/sf_Proj/nginx_analyse/objs/sbin/nginx -t
 
-	kill -USR2 `cat /home/lingjf/running/logs/nginx.pid`
+	kill -USR2 `cat /media/sf_Proj/nginx_analyse/objs/logs/nginx.pid`
 	sleep 1
-	test -f /home/lingjf/running/logs/nginx.pid.oldbin
+	test -f /media/sf_Proj/nginx_analyse/objs/logs/nginx.pid.oldbin
 
-	kill -QUIT `cat /home/lingjf/running/logs/nginx.pid.oldbin`
+	kill -QUIT `cat /media/sf_Proj/nginx_analyse/objs/logs/nginx.pid.oldbin`

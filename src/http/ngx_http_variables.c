@@ -470,18 +470,15 @@ ngx_http_variable_header(ngx_http_request_t *r, ngx_http_variable_value_t *v, ui
     ngx_table_elt_t  *h;
 
     h = *(ngx_table_elt_t **) ((char *) r + data);
-
     if (h) {
         v->len = h->value.len;
         v->valid = 1;
         v->no_cacheable = 0;
         v->not_found = 0;
         v->data = h->value.data;
-
     } else {
         v->not_found = 1;
     }
-
     return NGX_OK;
 }
 
@@ -573,8 +570,7 @@ ngx_http_variable_unknown_header_out(ngx_http_request_t *r, ngx_http_variable_va
 
 
 ngx_int_t
-ngx_http_variable_unknown_header(ngx_http_variable_value_t *v, ngx_str_t *var,
-    ngx_list_part_t *part, size_t prefix)
+ngx_http_variable_unknown_header(ngx_http_variable_value_t *v, ngx_str_t *var, ngx_list_part_t *part, size_t prefix)
 {
     u_char            ch;
     ngx_uint_t        i, n;
@@ -778,8 +774,7 @@ ngx_http_variable_tcpinfo(ngx_http_request_t *r, ngx_http_variable_value_t *v,
 
 
 static ngx_int_t
-ngx_http_variable_host(ngx_http_request_t *r, ngx_http_variable_value_t *v,
-    uintptr_t data)
+ngx_http_variable_host(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data)
 {
     ngx_http_core_srv_conf_t  *cscf;
 
@@ -803,8 +798,7 @@ ngx_http_variable_host(ngx_http_request_t *r, ngx_http_variable_value_t *v,
 
 
 static ngx_int_t
-ngx_http_variable_binary_remote_addr(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data)
+ngx_http_variable_binary_remote_addr(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data)
 {
     struct sockaddr_in   *sin;
 #if (NGX_HAVE_INET6)

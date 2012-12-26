@@ -1860,7 +1860,7 @@ u_char * jeff_str_tustring(ngx_str_t *s)
    return buffer;
 }
 
-u_char * jeff_tustring(char *s)
+u_char * jeff_tustring(void *s)
 {
    if (!s) return (u_char*)"";
    return (u_char*)s;
