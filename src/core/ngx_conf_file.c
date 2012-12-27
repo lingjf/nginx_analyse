@@ -1530,7 +1530,7 @@ u_char *jeff_command_type_tustring(unsigned long command_type)
 u_char *jeff_conf_tustring(ngx_conf_t *c)
 {
    static u_char buffer[1024 * 8];
-   memset(buffer, 0, sizeof(buffer));
+   buffer[0] = 0;
    ngx_snprintf(buffer, sizeof(buffer), "ngx_conf_t[%s %s %s]",
                 jeff_module_type_tustring(c->module_type),
                 jeff_command_type_tustring(c->cmd_type),
@@ -1541,7 +1541,7 @@ u_char *jeff_conf_tustring(ngx_conf_t *c)
 u_char *jeff_command_tustring(ngx_command_t *c)
 {
    static u_char buffer[1024 * 8];
-   memset(buffer, 0, sizeof(buffer));
+   buffer[0] = 0;
    ngx_snprintf(buffer, sizeof(buffer), "ngx_command_t[%V %s %xd.%d]",
                 &c->name,
                 jeff_command_type_tustring(c->type),
@@ -1549,3 +1549,12 @@ u_char *jeff_command_tustring(ngx_command_t *c)
    return buffer;
 }
 
+u_char *jeff_module_tustring(ngx_module_t *m)
+{
+   static u_char buffer[1024 * 8];
+   buffer[0] = 0;
+   if (!m) return "NULL";
+   ngx_snprintf(buffer, sizeof(buffer), "ngx_module_t{index=%d, type=%s}",
+                m->index, jeff_module_type_tustring(m->type));
+   return buffer;
+}

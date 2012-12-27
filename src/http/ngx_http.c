@@ -101,9 +101,6 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_http_core_srv_conf_t   **cscfp;
     ngx_http_core_main_conf_t   *cmcf;
 
-//    printf("%s\n", jeff_conf_tustring(cf));
-//    printf("%s\n", jeff_command_tustring(cmd));
-
     /* the main http context */
 
     ctx = ngx_pcalloc(cf->pool, sizeof(ngx_http_conf_ctx_t));
@@ -133,10 +130,7 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
 
 
-    /*
-     * the http null srv_conf context, it is used to merge
-     * the server{}s' srv_conf's
-     */
+    /* the http null srv_conf context, it is used to merge the server{}s' srv_conf's */
 
     ctx->srv_conf = ngx_pcalloc(cf->pool, sizeof(void *) * ngx_http_max_module);
     if (ctx->srv_conf == NULL) {
@@ -144,10 +138,7 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
 
 
-    /*
-     * the http null loc_conf context, it is used to merge
-     * the server{}s' loc_conf's
-     */
+    /* the http null loc_conf context, it is used to merge the server{}s' loc_conf's */
 
     ctx->loc_conf = ngx_pcalloc(cf->pool, sizeof(void *) * ngx_http_max_module);
     if (ctx->loc_conf == NULL) {
@@ -155,10 +146,7 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
 
 
-    /*
-     * create the main_conf's, the null srv_conf's, and the null loc_conf's
-     * of the all http modules
-     */
+    /* create the main_conf's, the null srv_conf's, and the null loc_conf's of the all http modules */
 
     for (m = 0; ngx_modules[m]; m++) {
         if (ngx_modules[m]->type != NGX_HTTP_MODULE) {
@@ -169,6 +157,7 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         mi = ngx_modules[m]->ctx_index;
 
         if (module->create_main_conf) {
+            //printf("create main conf : %s\n", jeff_module_tustring(ngx_modules[m]));
             ctx->main_conf[mi] = module->create_main_conf(cf);
             if (ctx->main_conf[mi] == NULL) {
                 return NGX_CONF_ERROR;
@@ -176,6 +165,7 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         }
 
         if (module->create_srv_conf) {
+            //printf("create srv conf : %s\n", jeff_module_tustring(ngx_modules[m]));
             ctx->srv_conf[mi] = module->create_srv_conf(cf);
             if (ctx->srv_conf[mi] == NULL) {
                 return NGX_CONF_ERROR;
@@ -183,6 +173,7 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         }
 
         if (module->create_loc_conf) {
+            //printf("create loc conf : %s\n", jeff_module_tustring(ngx_modules[m]));
             ctx->loc_conf[mi] = module->create_loc_conf(cf);
             if (ctx->loc_conf[mi] == NULL) {
                 return NGX_CONF_ERROR;
@@ -200,6 +191,7 @@ ngx_http_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         module = ngx_modules[m]->ctx;
 
         if (module->preconfiguration) {
+            //printf("preconfiguration : %s\n", jeff_module_tustring(ngx_modules[m]));
             if (module->preconfiguration(cf) != NGX_OK) {
                 return NGX_CONF_ERROR;
             }
