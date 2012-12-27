@@ -125,8 +125,7 @@ void ngx_reopen_files(ngx_cycle_t *cycle, ngx_uid_t user);
 char **ngx_set_environment(ngx_cycle_t *cycle, ngx_uint_t *last);
 ngx_pid_t ngx_exec_new_binary(ngx_cycle_t *cycle, char *const *argv);
 uint64_t ngx_get_cpu_affinity(ngx_uint_t n);
-ngx_shm_zone_t *ngx_shared_memory_add(ngx_conf_t *cf, ngx_str_t *name,
-    size_t size, void *tag);
+ngx_shm_zone_t *ngx_shared_memory_add(ngx_conf_t *cf, ngx_str_t *name, size_t size, void *tag);
 
 
 extern volatile ngx_cycle_t  *ngx_cycle;
@@ -138,5 +137,7 @@ extern ngx_uint_t             ngx_quiet_mode;
 extern ngx_tls_key_t          ngx_core_tls_key;
 #endif
 
+
+u_char *jeff_cycle_tustring(ngx_cycle_t *c);
 
 #endif /* _NGX_CYCLE_H_INCLUDED_ */

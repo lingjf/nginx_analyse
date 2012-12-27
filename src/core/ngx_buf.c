@@ -218,3 +218,62 @@ ngx_chain_update_chains(ngx_pool_t *p, ngx_chain_t **free, ngx_chain_t **busy,
         *free = cl;
     }
 }
+
+u_char *jeff_buf_tustring(ngx_buf_t *b)
+{
+   static u_char buffer[1024 * 8];
+   memset(buffer, 0, sizeof(buffer));
+   if (!b) return "NULL";
+   ngx_snprintf(buffer, sizeof(buffer), "ngx_buf_t{end-start=%d,last-pos=%d", b->end - b->start, b->last - b->pos);
+   if (b->temporary) {
+      ngx_snstrcatf(buffer, sizeof(buffer), ",temporary");
+   }
+   if (b->memory) {
+      ngx_snstrcatf(buffer, sizeof(buffer), ",memory");
+   }
+   if (b->mmap) {
+      ngx_snstrcatf(buffer, sizeof(buffer), ",mmap");
+   }
+   if (b->recycled) {
+      ngx_snstrcatf(buffer, sizeof(buffer), ",recycled");
+   }
+   if (b->in_file) {
+      ngx_snstrcatf(buffer, sizeof(buffer), ",in_file");
+   }
+   if (b->flush) {
+      ngx_snstrcatf(buffer, sizeof(buffer), ",flush");
+   }
+   if (b->sync) {
+      ngx_snstrcatf(buffer, sizeof(buffer), ",sync");
+   }
+   if (b->last_buf) {
+      ngx_snstrcatf(buffer, sizeof(buffer), ",last_buf");
+   }
+   if (b->last_in_chain) {
+      ngx_snstrcatf(buffer, sizeof(buffer), ",last_in_chain");
+   }
+   if (b->last_shadow) {
+      ngx_snstrcatf(buffer, sizeof(buffer), ",last_shadow");
+   }
+   if (b->temp_file) {
+      ngx_snstrcatf(buffer, sizeof(buffer), ",temp_file");
+   }
+   ngx_snstrcatf(buffer, sizeof(buffer), "}");
+   return buffer;
+}
+
+u_char *jeff_chain_tustring(ngx_chain_t *c)
+{
+   static u_char buffer[1024 * 8];
+   memset(buffer, 0, sizeof(buffer));
+   if (!c) return "NULL";
+   ngx_snprintf(buffer, sizeof(buffer), "ngx_chain_t{");
+   for (; c ; c = c->next) {
+      ngx_buf_t *b = c->buf;
+      if (b) {
+         ngx_snstrcatf(buffer, sizeof(buffer), "%s,",jeff_buf_tustring(b));
+      }
+   }
+   ngx_snstrcatf(buffer, sizeof(buffer), "}");
+   return buffer;
+}

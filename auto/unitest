@@ -187,6 +187,7 @@ ngx_link=${CORE_LINK:+`echo $CORE_LINK | sed -e "s/\//$ngx_regex_dirsep/g" -e "s
 cat << END                                                    >> $NGX_UNITEST_MAKEFILE
 all: $NGX_OBJS${ngx_dirsep}nginx_unitest${ngx_binext}
 	cp -rf conf $NGX_OBJS/
+	mkdir -p $NGX_OBJS/logs
 	$NGX_OBJS${ngx_dirsep}nginx_unitest${ngx_binext} -vcr
 	
 	

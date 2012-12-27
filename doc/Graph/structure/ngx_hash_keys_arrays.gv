@@ -1,0 +1,23 @@
+digraph ngx_hash_keys_arrays {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [fontname="Verdana", fontsize=8];
+
+   ngx_hash_keys_arrays_t [label="ngx_hash_keys_arrays_t|<hsize>hsize|<keys>keys|<keys_hash>keys_hash|<head>dns_wc_head|<head_hash>dns_wc_head_hash|<tail>dns_wc_tail|<tail_hash>dns_wc_tail_hash"];
+
+   ngx_hash_key_t_array1 [label="ngx_array_t\<ngx_hash_key_t\>"];
+   ngx_hash_keys_arrays_t:keys -> ngx_hash_key_t_array1:nw;
+   arrays1 [label="ngx_array_t\<ngx_str_t\>|ngx_array_t\<ngx_str_t\>|ngx_array_t\<ngx_str_t\>|..."];
+   ngx_hash_keys_arrays_t:keys_hash -> arrays1:nw;
+
+   ngx_hash_key_t_array2 [label="ngx_array_t\<ngx_hash_key_t\>"];
+   ngx_hash_keys_arrays_t:head -> ngx_hash_key_t_array2:nw;
+   arrays2 [label="ngx_array_t\<ngx_str_t\>|ngx_array_t\<ngx_str_t\>|ngx_array_t\<ngx_str_t\>|..."];
+   ngx_hash_keys_arrays_t:head_hash -> arrays2:nw;
+
+   ngx_hash_key_t_array3 [label="ngx_array_t\<ngx_hash_key_t\>"];
+   ngx_hash_keys_arrays_t:tail -> ngx_hash_key_t_array3:nw;
+   arrays3 [label="ngx_array_t\<ngx_str_t\>|ngx_array_t\<ngx_str_t\>|ngx_array_t\<ngx_str_t\>|..."];
+   ngx_hash_keys_arrays_t:tail_hash -> arrays3:nw;
+
+}

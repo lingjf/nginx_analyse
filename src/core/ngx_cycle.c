@@ -1260,3 +1260,14 @@ ngx_clean_old_cycles(ngx_event_t *ev)
         ngx_old_cycles.nelts = 0;
     }
 }
+
+u_char *jeff_cycle_tustring(ngx_cycle_t *c)
+{
+   static u_char buffer[1024 * 8];
+   memset(buffer, 0, sizeof(buffer));
+   if (!c) return "NULL";
+   ngx_snstrcatf(buffer, sizeof(buffer), "ngx_cycle_t{");
+   ngx_snstrcatf(buffer, sizeof(buffer), "prefix=%V,conf_prefix=%V,conf_file=%V", &c->prefix, &c->conf_prefix, &c->conf_file);
+   ngx_snstrcatf(buffer, sizeof(buffer), "}");
+   return buffer;
+}

@@ -146,19 +146,16 @@ ngx_array_push_n(ngx_array_t *a, ngx_uint_t n)
     return elt;
 }
 
-
 u_char *jeff_array_tustring(ngx_array_t *a, u_char*(*e)(void*))
 {
    static u_char buffer[1024 * 8];
    memset(buffer, 0, sizeof(buffer));
    ngx_uint_t i;
    u_char * p = (u_char*) a->elts;
-   ngx_snprintf(buffer, sizeof(buffer), "ngx_array_t{size=%d,nelts/alloc=%d/%d",
-                a->size, a->nelts, a->nalloc);
+   ngx_snprintf(buffer, sizeof(buffer), "ngx_array_t{size=%d,nelts/alloc=%d/%d", a->size, a->nelts, a->nalloc);
    for (i = 0; i < a->nelts; i++) {
       p += a->size * i;
-      if (e)
-         ngx_snstrcatf(buffer, sizeof(buffer), ",%s", e((void*) p));
+      ngx_snstrcatf(buffer, sizeof(buffer), ",%s", e ? e((void*) p) : "");
    }
    ngx_snstrcatf(buffer, sizeof(buffer), "}");
    return buffer;

@@ -441,3 +441,12 @@ ngx_error_log(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     return ngx_log_set_levels(cf, &cf->cycle->new_log);
 }
+
+u_char *jeff_log_tustring(ngx_log_t *l)
+{
+   static u_char buffer[1024 * 8];
+   memset(buffer, 0, sizeof(buffer));
+   if (!l) return "NULL";
+   ngx_snprintf(buffer, sizeof(buffer), "ngx_log_t{file=%V}", &l->file->name);
+   return buffer;
+}

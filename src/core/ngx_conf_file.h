@@ -159,8 +159,7 @@ typedef struct {
 } ngx_conf_file_t;
 
 
-typedef char *(*ngx_conf_handler_pt)(ngx_conf_t *cf,
-    ngx_command_t *dummy, void *conf);
+typedef char *(*ngx_conf_handler_pt)(ngx_conf_t *cf, ngx_command_t *dummy, void *conf);
 
 
 struct ngx_conf_s {
@@ -182,8 +181,7 @@ struct ngx_conf_s {
 };
 
 
-typedef char *(*ngx_conf_post_handler_pt) (ngx_conf_t *cf,
-    void *data, void *conf);
+typedef char *(*ngx_conf_post_handler_pt) (ngx_conf_t *cf, void *data, void *conf);
 
 typedef struct {
     ngx_conf_post_handler_pt  post_handler;
@@ -320,17 +318,14 @@ char *ngx_conf_parse(ngx_conf_t *cf, ngx_str_t *filename);
 char *ngx_conf_include(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 
-ngx_int_t ngx_conf_full_name(ngx_cycle_t *cycle, ngx_str_t *name,
-    ngx_uint_t conf_prefix);
+ngx_int_t ngx_conf_full_name(ngx_cycle_t *cycle, ngx_str_t *name, ngx_uint_t conf_prefix);
 ngx_open_file_t *ngx_conf_open_file(ngx_cycle_t *cycle, ngx_str_t *name);
-void ngx_cdecl ngx_conf_log_error(ngx_uint_t level, ngx_conf_t *cf,
-    ngx_err_t err, const char *fmt, ...);
+void ngx_cdecl ngx_conf_log_error(ngx_uint_t level, ngx_conf_t *cf, ngx_err_t err, const char *fmt, ...);
 
 
 char *ngx_conf_set_flag_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 char *ngx_conf_set_str_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
-char *ngx_conf_set_str_array_slot(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+char *ngx_conf_set_str_array_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 char *ngx_conf_set_keyval_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 char *ngx_conf_set_num_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 char *ngx_conf_set_size_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
