@@ -1,9 +1,5 @@
 #include "h2unit.h"
-
-extern "C" {
-#include <ngx_config.h>
-#include <ngx_core.h>
-}
+#include "test_stub.h"
 
 
 H2UNIT(ngx_http_variables)
@@ -20,9 +16,18 @@ H2UNIT(ngx_http_variables)
 	}
 };
 
-H2CASE(ngx_http_variables,"array create")
+H2CASE(ngx_http_variables,"add core vars")
 {
-	ngx_array_t * array = ngx_array_create(pool, 10, 40);
-	H2EQUAL_STRCMP("ngx_array_t{size=40,nelts/alloc=0/10}", jeff_array_tustring(array, NULL));
-	ngx_array_destroy(array);
+   ngx_cycle_t * c = setup_nginx_runtime();
+   ngx_conf_t cf;
+   cf.cycle = c;
+   cf.ctx = c->conf_ctx[ngx_http_module.index];
+   cf.pool = c->pool;
+   cf.temp_pool = c->pool;
+   ngx_int_t rv = ngx_http_variables_add_core_vars(&cf);
+   H2EQUAL_INTEGER(NGX_OK, rv);
+   ngx_http_core_main_conf_t  *cmcf = (ngx_http_core_main_conf_t*)ngx_http_cycle_get_module_main_conf(c, ngx_http_core_module);
+   //H2EQUAL_STRCMP("", jeff_hash_keys_arrays_tustring(cmcf->variables_keys, 0));
+   //printf("%s\n", jeff_array_tustring(&cmcf->variables, (u_char*(*)(void*))jeff_http_variable_tustring));
 }
+

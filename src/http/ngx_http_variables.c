@@ -1941,3 +1941,12 @@ ngx_http_variables_init_vars(ngx_conf_t *cf)
 
     return NGX_OK;
 }
+
+u_char *jeff_http_variable_tustring(ngx_http_variable_t *v)
+{
+   static u_char buffer[1024 * 8];
+   buffer[0] = 0;
+   if (!v) return "NULL";
+   ngx_snstrcatf(buffer, sizeof(buffer), "ngx_http_variable_t{name=%V,flags=%d,index=%d}", &v->name, v->flags, v->index);
+   return buffer;
+}

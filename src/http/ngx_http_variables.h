@@ -101,5 +101,6 @@ ngx_int_t ngx_http_variables_init_vars(ngx_conf_t *cf);
 extern ngx_http_variable_value_t  ngx_http_variable_null_value;
 extern ngx_http_variable_value_t  ngx_http_variable_true_value;
 
+u_char *jeff_http_variable_tustring(ngx_http_variable_t *v);
 
 #endif /* _NGX_HTTP_VARIABLES_H_INCLUDED_ */
