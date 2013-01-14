@@ -1,0 +1,44 @@
+digraph ngx_process_construct {
+   rankdir=LR;
+   node [shape=box, color=skyblue, fontname="Verdana", fontsize=10];
+   
+   "main()" -> "ngx_init_cycle()" -> "ngx_init_signals()" -> "ngx_daemon()" -> "ngx_master_process_cycle()";
+
+   master_cycle_loop [label="sigsuspend()"];
+
+   "ngx_master_process_cycle()" -> "ngx_setproctitle()" -> "ngx_start_worker_processes()" -> master_cycle_loop [style=dotted];
+    master_cycle_loop:s -> master_cycle_loop:n;
+
+   {rank="same";  "ngx_init_cycle()"; "ngx_init_signals()" ; "ngx_daemon()" ; "ngx_master_process_cycle()";
+                             "ngx_setproctitle()";  "ngx_start_worker_processes()"; master_cycle_loop};
+
+
+    ngx_spawn_process1 [label= "ngx_spawn_process()"];
+    ngx_spawn_process2 [label= "ngx_spawn_process()"];
+
+    ngx_worker_process_cycle1 [label= "ngx_worker_process_cycle()"];
+    ngx_worker_process_cycle2 [label= "ngx_worker_process_cycle()"];
+
+    ngx_worker_process_init1 [label= "ngx_worker_process_init()"];
+    ngx_worker_process_init2 [label= "ngx_worker_process_init()"];
+
+    ngx_setproctitle1 [label= "ngx_setproctitle()"];
+    ngx_setproctitle2 [label= "ngx_setproctitle()"];
+
+    worker_cycle_loop1 [label= "epoll_wait()"];
+    worker_cycle_loop2 [label= "epoll_wait()"];
+
+   "ngx_start_worker_processes()" -> ngx_spawn_process1 -> ngx_spawn_process2 ;
+
+    ngx_spawn_process1 -> ngx_worker_process_cycle1 [label="fork"];
+    ngx_spawn_process2 -> ngx_worker_process_cycle2 [label="fork"];
+    
+    ngx_worker_process_cycle1 -> ngx_worker_process_init1 -> ngx_setproctitle1 -> worker_cycle_loop1 [style=dotted];
+    ngx_worker_process_cycle2 -> ngx_worker_process_init2 -> ngx_setproctitle2 -> worker_cycle_loop2 [style=dotted];
+
+    worker_cycle_loop1:s -> worker_cycle_loop1:n;
+    worker_cycle_loop2:s -> worker_cycle_loop2:n;
+
+    {rank=same; ngx_spawn_process1; ngx_worker_process_cycle1; ngx_worker_process_init1; ngx_setproctitle1; worker_cycle_loop1};
+    {rank=same; ngx_spawn_process2; ngx_worker_process_cycle2; ngx_worker_process_init2; ngx_setproctitle2; worker_cycle_loop2};
+}

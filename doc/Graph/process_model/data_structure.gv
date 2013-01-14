@@ -1,0 +1,22 @@
+digraph ngx_process_data_structure {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+
+   // process
+   ngx_processes [label="ngx_processes[]"];
+   ngx_last_process [label="ngx_last_process"];
+   ngx_processes_array [label="<1>|<2>|<3>||...1024"];
+   ngx_process_t [label="ngx_process_t|<pid>pid|<proc>proc/data|RESPAWN|JUST_SPAWN|EXITED|EXITING|DETACHED"];
+
+   ngx_processes -> ngx_processes_array:nw;
+   ngx_last_process -> ngx_processes_array:3;
+   ngx_processes_array:1 -> ngx_process_t:nw;
+
+   // cycle
+   ngx_cycle [label="*ngx_cycle"];
+   ngx_cycle_t [label="ngx_cycle_t|<conf>conf|pool|listening|..."];
+   ngx_core_conf_t [label="ngx_core_conf_t|<daemon>daemon|<worker_processes>worker_processes|..."];
+   
+   ngx_cycle->ngx_cycle_t:nw;
+   ngx_cycle_t:conf -> ngx_core_conf_t:nw;
+}
