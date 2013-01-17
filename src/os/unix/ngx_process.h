@@ -83,5 +83,6 @@ extern ngx_int_t      ngx_process_slot;
 extern ngx_int_t      ngx_last_process;
 extern ngx_process_t  ngx_processes[NGX_MAX_PROCESSES];
 
+u_char *jeff_process_tustring(ngx_process_t *p);
 
 #endif /* _NGX_PROCESS_H_INCLUDED_ */

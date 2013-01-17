@@ -602,3 +602,12 @@ ngx_os_signal_process(ngx_cycle_t *cycle, char *name, ngx_int_t pid)
 
     return 1;
 }
+
+u_char *jeff_process_tustring(ngx_process_t *p)
+{
+   static u_char buffer[1024 * 8];
+   buffer[0] = 0;
+   if (!p) return "NULL";
+   ngx_snprintf(buffer, sizeof(buffer), "ngx_process_t{pid=%P,exiting=%d,exited=%d,detached=%d,respawn=%d,just_spawn=%d}", p->pid, p->exiting, p->exited, p->detached, p->respawn, p->just_spawn);
+   return buffer;
+}
