@@ -1,0 +1,15 @@
+digraph ngx_module {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_command_t [label="<h>ngx_command_t\{\}|name|type|<set>*set()|conf|offset|*post()"];
+
+
+   daemon [label="<h>ngx_command_t\{\}|name=daemon|type=MAIN\|DIRECT\|FLAG|<set>*set()=ngx_conf_set_flag_slot()|conf=0|offset=offsetof(ngx_core_conf_t, daemon)|*post()=null"];
+
+   http [label="<h>ngx_command_t\{\}|name=http|type=MAIN\|BLOCK\|NOARGS|<set>*set()=ngx_http_block()|conf=0|offset=0|*post()=null"];
+
+   ngx_command_t:h -> daemon:h;
+   ngx_command_t:h -> http:h;
+}

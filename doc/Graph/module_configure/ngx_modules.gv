@@ -1,0 +1,46 @@
+digraph ngx_module {
+   rankdir=LR;
+
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_modules [label="ngx_module_t\nngx_modules[]|<core>core_module|<events>events_module|<http>http_module|<conf>conf_module|<eventcore>event_core_module|<epoll>epoll_module|<httpcore>http_core_module|<upstream>http_upstream_module|......", height=8];
+   
+   ngx_core_module[label="ngx_module_t\{\}|{index=0|ctx_index=0}|{type=CORE|<ctx>ctx}"];
+   ngx_core_module_ctx1[label="ngx_core_module_t\{\}|..."];
+   ngx_modules:core -> ngx_core_module:nw;
+   ngx_core_module:ctx -> ngx_core_module_ctx1:nw;
+
+   ngx_events_module[label="ngx_module_t\{\}|{index=1|ctx_index=1}|{type=CORE|<ctx>ctx}"];
+   ngx_core_module_ctx2[label="ngx_core_module_t\{\}|..."];
+   ngx_modules:events -> ngx_events_module:nw;
+   ngx_events_module:ctx -> ngx_core_module_ctx2:nw;
+
+   ngx_http_module[label="ngx_module_t\{\}|{index=2|ctx_index=2}|{type=CORE|<ctx>ctx}"];
+   ngx_core_module_ctx3[label="ngx_core_module_t\{\}|..."];
+   ngx_modules:http -> ngx_http_module:nw;
+   ngx_http_module:ctx -> ngx_core_module_ctx3:nw;
+
+   ngx_conf_module[label="ngx_module_t\{\}|{index=3|ctx_index=0}|{type=CONF|<ctx>ctx=null}"];
+   ngx_modules:conf -> ngx_conf_module:nw;
+
+   ngx_event_core_module[label="ngx_module_t\{\}|{index=4|ctx_index=0}|{type=EVENT|<ctx>ctx}"];
+   ngx_event_module_ctx0[label="ngx_event_module_t\{\}|..."];
+   ngx_modules:eventcore -> ngx_event_core_module:nw;
+   ngx_event_core_module:ctx -> ngx_event_module_ctx0:nw;
+
+   ngx_epoll_module[label="ngx_module_t\{\}|{index=5|ctx_index=1}|{type=EVENT|<ctx>ctx}"];
+   ngx_event_module_ctx1[label="ngx_event_module_t\{\}|..."];
+   ngx_modules:epoll -> ngx_epoll_module:nw;
+   ngx_epoll_module:ctx -> ngx_event_module_ctx1:nw;
+
+   ngx_http_core_module[label="ngx_module_t\{\}|{index=6|ctx_index=0}|{type=HTTP|<ctx>ctx}"];
+   ngx_http_module_ctx0[label="ngx_http_module_t\{\}|..."];
+   ngx_modules:httpcore -> ngx_http_core_module:nw;
+   ngx_http_core_module:ctx -> ngx_http_module_ctx0:nw;
+
+   ngx_http_upstream_module[label="ngx_module_t\{\}|{index=7|ctx_index=1}|{type=HTTP|<ctx>ctx}"];
+   ngx_http_module_ctx1[label="ngx_http_module_t\{\}|..."];
+   ngx_modules:upstream -> ngx_http_upstream_module:nw;
+   ngx_http_upstream_module:ctx -> ngx_http_module_ctx1:nw;
+}

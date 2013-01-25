@@ -1,0 +1,18 @@
+digraph ngx_module {
+   rankdir=LR;
+
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [style=dashed, color=forestgreen, fontname="Verdana", fontsize=10];
+   
+   ngx_module[label="ngx_module_t\{\}|type|index|ctx_index|<ctx>ctx|init_master()|init_module()|init_process()|exit_process()|exit_master()"];
+
+   ngx_core_module_ctx[label="ngx_core_module_t\{\}|name|<create>create_conf()|<init>init_conf()"];
+   
+   ngx_event_module_ctx[label="ngx_event_module_t\{\}|name|create_conf()|init_conf()|<actions>actions"];
+   
+   ngx_http_module_ctx[label="ngx_http_module_t\{\}|preconfiguration()|postconfiguration()|create_main_conf()|init_main_conf()|create_srv_conf()|init_srv_conf()|create_loc_conf()|init_loc_conf()"];
+
+   ngx_module:ctx -> ngx_core_module_ctx:nw;
+   ngx_module:ctx -> ngx_event_module_ctx:nw;
+   ngx_module:ctx -> ngx_http_module_ctx:nw;
+}
