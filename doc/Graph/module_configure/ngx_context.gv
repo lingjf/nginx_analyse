@@ -1,0 +1,9 @@
+digraph ngx_conf {
+
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=white, fontname="Verdana", fontsize=10];
+
+   ngx_conf_t [label="ngx_conf_t|{char *|name}|{ngx_array_t|args}|{ngx_cycle_t*|cycle}|{ngx_pool_t*|pool,temp_pool}|{ngx_conf_file_t*|conf_file}|{void*|ctx}|{ngx_uint_t|module_type}|{ngx_uint_t|cmd_type}"];
+
+}
