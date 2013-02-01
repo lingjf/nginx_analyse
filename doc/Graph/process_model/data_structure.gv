@@ -7,7 +7,7 @@ digraph ngx_process_data_structure {
    ngx_processes [label="ngx_processes[]"];
    ngx_last_process [label="ngx_last_process"];
    ngx_processes_array [label="<1>|<2>|<3>||...1024"];
-   ngx_process_t [label="ngx_process_t|<pid>pid|<proc>proc/data|respawn/just_spawn|exiting/exited|detached"];
+   ngx_process_t [label="ngx_process_t\{\}|<pid>pid|<proc>proc/data|respawn/just_spawn|exiting/exited|detached"];
 
    ngx_processes:e -> ngx_processes_array:nw;
    ngx_last_process:e -> ngx_processes_array:3;
@@ -15,9 +15,11 @@ digraph ngx_process_data_structure {
 
    // cycle
    ngx_cycle [label="*ngx_cycle"];
-   ngx_cycle_t [label="ngx_cycle_t|<conf>conf|pool|listening|..."];
-   ngx_core_conf_t [label="ngx_core_conf_t|<daemon>daemon|<worker_processes>worker_processes|..."];
+   ngx_cycle_t [label="ngx_cycle_t\{\}|<conf>conf|pool|<listening>listening|..."];
+   ngx_core_conf_t [label="ngx_core_conf_t\{\}|<daemon>daemon|<worker_processes>worker_processes|..."];
+   ngx_listening_t [label="ngx_listening_t\{\}|socket|addr|..."];
    
    ngx_cycle:e->ngx_cycle_t:nw;
    ngx_cycle_t:conf -> ngx_core_conf_t:nw;
+   ngx_cycle_t:listening -> ngx_listening_t:nw;
 }
