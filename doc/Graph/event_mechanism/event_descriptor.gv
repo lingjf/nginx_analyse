@@ -1,0 +1,47 @@
+digraph g {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_cycle [shape="box3d", label="ngx_cycle"];
+   ngx_cycle_t [label="<h>ngx_cycle_t\{\}|...|<listening>listening|<connections>connections|<read_events>read_events|<write_events>write_events|...", height=3];
+   ngx_cycle -> ngx_cycle_t;
+
+   listening_array [label="<n1>ngx_listening_t|<n2>ngx_listening_t|..."];
+   connection_array [label="<n1>ngx_connection_t|<n2>ngx_connection_t|...|..1024"];
+   read_event_array [label="<n1>ngx_event_t|<n2>ngx_event_t|..."];
+   write_event_array [label="<n1>ngx_event_t|<n2>ngx_event_t|..."];
+
+   ngx_listening_t [label="<h>ngx_listening_t\{\}|socket|address|<c>connection|handler|..."];
+   ngx_connection_t_listen [label="<h>ngx_connection_t\{\}|socket|recv , send|<l>listening|<r>(event) read|<w>(event) write|..."];
+   ngx_connection_t_accept [label="<h>ngx_connection_t\{\}|socket|recv , send|listening|<r>(event) read|<w>(event) write|..."];
+   ngx_event_t_listen [label="<h>ngx_event_t\{\}|<d>data=connection|handler=\nngx_event_accept|write=0/accept=1|active/ready|..."];
+   ngx_event_t_listen_write [label="<h>ngx_event_t\{\}|<d>data=connection|handler|write=1/accept=0|active/ready|..."];  
+   ngx_event_t_accept [label="<h>ngx_event_t\{\}|<d>data=connection|handler|write=1/accept=0|active/ready|..."];  
+
+   
+   ngx_cycle_t:listening -> listening_array:n1;
+   ngx_cycle_t:connections -> connection_array:n1;
+   ngx_cycle_t:read_events -> read_event_array:n1;
+   ngx_cycle_t:write_events -> write_event_array:n1;
+   
+   listening_array:n1 -> ngx_listening_t:h:w;
+
+   ngx_listening_t:c->ngx_connection_t_listen:h:nw;
+   connection_array:n1 -> ngx_connection_t_listen:h:w [style=dashed];
+   connection_array:n2 -> ngx_connection_t_accept:h:w [style=dashed];
+
+   ngx_connection_t_listen:r -> ngx_event_t_listen:h;
+   ngx_connection_t_listen:w -> ngx_event_t_listen_write:h;
+   ngx_connection_t_listen:l -> ngx_listening_t:h;
+   ngx_connection_t_accept:w -> ngx_event_t_accept:h:nw;
+
+   write_event_array:n2 -> ngx_event_t_accept:h [style=dashed];
+
+   ngx_event_t_listen:d -> ngx_connection_t_listen:h:ne;
+   ngx_event_t_accept:d -> ngx_connection_t_accept:h;
+ 
+   {rank=same;ngx_cycle;ngx_cycle_t;};
+   {rank=same;listening_array;connection_array;read_event_array;write_event_array;};
+
+}

@@ -1,13 +1,14 @@
 digraph ngx_process_architecture {
    rankdir=LR;
-   node [shape=rect, color=skyblue, fontname="Verdana", fontsize=10];
+   node [shape=box3d, width=1.3, height=0.8, color=skyblue, fontname="Verdana", fontsize=12];
    edge [color=forestgreen, fontname="Verdana", fontsize=10];
   
-    Worker1 [label="Worker"];
-    Worker2 [label="Worker"];
+   Master [label="Master", height=0.8];
+   Worker1 [label="Worker", height=0.6];
+   Worker2 [label="Worker", height=0.6];
 
-    "Master" -> Worker1 [label="fork"];
-    "Master" -> Worker2 [label="fork"];
+   Master -> Worker1 [label="fork"];
+   Master -> Worker2 [label="fork"];
 
     {rank=same; Worker1; Worker2;};
 

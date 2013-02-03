@@ -1,0 +1,38 @@
+digraph g {
+   rankdir=LR;
+   node [shape=box, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+   
+   ngx_process_events_and_timers [ height=1, label="ngx_process_events_and_timers"];
+
+   ngx_worker_process_cycle -> ngx_process_events_and_timers;
+   ngx_process_events_and_timers:s -> ngx_process_events_and_timers:n [label="loop"];
+
+   {rank=same; ngx_worker_process_cycle; ngx_process_events_and_timers};
+
+   node [height=0.6];
+   ngx_process_events_and_timers:ne -> ngx_event_find_timer:n;
+   ngx_event_find_timer -> ngx_process_events -> "ngx_event_process_posted\<accept\>" -> ngx_event_expire_timers -> ngx_event_process_posted;
+   ngx_event_process_posted:s -> ngx_process_events_and_timers:se;
+
+   {rank=same; ngx_event_find_timer; ngx_process_events;  "ngx_event_process_posted\<accept\>"; ngx_event_expire_timers; ngx_event_process_posted};
+
+   node [height=0.3];
+   // ngx_event_find_timer
+   ngx_rbtree_min1 [label="ngx_rbtree_min"];
+   ngx_event_find_timer -> ngx_rbtree_min1 [dir=both];
+
+   // ngx_process_events
+   ngx_process_events:ne -> "select/epoll_wait" -> ngx_post_event -> ngx_process_events:se;
+
+   // ngx_event_expire_timers
+   ngx_rbtree_min2 [label="ngx_rbtree_min"];
+   event_handler1 [label="ngx_event_t.handler"];
+   ngx_event_expire_timers:ne -> ngx_rbtree_min2 -> ngx_rbtree_delete -> event_handler1 -> ngx_event_expire_timers:se;
+
+   // ngx_event_process_posted
+   event_handler2 [label="ngx_event_t.handler"];
+   ngx_event_process_posted:ne -> ngx_delete_posted_event -> event_handler2 -> ngx_event_process_posted:se;
+
+   {rank=same; "select/epoll_wait"; ngx_post_event; ngx_rbtree_min2; ngx_rbtree_delete; event_handler1; event_handler2; ngx_delete_posted_event;};
+}

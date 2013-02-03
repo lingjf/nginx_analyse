@@ -1,0 +1,8 @@
+digraph g {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_event_actions_t [label="<h>ngx_event_actions_t\{\}|{{add|del|enable|disable|add_conn|del_conn|process_events|init|done}|{ngx_add_event|ngx_del_event| | |ngx_add_conn|ngx_del_conn|ngx_process_events||}}"];
+
+}
