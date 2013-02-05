@@ -1,0 +1,27 @@
+digraph g {
+   rankdir = TB;
+   ranksep = 0.3;
+   
+   node [shape=oval, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   start [shape = oval, label="start"];
+   end [shape = oval, label="end"];
+   has_node [shape = diamond, label="tree not empty"];
+   ngx_rbtree_min [shape = rect, style=rounded, label="ngx_rbtree_min\nmost left node"];
+   node_pasted [shape = diamond, label="expired"];
+   ngx_rbtree_delete [shape = rect, style=rounded, label="ngx_rbtree_delete"];
+   handler [shape = rect, style=rounded, label="handler"];
+   
+   edge [weight = 2];
+   start -> has_node ;
+   has_node -> ngx_rbtree_min [label="yes"];
+   ngx_rbtree_min -> node_pasted;
+   node_pasted -> ngx_rbtree_delete [label="yes"];
+   ngx_rbtree_delete -> handler;
+   handler -> end;
+
+   edge [weight = 1];
+   has_node:e -> end [label="no"];
+   node_pasted:w -> end [label="no"];
+}

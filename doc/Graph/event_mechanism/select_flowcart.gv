@@ -1,0 +1,71 @@
+digraph g {
+   rankdir = TB;
+   ranksep = 0.3;
+   
+   node [shape=oval, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   node[group=a, shape=none, width=0, height=0, label=""];
+   null10 -> null11 -> null12  -> null13 -> null14 -> null15 -> null16 -> null17 -> null18 -> null19  [weight=1, color=none];
+
+   node [group=b, shape=oval, color=skyblue, fontname="Verdana", fontsize=10, width=1, height=0.5];
+   start [shape = oval, label="select"];
+   return [shape = oval, label="return"];
+   fill_fd_set [shape = rect, style=rounded, label="fill fd_set"];
+   get_first_fd [shape = rect, style=rounded, label="get first fd"];
+   null23[shape=none, width=0, height=0, label=""];
+   poll_operable [shape = diamond, label="fops poll"];
+   mark [shape = rect, style=rounded, label="mark"];
+   null26[shape=none, width=0, height=0, label=""];
+   get_next_fd [shape = diamond, label="get next fd"];
+   marked [shape = diamond, label="marked"];
+   
+   node [group=c, shape=oval, color=skyblue, fontname="Verdana", fontsize=10, width=1, height=0.5];
+   null34[shape=none, width=0, height=0, label=""];
+   wait_list [shape = rect, style=rounded, label="add process to fd\ndriver waiting queue"];
+   null36[shape=none, width=0, height=0, label=""];
+
+   node [group=d, shape=oval, color=skyblue, fontname="Verdana", fontsize=10, width=1, height=0.5];
+   sleep [shape = rect, style=rounded, label="sleep"];
+
+   edge [weight = 9];
+   start -> fill_fd_set  -> get_first_fd;
+   get_first_fd -> null23 [dir=none];
+   null23 -> poll_operable;
+   poll_operable -> mark [label="operable"];
+   mark -> null26[dir=none];
+   null26 -> get_next_fd;
+   get_next_fd -> marked [label="none"];
+   marked -> return [label="yes"];
+  {rank=same; null10; start;};
+  {rank=same; null11; fill_fd_set;};
+  {rank=same; null12; get_first_fd;};
+  {rank=same; null13; null23;};
+  {rank=same; null14; poll_operable;};
+  {rank=same; null15; mark;};
+  {rank=same; null16; null26;};
+  {rank=same; null17; get_next_fd;};
+  {rank=same; null18; marked;};
+  {rank=same; null19; return;};
+
+   edge [weight = 8];
+   null17:e -> get_next_fd:w [dir=none];
+   null17:n -> null13:s [label="have", dir=none];
+   null13:e -> null23:w;
+
+   edge [weight=7];
+   //poll_operable:e -> null34:w [label="no", dir=none];
+   //null34:s -> wait_list:n;
+   poll_operable:e -> wait_list:n [label="no"];
+   wait_list:s -> null36:n [dir=none];
+   null26:e -> null36:w [dir=back];
+
+   {rank=same; poll_operable; null34;};
+   {rank=same; mark; wait_list;};
+   {rank=same; null26; null36};
+
+   edge [weight = 6];
+   marked:e -> sleep:w [label="no"];
+   sleep -> get_first_fd:e [label="wakeup by driver\ninterrupt handler"];
+   {rank=same; marked; sleep;};
+}
