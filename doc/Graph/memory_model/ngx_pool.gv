@@ -1,0 +1,36 @@
+digraph ngx_pool {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_pool_t0 [label="<h>ngx_pool_t\{\}|{d|{<next>next|<end>end|<last>last|failed}}|<current>current|<large>large|<cleanup>cleanup|\n...allocated\n|wasted", height=5];
+   ngx_pool_t1 [label="<h>ngx_pool_t\{\}|{d|{<next>next|<end>end|<last>last|failed}}|\n...allocated\n"];
+   ngx_pool_t2 [label="<h>ngx_pool_t\{\}|{d|{<next>next|<end>end|<last>last|failed}}|...allocated|<space>\nfree\n\n"];
+   ngx_pool_t3[shape=none, width=0, height=0, label=""];
+
+   ngx_pool_t0:next -> ngx_pool_t1:h:nw [weight=10];
+   ngx_pool_t1:next -> ngx_pool_t2:h:nw [weight=10];
+   ngx_pool_t2:next -> ngx_pool_t3:nw [weight=10];
+
+   ngx_pool_t1:end:e -> ngx_pool_t1:se [weight=10];
+   ngx_pool_t2:last:e -> ngx_pool_t2:space:ne;
+
+   ngx_pool_t0:current -> ngx_pool_t2:h;
+
+   ngx_pool_large_t_1 [label="<h>ngx_pool_large_t\{\}|<next>next|<alloc>alloc"];
+   ngx_pool_large_t_2 [label="<h>ngx_pool_large_t\{\}|<next>next|<alloc>alloc"];
+   ngx_pool_large_t_3 [label="<h>ngx_pool_large_t\{\}|<next>next|<alloc>alloc"];
+
+   ngx_pool_t0:large -> ngx_pool_large_t_1:h:nw;
+   ngx_pool_large_t_1:next -> ngx_pool_large_t_2:h:nw;
+   ngx_pool_large_t_2:next -> ngx_pool_large_t_3:h:nw;
+
+
+   ngx_pool_cleanup_t_1 [label="<h>ngx_pool_cleanup_t|<next>next|<handler>handler|<data>data"];
+   ngx_pool_cleanup_t_2 [label="<h>ngx_pool_cleanup_t|<next>next|<handler>handler|<data>data"];
+   ngx_pool_cleanup_t_3 [label="<h>ngx_pool_cleanup_t|<next>next|<handler>handler|<data>data"];
+
+   ngx_pool_t0:cleanup -> ngx_pool_cleanup_t_1:h:nw;
+   ngx_pool_cleanup_t_1:next -> ngx_pool_cleanup_t_2:h:nw;
+   ngx_pool_cleanup_t_2:next -> ngx_pool_cleanup_t_3:h:nw;
+}
