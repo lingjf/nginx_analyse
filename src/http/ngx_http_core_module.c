@@ -2709,11 +2709,7 @@ ngx_http_core_server(ngx_conf_t *cf, ngx_command_t *cmd, void *dummy)
         sin = &lsopt.u.sockaddr_in;
 
         sin->sin_family = AF_INET;
-#if (NGX_WIN32)
-        sin->sin_port = htons(80);
-#else
         sin->sin_port = htons((getuid() == 0) ? 80 : 8000);
-#endif
         sin->sin_addr.s_addr = INADDR_ANY;
 
         lsopt.socklen = sizeof(struct sockaddr_in);

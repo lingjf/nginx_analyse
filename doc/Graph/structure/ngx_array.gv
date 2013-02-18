@@ -1,7 +1,0 @@
-digraph ngx_array {
-   rankdir=LR;
-   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
-   ngx_array_t [label="ngx_array_t|<elts>elts|nelts|size|nalloc|pool"];
-   elts_1 [label="{1|...|nelts|...|nalloc}", height=0.1];
-   ngx_array_t:elts -> elts_1;
-}

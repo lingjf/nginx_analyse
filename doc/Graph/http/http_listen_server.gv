@@ -1,0 +1,17 @@
+digraph ngx_array {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_listening_t [label="ngx_listening_t\{\}|<servers>servers|..."];
+   ngx_http_port_t [label="<head>ngx_http_port_t\{\}|naddrs|<addrs>addrs"];
+   ngx_http_in_addr_t_array [label="<head>ngx_http_in_addr_t\[\]|<n1>ngx_http_in_addr_t|<n2>ngx_http_in_addr_t|..."];
+   ngx_http_in_addr_t [label="<head>ngx_http_in_addr_t\{\}|addr|<conf>conf"];
+   ngx_http_addr_conf_t [label="<head>ngx_http_addr_conf_t\{\}|<default_server>default_server|<vn>virtual_names"];
+
+   ngx_listening_t:servers -> ngx_http_port_t:head:nw;
+   ngx_http_port_t:addrs -> ngx_http_in_addr_t_array:head;
+   ngx_http_in_addr_t_array:n1 -> ngx_http_in_addr_t:head:nw;
+   ngx_http_in_addr_t:conf -> ngx_http_addr_conf_t:head:nw;
+
+}

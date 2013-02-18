@@ -1,0 +1,24 @@
+digraph ngx_list {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_list_t [label="ngx_list_t\{\}|{part|{ngx_list_part_t\{\}|<elts>elts|nelts|<next>next}}|<last>last|size|nalloc|pool"];
+
+   elts_0 [label="{0|...|nalloc}", height=0.1];
+   ngx_list_t:elts -> elts_0;
+
+   ngx_list_part_t_1 [label="<head>ngx_list_part_t\{\}|<elts>elts|nelts|<next>next"];   
+   ngx_list_t:next -> ngx_list_part_t_1:head:nw;
+
+   elts_1 [label="{0|...|nalloc}", height=0.1];
+   ngx_list_part_t_1:elts -> elts_1;
+
+   ngx_list_part_t_2 [label="<head>ngx_list_part_t\{\}|<elts>elts|nelts|<next>next=null"];
+   ngx_list_part_t_1:next -> ngx_list_part_t_2:head:nw;
+   elts_2 [label="{0|...|nalloc}", height=0.1];
+   ngx_list_part_t_2:elts -> elts_2;
+
+
+   ngx_list_t:last -> ngx_list_part_t_2:head [style=dotted];
+}

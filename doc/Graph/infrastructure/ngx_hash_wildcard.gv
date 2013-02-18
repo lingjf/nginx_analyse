@@ -1,0 +1,22 @@
+digraph ngx_array {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_hash_wildcard_t [label="ngx_hash_wildcard_t\{\}|{hash|{<head>ngx_hash_t\{\}|<buckets>buckets|<size>size}}|value"];
+
+   buckets [label="<n1>ngx_hash_elt_t *|<n2>ngx_hash_elt_t *|<n3>ngx_hash_elt_t *|<n4>ngx_hash_elt_t *|...", fontsize=10];
+   ngx_hash_wildcard_t:buckets -> buckets:nw;
+
+   elts_complex [label="{<e1>1|{{len|<ev1>value}|name[...]}}|{<e2>2|{{len|<ev2>value}|name[...]}}|......"];
+   buckets:n1 -> elts_complex:nw;
+
+   ngx_hash_wildcard_2 [label="ngx_hash_wildcard_t\{\}|{hash|{<head>ngx_hash_t\{\}|<buckets>buckets|<size>size}}|<value>value"];
+   elts_complex:ev1 -> ngx_hash_wildcard_2:nw [label="have\nsubitem"];
+
+   real_hash_value1 [label="hash\nvalue", height=0.1];
+   elts_complex:ev2 -> real_hash_value1:w[label="none\nsubitem"];
+
+   real_hash_value2 [label="hash\nvalue", height=0.1];
+   ngx_hash_wildcard_2:value -> real_hash_value2:nw[label="parent\nhave\nvalue"];
+}
