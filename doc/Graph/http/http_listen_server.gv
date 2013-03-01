@@ -8,10 +8,16 @@ digraph ngx_array {
    ngx_http_in_addr_t_array [label="<head>ngx_http_in_addr_t\[\]|<n1>ngx_http_in_addr_t|<n2>ngx_http_in_addr_t|..."];
    ngx_http_in_addr_t [label="<head>ngx_http_in_addr_t\{\}|addr|<conf>conf"];
    ngx_http_addr_conf_t [label="<head>ngx_http_addr_conf_t\{\}|<default_server>default_server|<vn>virtual_names"];
+   ngx_http_virtual_names_t [label="<head>ngx_http_virtual_names_t\{\}|<names>names"];
+   ngx_hash_combined_t  [label="<head>ngx_hash_combined_t\{\}|<name>key=server_name|<value>value|..."];
+   ngx_http_core_srv_conf_t [label="<head>ngx_http_core_srv_conf_t\{\}|<ctx>ctx|server_name|<named_locations>named_locations"];
 
    ngx_listening_t:servers -> ngx_http_port_t:head:nw;
    ngx_http_port_t:addrs -> ngx_http_in_addr_t_array:head;
    ngx_http_in_addr_t_array:n1 -> ngx_http_in_addr_t:head:nw;
    ngx_http_in_addr_t:conf -> ngx_http_addr_conf_t:head:nw;
-
+   ngx_http_addr_conf_t:vn -> ngx_http_virtual_names_t:head;
+   ngx_http_virtual_names_t:names -> ngx_hash_combined_t:head;
+   ngx_hash_combined_t:value -> ngx_http_core_srv_conf_t:head;
+   ngx_http_addr_conf_t:default_server -> ngx_http_core_srv_conf_t:head:nw;
 }
