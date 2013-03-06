@@ -1,0 +1,26 @@
+digraph ngx_http_filter_chain {
+
+   rankdir=TB;
+   ranksep = 0.25;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_http_top_header_filter ->
+   ngx_http_not_modified_header_filter ->
+   ngx_http_headers_filter ->
+   ngx_http_userid_filter ->
+   ngx_http_charset_header_filter ->
+   ngx_http_ssi_header_filter ->
+   ngx_http_range_header_filter ->
+   ngx_http_chunked_header_filter ->
+   ngx_http_header_filter;
+
+   ngx_http_top_body_filter ->
+   ngx_http_range_body_filter ->
+   ngx_http_copy_filter -> 
+   ngx_http_charset_body_filter ->
+   ngx_http_ssi_body_filter ->
+   ngx_http_chunked_body_filter ->
+   ngx_http_write_filter;
+
+}

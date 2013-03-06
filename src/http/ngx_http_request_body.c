@@ -12,8 +12,7 @@
 
 static void ngx_http_read_client_request_body_handler(ngx_http_request_t *r);
 static ngx_int_t ngx_http_do_read_client_request_body(ngx_http_request_t *r);
-static ngx_int_t ngx_http_write_request_body(ngx_http_request_t *r,
-    ngx_chain_t *body);
+static ngx_int_t ngx_http_write_request_body(ngx_http_request_t *r, ngx_chain_t *body);
 static ngx_int_t ngx_http_read_discarded_request_body(ngx_http_request_t *r);
 static ngx_int_t ngx_http_test_expect(ngx_http_request_t *r);
 
@@ -26,8 +25,7 @@ static ngx_int_t ngx_http_test_expect(ngx_http_request_t *r);
  */
 
 ngx_int_t
-ngx_http_read_client_request_body(ngx_http_request_t *r,
-    ngx_http_client_body_handler_pt post_handler)
+ngx_http_read_client_request_body(ngx_http_request_t *r, ngx_http_client_body_handler_pt post_handler)
 {
     size_t                     preread;
     ssize_t                    size;
@@ -85,10 +83,7 @@ ngx_http_read_client_request_body(ngx_http_request_t *r,
 
             rb->temp_file = tf;
 
-            if (ngx_create_temp_file(&tf->file, tf->path, tf->pool,
-                                     tf->persistent, tf->clean, tf->access)
-                != NGX_OK)
-            {
+            if (ngx_create_temp_file(&tf->file, tf->path, tf->pool, tf->persistent, tf->clean, tf->access) != NGX_OK) {
                 return NGX_HTTP_INTERNAL_SERVER_ERROR;
             }
         }
@@ -114,8 +109,7 @@ ngx_http_read_client_request_body(ngx_http_request_t *r,
 
         /* there is the pre-read part of the request body */
 
-        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                       "http client request body preread %uz", preread);
+        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "http client request body preread %uz", preread);
 
         b = ngx_calloc_buf(r->pool);
         if (b == NULL) {
@@ -271,8 +265,7 @@ ngx_http_do_read_client_request_body(ngx_http_request_t *r)
     c = r->connection;
     rb = r->request_body;
 
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                   "http read client request body");
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, c->log, 0, "http read client request body");
 
     for ( ;; ) {
         for ( ;; ) {
@@ -294,16 +287,14 @@ ngx_http_do_read_client_request_body(ngx_http_request_t *r)
 
             n = c->recv(c, rb->buf->last, size);
 
-            ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                           "http client request body recv %z", n);
+            ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0, "http client request body recv %z", n);
 
             if (n == NGX_AGAIN) {
                 break;
             }
 
             if (n == 0) {
-                ngx_log_error(NGX_LOG_INFO, c->log, 0,
-                              "client prematurely closed connection");
+                ngx_log_error(NGX_LOG_INFO, c->log, 0, "client prematurely closed connection");
             }
 
             if (n == 0 || n == NGX_ERROR) {
@@ -324,8 +315,7 @@ ngx_http_do_read_client_request_body(ngx_http_request_t *r)
             }
         }
 
-        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                       "http client request body rest %O", rb->rest);
+        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0, "http client request body rest %O", rb->rest);
 
         if (rb->rest == 0) {
             break;
@@ -373,9 +363,7 @@ ngx_http_do_read_client_request_body(ngx_http_request_t *r)
         }
     }
 
-    if (rb->bufs->next
-        && (r->request_body_in_file_only || r->request_body_in_single_buf))
-    {
+    if (rb->bufs->next && (r->request_body_in_file_only || r->request_body_in_single_buf)) {
         rb->bufs = rb->bufs->next;
     }
 
@@ -608,10 +596,7 @@ ngx_http_test_expect(ngx_http_request_t *r)
     ngx_int_t   n;
     ngx_str_t  *expect;
 
-    if (r->expect_tested
-        || r->headers_in.expect == NULL
-        || r->http_version < NGX_HTTP_VERSION_11)
-    {
+    if (r->expect_tested || r->headers_in.expect == NULL || r->http_version < NGX_HTTP_VERSION_11) {
         return NGX_OK;
     }
 
@@ -619,16 +604,11 @@ ngx_http_test_expect(ngx_http_request_t *r)
 
     expect = &r->headers_in.expect->value;
 
-    if (expect->len != sizeof("100-continue") - 1
-        || ngx_strncasecmp(expect->data, (u_char *) "100-continue",
-                           sizeof("100-continue") - 1)
-           != 0)
-    {
+    if (expect->len != sizeof("100-continue") - 1 || ngx_strncasecmp(expect->data, (u_char *) "100-continue", sizeof("100-continue") - 1) != 0) {
         return NGX_OK;
     }
 
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "send 100 Continue");
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "send 100 Continue");
 
     n = r->connection->send(r->connection,
                             (u_char *) "HTTP/1.1 100 Continue" CRLF CRLF,

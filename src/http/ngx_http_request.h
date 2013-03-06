@@ -321,8 +321,7 @@ struct ngx_http_cleanup_s {
 };
 
 
-typedef ngx_int_t (*ngx_http_post_subrequest_pt)(ngx_http_request_t *r,
-    void *data, ngx_int_t rc);
+typedef ngx_int_t (*ngx_http_post_subrequest_pt)(ngx_http_request_t *r, void *data, ngx_int_t rc);
 
 typedef struct {
     ngx_http_post_subrequest_pt       handler;
@@ -369,8 +368,7 @@ struct ngx_http_request_s {
 #endif
 
     ngx_http_upstream_t              *upstream;
-    ngx_array_t                      *upstream_states;
-                                         /* of ngx_http_upstream_state_t */
+    ngx_array_t                      *upstream_states; /* of ngx_http_upstream_state_t */
 
     ngx_pool_t                       *pool;
     ngx_buf_t                        *header_in;

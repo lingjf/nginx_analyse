@@ -164,8 +164,7 @@ ngx_http_write_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
     *ll = NULL;
 
-    ngx_log_debug3(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                   "http write filter: l:%d f:%d s:%O", last, flush, size);
+    ngx_log_debug3(NGX_LOG_DEBUG_HTTP, c->log, 0, "http write filter: l:%d f:%d s:%O", last, flush, size);
 
     clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
 
@@ -198,8 +197,7 @@ ngx_http_write_filter(ngx_http_request_t *r, ngx_chain_t *in)
             return NGX_OK;
         }
 
-        ngx_log_error(NGX_LOG_ALERT, c->log, 0,
-                      "the http output chain is empty");
+        ngx_log_error(NGX_LOG_ALERT, c->log, 0, "the http output chain is empty");
 
         ngx_debug_point();
 
@@ -207,22 +205,18 @@ ngx_http_write_filter(ngx_http_request_t *r, ngx_chain_t *in)
     }
 
     if (r->limit_rate) {
-        limit = r->limit_rate * (ngx_time() - r->start_sec + 1)
-                - (c->sent - clcf->limit_rate_after);
+        limit = r->limit_rate * (ngx_time() - r->start_sec + 1) - (c->sent - clcf->limit_rate_after);
 
         if (limit <= 0) {
             c->write->delayed = 1;
-            ngx_add_timer(c->write,
-                          (ngx_msec_t) (- limit * 1000 / r->limit_rate + 1));
+            ngx_add_timer(c->write, (ngx_msec_t) (- limit * 1000 / r->limit_rate + 1));
 
             c->buffered |= NGX_HTTP_WRITE_BUFFERED;
 
             return NGX_AGAIN;
         }
 
-        if (clcf->sendfile_max_chunk
-            && (off_t) clcf->sendfile_max_chunk < limit)
-        {
+        if (clcf->sendfile_max_chunk && (off_t) clcf->sendfile_max_chunk < limit) {
             limit = clcf->sendfile_max_chunk;
         }
 
@@ -232,13 +226,11 @@ ngx_http_write_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
     sent = c->sent;
 
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                   "http write filter limit %O", limit);
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0, "http write filter limit %O", limit);
 
     chain = c->send_chain(c, r->out, limit);
 
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                   "http write filter %p", chain);
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0, "http write filter %p", chain);
 
     if (chain == NGX_CHAIN_ERROR) {
         c->error = 1;
@@ -271,10 +263,7 @@ ngx_http_write_filter(ngx_http_request_t *r, ngx_chain_t *in)
         }
     }
 
-    if (limit
-        && c->write->ready
-        && c->sent - sent >= limit - (off_t) (2 * ngx_pagesize))
-    {
+    if (limit && c->write->ready && c->sent - sent >= limit - (off_t) (2 * ngx_pagesize)) {
         c->write->delayed = 1;
         ngx_add_timer(c->write, 1);
     }

@@ -1,0 +1,20 @@
+digraph ngx_http_filter_chain {
+   rankdir=LR;
+   
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+
+   top_header [label="ngx_http_core_module.c|<header_next>ngx_http_top_header_filter|<body_next>ngx_http_top_body_filter"];
+   not_modified_header [label="ngx_http_not_modified_filter_module.c|<filter>ngx_http_not_modified_header_filter()|<next>ngx_http_next_header_filter"];
+   header_filter [label="ngx_http_header_filter_module.c|<filter>ngx_http_header_filter()"];
+   range_header [label="ngx_http_range_filter_module.c|<filter>ngx_http_range_body_filter()|<next>ngx_http_next_body_filter"];
+   write_filter [label="ngx_http_write_filter_module.c|<filter>ngx_http_write_filter()"];
+
+   top_header:header_next -> not_modified_header:filter;
+   not_modified_header:next -> header_filter:filter;
+
+   top_header:body_next -> range_header:filter;
+   range_header:next -> write_filter:filter;
+
+}
