@@ -539,10 +539,7 @@ struct ngx_http_request_s {
     u_char                           *header_start;
     u_char                           *header_end;
 
-    /*
-     * a memory that can be reused after parsing a request line
-     * via ngx_http_ephemeral_t
-     */
+    /* a memory that can be reused after parsing a request line via ngx_http_ephemeral_t */
 
     u_char                           *uri_start;
     u_char                           *uri_end;

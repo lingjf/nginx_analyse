@@ -1414,42 +1414,34 @@ ngx_http_process_request_header(ngx_http_request_t *r)
     }
 
     if (r->headers_in.host == NULL && r->http_version > NGX_HTTP_VERSION_10) {
-        ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
-                   "client sent HTTP/1.1 request without \"Host\" header");
+        ngx_log_error(NGX_LOG_INFO, r->connection->log, 0, "client sent HTTP/1.1 request without \"Host\" header");
         ngx_http_finalize_request(r, NGX_HTTP_BAD_REQUEST);
         return NGX_ERROR;
     }
 
     if (r->headers_in.content_length) {
-        r->headers_in.content_length_n =
-                            ngx_atoof(r->headers_in.content_length->value.data,
-                                      r->headers_in.content_length->value.len);
+        r->headers_in.content_length_n = ngx_atoof(r->headers_in.content_length->value.data, r->headers_in.content_length->value.len);
 
         if (r->headers_in.content_length_n == NGX_ERROR) {
-            ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
-                          "client sent invalid \"Content-Length\" header");
+            ngx_log_error(NGX_LOG_INFO, r->connection->log, 0, "client sent invalid \"Content-Length\" header");
             ngx_http_finalize_request(r, NGX_HTTP_LENGTH_REQUIRED);
             return NGX_ERROR;
         }
     }
 
     if (r->method & NGX_HTTP_PUT && r->headers_in.content_length_n == -1) {
-        ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
-                  "client sent %V method without \"Content-Length\" header",
-                  &r->method_name);
+        ngx_log_error(NGX_LOG_INFO, r->connection->log, 0, "client sent %V method without \"Content-Length\" header", &r->method_name);
         ngx_http_finalize_request(r, NGX_HTTP_LENGTH_REQUIRED);
         return NGX_ERROR;
     }
 
     if (r->method & NGX_HTTP_TRACE) {
-        ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
-                      "client sent TRACE method");
+        ngx_log_error(NGX_LOG_INFO, r->connection->log, 0, "client sent TRACE method");
         ngx_http_finalize_request(r, NGX_HTTP_NOT_ALLOWED);
         return NGX_ERROR;
     }
 
-    if (r->headers_in.transfer_encoding
-        && ngx_strcasestrn(r->headers_in.transfer_encoding->value.data, "chunked", 7 - 1)) {
+    if (r->headers_in.transfer_encoding && ngx_strcasestrn(r->headers_in.transfer_encoding->value.data, "chunked", 7 - 1)) {
         ngx_log_error(NGX_LOG_INFO, r->connection->log, 0, "client sent \"Transfer-Encoding: chunked\" header");
         ngx_http_finalize_request(r, NGX_HTTP_LENGTH_REQUIRED);
         return NGX_ERROR;
@@ -1710,8 +1702,7 @@ ngx_http_request_handler(ngx_event_t *ev)
     ctx = c->log->data;
     ctx->current_request = r;
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                   "http run request: \"%V?%V\"", &r->uri, &r->args);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0, "http run request: \"%V?%V\"", &r->uri, &r->args);
 
     if (ev->write) {
         r->write_event_handler(r);
@@ -1791,9 +1782,7 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
 
     c = r->connection;
 
-    ngx_log_debug5(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                   "http finalize request: %d, \"%V?%V\" a:%d, c:%d",
-                   rc, &r->uri, &r->args, r == c->data, r->main->count);
+    ngx_log_debug5(NGX_LOG_DEBUG_HTTP, c->log, 0, "http finalize request: %d, \"%V?%V\" a:%d, c:%d", rc, &r->uri, &r->args, r == c->data, r->main->count);
 
     if (rc == NGX_DONE) {
         ngx_http_finalize_connection(r);
@@ -2045,8 +2034,7 @@ ngx_http_finalize_connection(ngx_http_request_t *r)
             ngx_add_timer(r->connection->read, clcf->lingering_timeout);
 
             if (r->lingering_time == 0) {
-                r->lingering_time = ngx_time()
-                                      + (time_t) (clcf->lingering_time / 1000);
+                r->lingering_time = ngx_time() + (time_t) (clcf->lingering_time / 1000);
             }
         }
 
@@ -2121,15 +2109,13 @@ ngx_http_writer(ngx_http_request_t *r)
     c = r->connection;
     wev = c->write;
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, wev->log, 0,
-                   "http writer handler: \"%V?%V\"", &r->uri, &r->args);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, wev->log, 0, "http writer handler: \"%V?%V\"", &r->uri, &r->args);
 
     clcf = ngx_http_get_module_loc_conf(r->main, ngx_http_core_module);
 
     if (wev->timedout) {
         if (!wev->delayed) {
-            ngx_log_error(NGX_LOG_INFO, c->log, NGX_ETIMEDOUT,
-                          "client timed out");
+            ngx_log_error(NGX_LOG_INFO, c->log, NGX_ETIMEDOUT, "client timed out");
             c->timedout = 1;
 
             ngx_http_finalize_request(r, NGX_HTTP_REQUEST_TIME_OUT);
@@ -2152,8 +2138,7 @@ ngx_http_writer(ngx_http_request_t *r)
     }
 
     if (wev->delayed || r->aio) {
-        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, wev->log, 0,
-                       "http writer delayed");
+        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, wev->log, 0, "http writer delayed");
 
         if (ngx_handle_write_event(wev, clcf->send_lowat) != NGX_OK) {
             ngx_http_close_request(r, 0);
@@ -2164,9 +2149,7 @@ ngx_http_writer(ngx_http_request_t *r)
 
     rc = ngx_http_output_filter(r, NULL);
 
-    ngx_log_debug3(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                   "http writer output filter: %d, \"%V?%V\"",
-                   rc, &r->uri, &r->args);
+    ngx_log_debug3(NGX_LOG_DEBUG_HTTP, c->log, 0, "http writer output filter: %d, \"%V?%V\"", rc, &r->uri, &r->args);
 
     if (rc == NGX_ERROR) {
         ngx_http_finalize_request(r, rc);
@@ -2186,8 +2169,7 @@ ngx_http_writer(ngx_http_request_t *r)
         return;
     }
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, wev->log, 0,
-                   "http writer done: \"%V?%V\"", &r->uri, &r->args);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, wev->log, 0, "http writer done: \"%V?%V\"", &r->uri, &r->args);
 
     r->write_event_handler = ngx_http_request_empty_handler;
 
@@ -2198,8 +2180,7 @@ ngx_http_writer(ngx_http_request_t *r)
 static void
 ngx_http_request_finalizer(ngx_http_request_t *r)
 {
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "http finalizer done: \"%V?%V\"", &r->uri, &r->args);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "http finalizer done: \"%V?%V\"", &r->uri, &r->args);
 
     ngx_http_finalize_request(r, 0);
 }
@@ -2208,14 +2189,11 @@ ngx_http_request_finalizer(ngx_http_request_t *r)
 void
 ngx_http_block_reading(ngx_http_request_t *r)
 {
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "http reading blocked");
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "http reading blocked");
 
     /* aio does not call this handler */
 
-    if ((ngx_event_flags & NGX_USE_LEVEL_EVENT)
-        && r->connection->read->active)
-    {
+    if ((ngx_event_flags & NGX_USE_LEVEL_EVENT) && r->connection->read->active) {
         if (ngx_del_event(r->connection->read, NGX_READ_EVENT, 0) != NGX_OK) {
             ngx_http_close_request(r, 0);
         }
@@ -2291,8 +2269,7 @@ closed:
         rev->error = 1;
     }
 
-    ngx_log_error(NGX_LOG_INFO, c->log, err,
-                  "client prematurely closed connection");
+    ngx_log_error(NGX_LOG_INFO, c->log, err, "client prematurely closed connection");
 
     ngx_http_finalize_request(r, 0);
 }
@@ -2429,8 +2406,7 @@ ngx_http_set_keepalive(ngx_http_request_t *r)
         b->last = b->start;
     }
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0, "hc free: %p %d",
-                   hc->free, hc->nfree);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0, "hc free: %p %d", hc->free, hc->nfree);
 
     if (hc->free) {
         for (i = 0; i < hc->nfree; i++) {
@@ -2690,8 +2666,7 @@ ngx_http_lingering_close_handler(ngx_event_t *rev)
     c = rev->data;
     r = c->data;
 
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                   "http lingering close handler");
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, c->log, 0, "http lingering close handler");
 
     if (rev->timedout) {
         ngx_http_close_request(r, 0);
@@ -2745,8 +2720,7 @@ ngx_http_empty_handler(ngx_event_t *wev)
 void
 ngx_http_request_empty_handler(ngx_http_request_t *r)
 {
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "http request empty handler");
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "http request empty handler");
 
     return;
 }

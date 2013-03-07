@@ -1,0 +1,34 @@
+digraph ngx_http_parse_request_line {
+
+   rankdir=TB;
+   ranksep = 0.25;
+   node [shape=ellipse, color=skyblue, fontname="Verdana", fontsize=10, height=0.3];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   start -> method;
+   method -> method [label="A-Z"];
+   method -> spaces_before_uri [label="space"];
+   spaces_before_uri -> schema [label="a-z"];
+   schema -> schema [label="char"];
+   schema -> schema_slash [label=" : "];
+   schema_slash -> schema_slash_slash [label=" / "];
+   schema_slash_slash -> host [label=" / "];
+   host -> host [label="char"];
+   host -> port [label=" : "];
+
+   spaces_before_uri -> after_slash_in_uri [label=" / "];
+   host -> after_slash_in_uri [label=" / "];
+   port -> after_slash_in_uri [label=" / "];
+   after_slash_in_uri -> uri [label="char"];
+   uri -> uri [label="char"];
+   uri -> http_H [label="space"];
+   http_H -> http_HT [label=" H "];
+   http_HT -> http_HTT [label=" T "];
+   http_HTT -> http_HTTP [label=" T "];
+   http_HTTP -> major_digit [label=" P "];
+   major_digit -> major_digit [label="0-9"];
+   major_digit -> minor_digit [label=" . "];
+   minor_digit -> minor_digit [label="0-9"];
+   minor_digit -> almost_done [label="CR"];
+   almost_done -> done [label="LF"];
+}

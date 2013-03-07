@@ -238,25 +238,21 @@ ngx_http_parse_request_line(ngx_http_request_t *r, ngx_buf_t *b)
                     break;
 
                 case 7:
-                    if (ngx_str7_cmp(m, 'O', 'P', 'T', 'I', 'O', 'N', 'S', ' '))
-                    {
+                    if (ngx_str7_cmp(m, 'O', 'P', 'T', 'I', 'O', 'N', 'S', ' ')) {
                         r->method = NGX_HTTP_OPTIONS;
                     }
 
                     break;
 
                 case 8:
-                    if (ngx_str8cmp(m, 'P', 'R', 'O', 'P', 'F', 'I', 'N', 'D'))
-                    {
+                    if (ngx_str8cmp(m, 'P', 'R', 'O', 'P', 'F', 'I', 'N', 'D')) {
                         r->method = NGX_HTTP_PROPFIND;
                     }
 
                     break;
 
                 case 9:
-                    if (ngx_str9cmp(m,
-                            'P', 'R', 'O', 'P', 'P', 'A', 'T', 'C', 'H'))
-                    {
+                    if (ngx_str9cmp(m, 'P', 'R', 'O', 'P', 'P', 'A', 'T', 'C', 'H')) {
                         r->method = NGX_HTTP_PROPPATCH;
                     }
 
@@ -819,8 +815,7 @@ done:
 
 
 ngx_int_t
-ngx_http_parse_header_line(ngx_http_request_t *r, ngx_buf_t *b,
-    ngx_uint_t allow_underscores)
+ngx_http_parse_header_line(ngx_http_request_t *r, ngx_buf_t *b, ngx_uint_t allow_underscores)
 {
     u_char      c, ch, *p;
     ngx_uint_t  hash, i;
