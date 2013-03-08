@@ -1804,11 +1804,7 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
         rc = r->post_subrequest->handler(r, r->post_subrequest->data, rc);
     }
 
-    if (rc == NGX_ERROR
-        || rc == NGX_HTTP_REQUEST_TIME_OUT
-        || rc == NGX_HTTP_CLIENT_CLOSED_REQUEST
-        || c->error)
-    {
+    if (rc == NGX_ERROR || rc == NGX_HTTP_REQUEST_TIME_OUT || rc == NGX_HTTP_CLIENT_CLOSED_REQUEST || c->error) {
         if (ngx_http_post_action(r) == NGX_OK) {
             return;
         }
@@ -1821,10 +1817,7 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
         return;
     }
 
-    if (rc >= NGX_HTTP_SPECIAL_RESPONSE
-        || rc == NGX_HTTP_CREATED
-        || rc == NGX_HTTP_NO_CONTENT)
-    {
+    if (rc >= NGX_HTTP_SPECIAL_RESPONSE || rc == NGX_HTTP_CREATED || rc == NGX_HTTP_NO_CONTENT) {
         if (rc == NGX_HTTP_CLOSE) {
             ngx_http_terminate_request(r, rc);
             return;
@@ -1876,9 +1869,7 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
                 r->logged = 1;
 
             } else {
-                ngx_log_error(NGX_LOG_ALERT, c->log, 0,
-                              "subrequest: \"%V?%V\" logged again",
-                              &r->uri, &r->args);
+                ngx_log_error(NGX_LOG_ALERT, c->log, 0, "subrequest: \"%V?%V\" logged again", &r->uri, &r->args);
             }
 
             r->done = 1;
@@ -1891,9 +1882,7 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
 
         } else {
 
-            ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                           "http finalize non-active request: \"%V?%V\"",
-                           &r->uri, &r->args);
+            ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0, "http finalize non-active request: \"%V?%V\"", &r->uri, &r->args);
 
             r->write_event_handler = ngx_http_request_finalizer;
 
@@ -1908,9 +1897,7 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
             return;
         }
 
-        ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                       "http wake parent request: \"%V?%V\"",
-                       &pr->uri, &pr->args);
+        ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0, "http wake parent request: \"%V?%V\"", &pr->uri, &pr->args);
 
         return;
     }
@@ -1925,9 +1912,7 @@ ngx_http_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
     }
 
     if (r != c->data) {
-        ngx_log_error(NGX_LOG_ALERT, c->log, 0,
-                      "http finalize non-active request: \"%V?%V\"",
-                      &r->uri, &r->args);
+        ngx_log_error(NGX_LOG_ALERT, c->log, 0, "http finalize non-active request: \"%V?%V\"", &r->uri, &r->args);
         return;
     }
 
@@ -2073,9 +2058,7 @@ ngx_http_set_write_handler(ngx_http_request_t *r)
 
     r->http_state = NGX_HTTP_WRITING_REQUEST_STATE;
 
-    r->read_event_handler = r->discard_body ?
-                                ngx_http_discarded_request_body_handler:
-                                ngx_http_test_reading;
+    r->read_event_handler = r->discard_body ? ngx_http_discarded_request_body_handler: ngx_http_test_reading;
     r->write_event_handler = ngx_http_writer;
 
     wev = r->connection->write;

@@ -75,7 +75,7 @@ ngx_linux_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
     header.nalloc = NGX_HEADERS;
     header.pool = c->pool;
 
-    for ( ;; ) {
+    for ( ;; ) { /* 分离发送内存与发送文件， 以及API被信号中断后的重来 */
         file = NULL;
         file_size = 0;
         eintr = 0;
@@ -87,7 +87,7 @@ ngx_linux_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
         prev = NULL;
         iov = NULL;
 
-        /* create the iovec and coalesce the neighbouring bufs */
+        /* create the iovec and coalesce(合并) the neighbouring bufs */
 
         for (cl = in; cl && send < limit; cl = cl->next) {
 
@@ -149,20 +149,14 @@ ngx_linux_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
         /* set TCP_CORK if there is a header before a file */
 
-        if (c->tcp_nopush == NGX_TCP_NOPUSH_UNSET
-            && header.nelts != 0
-            && cl
-            && cl->buf->in_file)
-        {
+        if (c->tcp_nopush == NGX_TCP_NOPUSH_UNSET && header.nelts != 0 && cl && cl->buf->in_file) {
             /* the TCP_CORK and TCP_NODELAY are mutually exclusive */
 
             if (c->tcp_nodelay == NGX_TCP_NODELAY_SET) {
 
                 tcp_nodelay = 0;
 
-                if (setsockopt(c->fd, IPPROTO_TCP, TCP_NODELAY,
-                               (const void *) &tcp_nodelay, sizeof(int)) == -1)
-                {
+                if (setsockopt(c->fd, IPPROTO_TCP, TCP_NODELAY, (const void *) &tcp_nodelay, sizeof(int)) == -1) {
                     err = ngx_errno;
 
                     /*
@@ -173,16 +167,14 @@ ngx_linux_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
                     if (err != NGX_EINTR) {
                         wev->error = 1;
-                        ngx_connection_error(c, err,
-                                             "setsockopt(TCP_NODELAY) failed");
+                        ngx_connection_error(c, err, "setsockopt(TCP_NODELAY) failed");
                         return NGX_CHAIN_ERROR;
                     }
 
                 } else {
                     c->tcp_nodelay = NGX_TCP_NODELAY_UNSET;
 
-                    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                                   "no tcp_nodelay");
+                    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, c->log, 0, "no tcp_nodelay");
                 }
             }
 
@@ -198,16 +190,14 @@ ngx_linux_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
                     if (err != NGX_EINTR) {
                         wev->error = 1;
-                        ngx_connection_error(c, err,
-                                             ngx_tcp_nopush_n " failed");
+                        ngx_connection_error(c, err, ngx_tcp_nopush_n " failed");
                         return NGX_CHAIN_ERROR;
                     }
 
                 } else {
                     c->tcp_nopush = NGX_TCP_NOPUSH_SET;
 
-                    ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, 0,
-                                   "tcp_nopush");
+                    ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, 0, "tcp_nopush");
                 }
             }
         }
@@ -225,8 +215,7 @@ ngx_linux_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
                 if (send + size > limit) {
                     size = limit - send;
 
-                    aligned = (cl->buf->file_pos + size + ngx_pagesize - 1)
-                               & ~((off_t) ngx_pagesize - 1);
+                    aligned = (cl->buf->file_pos + size + ngx_pagesize - 1) & ~((off_t) ngx_pagesize - 1);
 
                     if (aligned <= cl->buf->file_last) {
                         size = aligned - cl->buf->file_pos;
@@ -238,8 +227,7 @@ ngx_linux_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
                 fprev = cl->buf->file_pos + size;
                 cl = cl->next;
 
-            } while (cl
-                     && cl->buf->in_file
+            } while (cl && cl->buf->in_file
                      && send < limit
                      && file->file->fd == cl->buf->file->fd
                      && fprev == cl->buf->file_pos);
@@ -258,8 +246,7 @@ ngx_linux_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
             offset = (int32_t) file->file_pos;
 #endif
 
-            ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0,
-                           "sendfile: @%O %uz", file->file_pos, file_size);
+            ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0, "sendfile: @%O %uz", file->file_pos, file_size);
 
             rc = sendfile(c->fd, file->file->fd, &offset, file_size);
 
@@ -280,15 +267,12 @@ ngx_linux_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
                     return NGX_CHAIN_ERROR;
                 }
 
-                ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err,
-                               "sendfile() is not ready");
+                ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "sendfile() is not ready");
             }
 
             sent = rc > 0 ? rc : 0;
 
-            ngx_log_debug4(NGX_LOG_DEBUG_EVENT, c->log, 0,
-                           "sendfile: %d, @%O %O:%uz",
-                           rc, file->file_pos, sent, file_size);
+            ngx_log_debug4(NGX_LOG_DEBUG_EVENT, c->log, 0, "sendfile: %d, @%O %O:%uz", rc, file->file_pos, sent, file_size);
 
         } else {
             rc = writev(c->fd, header.elts, header.nelts);
@@ -310,8 +294,7 @@ ngx_linux_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
                     return NGX_CHAIN_ERROR;
                 }
 
-                ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err,
-                               "writev() not ready");
+                ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err, "writev() not ready");
             }
 
             sent = rc > 0 ? rc : 0;
@@ -320,6 +303,7 @@ ngx_linux_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
         }
 
         if (send - prev_send == sent) {
+            /* API sendfile/writev 发送了部分数据， 说明拥堵了，不能连续发送需要等待  */
             complete = 1;
         }
 
@@ -372,6 +356,7 @@ ngx_linux_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
         }
 
         if (send >= limit || cl == NULL) {
+            /* 发送量达到限额 或者全部发送完毕  */
             return cl;
         }
 

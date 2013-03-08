@@ -1,0 +1,18 @@
+digraph ngx_out_chain2 {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   out [shape=box3d];
+   ngx_chain_t_1 [label="<head>ngx_chain_t\{\}|<next>next|<buf>buf"];
+   ngx_chain_t_2 [label="<head>ngx_chain_t\{\}|<next>next=null|<buf>buf"];
+
+   ngx_buf_t_1 [label="ngx_buf_t\{\}|in_memory|th: 18\\r\\n \n\\r\\n"];
+   ngx_buf_t_2 [label="ngx_buf_t\{\}|in_file|\<html\>hello\</html\>"];
+
+   out -> ngx_chain_t_1:head;
+   ngx_chain_t_1:next -> ngx_chain_t_2:head;
+
+   ngx_chain_t_1:buf -> ngx_buf_t_1:nw;
+   ngx_chain_t_2:buf -> ngx_buf_t_2:nw;
+}
