@@ -65,16 +65,13 @@ typedef struct {
 
 typedef struct {
     ngx_hash_t                       headers_in_hash;
-    ngx_array_t                      upstreams;
-                                             /* ngx_http_upstream_srv_conf_t */
+    ngx_array_t                      upstreams; /* ngx_http_upstream_srv_conf_t */
 } ngx_http_upstream_main_conf_t;
 
 typedef struct ngx_http_upstream_srv_conf_s  ngx_http_upstream_srv_conf_t;
 
-typedef ngx_int_t (*ngx_http_upstream_init_pt)(ngx_conf_t *cf,
-    ngx_http_upstream_srv_conf_t *us);
-typedef ngx_int_t (*ngx_http_upstream_init_peer_pt)(ngx_http_request_t *r,
-    ngx_http_upstream_srv_conf_t *us);
+typedef ngx_int_t (*ngx_http_upstream_init_pt)(ngx_conf_t *cf, ngx_http_upstream_srv_conf_t *us);
+typedef ngx_int_t (*ngx_http_upstream_init_peer_pt)(ngx_http_request_t *r, ngx_http_upstream_srv_conf_t *us);
 
 
 typedef struct {
@@ -254,8 +251,7 @@ typedef struct {
 } ngx_http_upstream_resolved_t;
 
 
-typedef void (*ngx_http_upstream_handler_pt)(ngx_http_request_t *r,
-    ngx_http_upstream_t *u);
+typedef void (*ngx_http_upstream_handler_pt)(ngx_http_request_t *r, ngx_http_upstream_t *u);
 
 
 struct ngx_http_upstream_s {
@@ -295,12 +291,9 @@ struct ngx_http_upstream_s {
     ngx_int_t                      (*reinit_request)(ngx_http_request_t *r);
     ngx_int_t                      (*process_header)(ngx_http_request_t *r);
     void                           (*abort_request)(ngx_http_request_t *r);
-    void                           (*finalize_request)(ngx_http_request_t *r,
-                                         ngx_int_t rc);
-    ngx_int_t                      (*rewrite_redirect)(ngx_http_request_t *r,
-                                         ngx_table_elt_t *h, size_t prefix);
-    ngx_int_t                      (*rewrite_cookie)(ngx_http_request_t *r,
-                                         ngx_table_elt_t *h);
+    void                           (*finalize_request)(ngx_http_request_t *r, ngx_int_t rc);
+    ngx_int_t                      (*rewrite_redirect)(ngx_http_request_t *r, ngx_table_elt_t *h, size_t prefix);
+    ngx_int_t                      (*rewrite_cookie)(ngx_http_request_t *r, ngx_table_elt_t *h);
 
     ngx_msec_t                       timeout;
 
@@ -340,25 +333,17 @@ typedef struct {
     ngx_uint_t  skip_empty;
 } ngx_http_upstream_param_t;
 
-
-ngx_int_t ngx_http_upstream_header_variable(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data);
+ngx_int_t ngx_http_upstream_header_variable(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data);
 
 ngx_int_t ngx_http_upstream_create(ngx_http_request_t *r);
 void ngx_http_upstream_init(ngx_http_request_t *r);
-ngx_http_upstream_srv_conf_t *ngx_http_upstream_add(ngx_conf_t *cf,
-    ngx_url_t *u, ngx_uint_t flags);
-char *ngx_http_upstream_bind_set_slot(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-char *ngx_http_upstream_param_set_slot(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-ngx_int_t ngx_http_upstream_hide_headers_hash(ngx_conf_t *cf,
-    ngx_http_upstream_conf_t *conf, ngx_http_upstream_conf_t *prev,
-    ngx_str_t *default_hide_headers, ngx_hash_init_t *hash);
+ngx_http_upstream_srv_conf_t *ngx_http_upstream_add(ngx_conf_t *cf, ngx_url_t *u, ngx_uint_t flags);
+char *ngx_http_upstream_bind_set_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+char *ngx_http_upstream_param_set_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+ngx_int_t ngx_http_upstream_hide_headers_hash(ngx_conf_t *cf, ngx_http_upstream_conf_t *conf, ngx_http_upstream_conf_t *prev, ngx_str_t *default_hide_headers, ngx_hash_init_t *hash);
 
 
-#define ngx_http_conf_upstream_srv_conf(uscf, module)                         \
-    uscf->srv_conf[module.ctx_index]
+#define ngx_http_conf_upstream_srv_conf(uscf, module) uscf->srv_conf[module.ctx_index]
 
 
 extern ngx_module_t        ngx_http_upstream_module;

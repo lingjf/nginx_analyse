@@ -1,0 +1,29 @@
+digraph ngx_upstream_configuration {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+ 
+
+   ngx_http_conf_ctx_t [label="<head>ngx_http_conf_ctx_t|<main>main_conf|<srv>srv_conf|<loc>loc_conf"];
+   srv_conf_array [label="<head>void **\[\]|<n1>http_core|<n2>http_log|..."];
+   ngx_http_core_srv_conf_t [label="<head>ngx_http_core_srv_conf_t\{\}|<ctx>ctx|..."];
+   loc_conf_array1 [label="<head>void **\[\]|<n1>http_core|<n2>http_log|..."];
+   ngx_http_core_loc_conf_t_array [label="<head>ngx_http_core_loc_conf_t*\[\]|<n1>ngx_http_core_loc_conf_t*|<n2>ngx_http_core_loc_conf_t*|..."];
+   ngx_http_core_loc_conf_t2 [label="<head>ngx_http_core_loc_conf_t\{\}|<loc_conf>loc_conf|<name>name|<root>root|..."];
+   loc_conf_array2 [label="<head>void **\[\]|<n1>http_core|<n2>http_log|<n3>http_upstream|..."];
+   ngx_http_proxy_loc_conf_t [label="<head>ngx_http_proxy_loc_conf_t\{\}|<upstream>upstream|..."];
+   ngx_http_upstream_conf_t [label="<head>ngx_http_upstream_conf_t\{\}|<upstream>upstream|..."];
+   ngx_http_upstream_srv_conf_t [label="<head>ngx_http_upstream_srv_conf_t\{\}|<servers>servers|host|..."];
+   
+   ngx_http_conf_ctx_t:srv -> srv_conf_array:head;
+   ngx_http_conf_ctx_t:loc -> loc_conf_array1:head;
+   srv_conf_array:n1 -> ngx_http_core_srv_conf_t:head;
+   ngx_http_core_srv_conf_t:ctx:e -> ngx_http_conf_ctx_t:head;
+   loc_conf_array1:n1 -> ngx_http_core_loc_conf_t_array:head:nw;
+   ngx_http_core_loc_conf_t_array:n1 -> ngx_http_core_loc_conf_t2:head;
+   ngx_http_core_loc_conf_t2:loc_conf -> loc_conf_array2:head;
+   loc_conf_array2:n1:e -> ngx_http_core_loc_conf_t2:head;
+   loc_conf_array2:n3 -> ngx_http_proxy_loc_conf_t:head;
+   ngx_http_proxy_loc_conf_t:upstream -> ngx_http_upstream_conf_t:head;
+   ngx_http_upstream_conf_t:upstream -> ngx_http_upstream_srv_conf_t:head;
+}

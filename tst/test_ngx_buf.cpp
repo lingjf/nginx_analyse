@@ -24,9 +24,24 @@ H2CASE(ngx_buf,"create temp buf")
 {
    ngx_buf_t *buf = ngx_create_temp_buf(pool, 68);
 	H2EQUAL_STRCMP("ngx_buf_t{end-start=68,last-pos=0,temporary}", jeff_buf_tustring(buf));
+	H2EQUAL_INTEGER(0, ngx_buf_size(buf));
 }
 
-H2CASE(ngx_buf,"alloc chain link")
+H2UNIT(ngx_chain)
+{
+   ngx_pool_t * pool;
+   void setup()
+   {
+      pool = ngx_create_pool(128, NULL);
+   }
+
+   void teardown()
+   {
+      ngx_destroy_pool(pool);
+   }
+};
+
+H2CASE(ngx_chain,"alloc chain link")
 {
    ngx_chain_t *chain = ngx_alloc_chain_link(pool);
    //chain is not initialized
@@ -35,9 +50,33 @@ H2CASE(ngx_buf,"alloc chain link")
    H2EQUAL_STRCMP("ngx_pool_t[max=88,small=1,large=0,cleanup=0,chain=1]", jeff_pool_tustring(pool));
 }
 
-H2CASE(ngx_buf,"create chain of bufs")
+H2CASE(ngx_chain,"create chain of bufs")
 {
    ngx_bufs_t bufs = {2, 64};
    ngx_chain_t *chain = ngx_create_chain_of_bufs(pool, &bufs);
 	H2EQUAL_STRCMP("ngx_chain_t{ngx_buf_t{end-start=64,last-pos=0,temporary},ngx_buf_t{end-start=64,last-pos=0,temporary},}", jeff_chain_tustring(chain));
+}
+
+H2CASE(ngx_chain,"add copy chain")
+{
+   ngx_chain_t *chain_0 = NULL;
+
+   ngx_bufs_t bufs_1 = {2, 64};
+   ngx_chain_t *chain_1 = ngx_create_chain_of_bufs(pool, &bufs_1);
+   H2EQUAL_STRCMP("ngx_chain_t{ngx_buf_t{end-start=64,last-pos=0,temporary},ngx_buf_t{end-start=64,last-pos=0,temporary},}", jeff_chain_tustring(chain_1));
+
+   ngx_bufs_t bufs_2 = {2, 32};
+   ngx_chain_t *chain_2 = ngx_create_chain_of_bufs(pool, &bufs_2);
+   H2EQUAL_STRCMP("ngx_chain_t{ngx_buf_t{end-start=32,last-pos=0,temporary},ngx_buf_t{end-start=32,last-pos=0,temporary},}", jeff_chain_tustring(chain_2));
+
+   H2EQUAL_INTEGER(NGX_OK, ngx_chain_add_copy(pool, &chain_0, chain_1));
+   H2EQUAL_STRCMP("ngx_chain_t{ngx_buf_t{end-start=64,last-pos=0,temporary},ngx_buf_t{end-start=64,last-pos=0,temporary},}", jeff_chain_tustring(chain_0));
+
+   H2EQUAL_INTEGER(NGX_OK, ngx_chain_add_copy(pool, &chain_0, chain_2));
+   H2EQUAL_STRCMP("ngx_chain_t{ngx_buf_t{end-start=64,last-pos=0,temporary},ngx_buf_t{end-start=64,last-pos=0,temporary},ngx_buf_t{end-start=32,last-pos=0,temporary},ngx_buf_t{end-start=32,last-pos=0,temporary},}", jeff_chain_tustring(chain_0));
+}
+
+H2CASE(ngx_chain,"update chains")
+{
+   //todo
 }

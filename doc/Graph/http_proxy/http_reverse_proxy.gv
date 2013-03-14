@@ -1,0 +1,21 @@
+digraph ngx_upstream_server {
+   rankdir=LR;
+
+   node [shape=box3d, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   client;
+   proxy;
+   server1 [label="server"];
+   server2 [label="server"];
+
+   client -> proxy [label="1. request"];
+   proxy -> client [label="4. response"];
+
+   proxy -> server1 [label="2. request"];
+   server1 -> proxy [label="3. response"];
+
+   proxy -> server2 [label="request"];
+   server2 -> proxy [label="response"];
+   
+}

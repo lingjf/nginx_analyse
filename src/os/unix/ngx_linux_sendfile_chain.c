@@ -33,6 +33,12 @@
 #define NGX_HEADERS  IOV_MAX
 #endif
 
+/*
+ * memory based buffer is sent by writev()
+ * file based buffer is sent by sendfile()
+ * pos of ngx_buf_t is updated
+ * return the ngx_chain_t which is not sent
+ */
 
 ngx_chain_t *
 ngx_linux_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
@@ -323,7 +329,7 @@ ngx_linux_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
             if (sent >= size) {
                 sent -= size;
-
+                /* 已经成功发送出去的ngx_buf_t， 将其buf_size设为0 */
                 if (ngx_buf_in_memory(cl->buf)) {
                     cl->buf->pos = cl->buf->last;
                 }
@@ -334,7 +340,7 @@ ngx_linux_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
                 continue;
             }
-
+            /* 已经成功发送出去部分的ngx_buf_t， 将其buf_size剩余量*/
             if (ngx_buf_in_memory(cl->buf)) {
                 cl->buf->pos += (size_t) sent;
             }

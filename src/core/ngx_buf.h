@@ -70,15 +70,14 @@ typedef struct ngx_output_chain_ctx_s  ngx_output_chain_ctx_t;
 typedef ngx_int_t (*ngx_output_chain_filter_pt)(void *ctx, ngx_chain_t *in);
 
 #if (NGX_HAVE_FILE_AIO)
-typedef void (*ngx_output_chain_aio_pt)(ngx_output_chain_ctx_t *ctx,
-    ngx_file_t *file);
+typedef void (*ngx_output_chain_aio_pt)(ngx_output_chain_ctx_t *ctx, ngx_file_t *file);
 #endif
 
 struct ngx_output_chain_ctx_s {
-    ngx_buf_t                   *buf;
-    ngx_chain_t                 *in;
-    ngx_chain_t                 *free;
-    ngx_chain_t                 *busy;
+    ngx_buf_t                   *buf;   // 临时的buffer
+    ngx_chain_t                 *in;    // 将要发送的chain
+    ngx_chain_t                 *free;  // 空闲的chain
+    ngx_chain_t                 *busy;  // 还没发送的chain
 
     unsigned                     sendfile:1;
     unsigned                     directio:1;
@@ -120,16 +119,11 @@ typedef struct {
 #define ngx_buf_in_memory(b)        (b->temporary || b->memory || b->mmap)
 #define ngx_buf_in_memory_only(b)   (ngx_buf_in_memory(b) && !b->in_file)
 
-#define ngx_buf_special(b)                                                   \
-    ((b->flush || b->last_buf || b->sync)                                    \
-     && !ngx_buf_in_memory(b) && !b->in_file)
+#define ngx_buf_special(b) ((b->flush || b->last_buf || b->sync) && !ngx_buf_in_memory(b) && !b->in_file)
 
-#define ngx_buf_sync_only(b)                                                 \
-    (b->sync                                                                 \
-     && !ngx_buf_in_memory(b) && !b->in_file && !b->flush && !b->last_buf)
+#define ngx_buf_sync_only(b) (b->sync && !ngx_buf_in_memory(b) && !b->in_file && !b->flush && !b->last_buf)
 
-#define ngx_buf_size(b)                                                      \
-    (ngx_buf_in_memory(b) ? (off_t) (b->last - b->pos): (b->file_last - b->file_pos))
+#define ngx_buf_size(b) (ngx_buf_in_memory(b) ? (off_t) (b->last - b->pos): (b->file_last - b->file_pos))
 
 ngx_buf_t *ngx_create_temp_buf(ngx_pool_t *pool, size_t size);
 ngx_chain_t *ngx_create_chain_of_bufs(ngx_pool_t *pool, ngx_bufs_t *bufs);
