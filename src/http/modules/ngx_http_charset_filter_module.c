@@ -85,41 +85,28 @@ typedef struct {
 } ngx_http_charset_conf_ctx_t;
 
 
-static ngx_int_t ngx_http_destination_charset(ngx_http_request_t *r,
-    ngx_str_t *name);
-static ngx_int_t ngx_http_main_request_charset(ngx_http_request_t *r,
-    ngx_str_t *name);
-static ngx_int_t ngx_http_source_charset(ngx_http_request_t *r,
-    ngx_str_t *name);
+static ngx_int_t ngx_http_destination_charset(ngx_http_request_t *r, ngx_str_t *name);
+static ngx_int_t ngx_http_main_request_charset(ngx_http_request_t *r, ngx_str_t *name);
+static ngx_int_t ngx_http_source_charset(ngx_http_request_t *r, ngx_str_t *name);
 static ngx_int_t ngx_http_get_charset(ngx_http_request_t *r, ngx_str_t *name);
-static ngx_inline void ngx_http_set_charset(ngx_http_request_t *r,
-    ngx_str_t *charset);
-static ngx_int_t ngx_http_charset_ctx(ngx_http_request_t *r,
-    ngx_http_charset_t *charsets, ngx_int_t charset, ngx_int_t source_charset);
+static ngx_inline void ngx_http_set_charset(ngx_http_request_t *r, ngx_str_t *charset);
+static ngx_int_t ngx_http_charset_ctx(ngx_http_request_t *r, ngx_http_charset_t *charsets, ngx_int_t charset, ngx_int_t source_charset);
 static ngx_uint_t ngx_http_charset_recode(ngx_buf_t *b, u_char *table);
-static ngx_chain_t *ngx_http_charset_recode_from_utf8(ngx_pool_t *pool,
-    ngx_buf_t *buf, ngx_http_charset_ctx_t *ctx);
-static ngx_chain_t *ngx_http_charset_recode_to_utf8(ngx_pool_t *pool,
-    ngx_buf_t *buf, ngx_http_charset_ctx_t *ctx);
+static ngx_chain_t *ngx_http_charset_recode_from_utf8(ngx_pool_t *pool, ngx_buf_t *buf, ngx_http_charset_ctx_t *ctx);
+static ngx_chain_t *ngx_http_charset_recode_to_utf8(ngx_pool_t *pool, ngx_buf_t *buf, ngx_http_charset_ctx_t *ctx);
 
-static ngx_chain_t *ngx_http_charset_get_buf(ngx_pool_t *pool,
-    ngx_http_charset_ctx_t *ctx);
-static ngx_chain_t *ngx_http_charset_get_buffer(ngx_pool_t *pool,
-    ngx_http_charset_ctx_t *ctx, size_t size);
+static ngx_chain_t *ngx_http_charset_get_buf(ngx_pool_t *pool, ngx_http_charset_ctx_t *ctx);
+static ngx_chain_t *ngx_http_charset_get_buffer(ngx_pool_t *pool, ngx_http_charset_ctx_t *ctx, size_t size);
 
-static char *ngx_http_charset_map_block(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char *ngx_http_charset_map(ngx_conf_t *cf, ngx_command_t *dummy,
-    void *conf);
+static char *ngx_http_charset_map_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_charset_map(ngx_conf_t *cf, ngx_command_t *dummy, void *conf);
 
-static char *ngx_http_set_charset_slot(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+static char *ngx_http_set_charset_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static ngx_int_t ngx_http_add_charset(ngx_array_t *charsets, ngx_str_t *name);
 
 static void *ngx_http_charset_create_main_conf(ngx_conf_t *cf);
 static void *ngx_http_charset_create_loc_conf(ngx_conf_t *cf);
-static char *ngx_http_charset_merge_loc_conf(ngx_conf_t *cf,
-    void *parent, void *child);
+static char *ngx_http_charset_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child);
 static ngx_int_t ngx_http_charset_postconfiguration(ngx_conf_t *cf);
 
 
@@ -137,24 +124,21 @@ ngx_str_t  ngx_http_charset_default_types[] = {
 static ngx_command_t  ngx_http_charset_filter_commands[] = {
 
     { ngx_string("charset"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF
-                        |NGX_HTTP_LIF_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF |NGX_HTTP_LIF_CONF|NGX_CONF_TAKE1,
       ngx_http_set_charset_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_charset_loc_conf_t, charset),
       NULL },
 
     { ngx_string("source_charset"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF
-                        |NGX_HTTP_LIF_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF |NGX_HTTP_LIF_CONF|NGX_CONF_TAKE1,
       ngx_http_set_charset_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_charset_loc_conf_t, source_charset),
       NULL },
 
     { ngx_string("override_charset"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF
-                        |NGX_HTTP_LIF_CONF|NGX_CONF_FLAG,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF |NGX_HTTP_LIF_CONF|NGX_CONF_FLAG,
       ngx_conf_set_flag_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_charset_loc_conf_t, override_charset),
@@ -249,8 +233,7 @@ ngx_http_charset_header_filter(ngx_http_request_t *r)
      *                 or NGX_HTTP_CHARSET_OFF
      */
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "charset: \"%V\" > \"%V\"", &src, &dst);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "charset: \"%V\" > \"%V\"", &src, &dst);
 
     if (source_charset == NGX_HTTP_CHARSET_OFF) {
         ngx_http_set_charset(r, &dst);

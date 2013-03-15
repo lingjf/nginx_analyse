@@ -35,26 +35,21 @@ typedef struct {
 
 
 static ngx_int_t ngx_http_access_handler(ngx_http_request_t *r);
-static ngx_int_t ngx_http_access_inet(ngx_http_request_t *r,
-    ngx_http_access_loc_conf_t *alcf, in_addr_t addr);
+static ngx_int_t ngx_http_access_inet(ngx_http_request_t *r, ngx_http_access_loc_conf_t *alcf, in_addr_t addr);
 #if (NGX_HAVE_INET6)
-static ngx_int_t ngx_http_access_inet6(ngx_http_request_t *r,
-    ngx_http_access_loc_conf_t *alcf, u_char *p);
+static ngx_int_t ngx_http_access_inet6(ngx_http_request_t *r, ngx_http_access_loc_conf_t *alcf, u_char *p);
 #endif
 static ngx_int_t ngx_http_access_found(ngx_http_request_t *r, ngx_uint_t deny);
-static char *ngx_http_access_rule(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+static char *ngx_http_access_rule(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static void *ngx_http_access_create_loc_conf(ngx_conf_t *cf);
-static char *ngx_http_access_merge_loc_conf(ngx_conf_t *cf,
-    void *parent, void *child);
+static char *ngx_http_access_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child);
 static ngx_int_t ngx_http_access_init(ngx_conf_t *cf);
 
 
 static ngx_command_t  ngx_http_access_commands[] = {
 
     { ngx_string("allow"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LMT_CONF
-                        |NGX_CONF_TAKE1,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LMT_CONF |NGX_CONF_TAKE1,
       ngx_http_access_rule,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,

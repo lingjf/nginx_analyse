@@ -127,8 +127,7 @@ typedef struct {
 } ngx_http_fastcgi_request_start_t;
 
 
-static ngx_int_t ngx_http_fastcgi_eval(ngx_http_request_t *r,
-    ngx_http_fastcgi_loc_conf_t *flcf);
+static ngx_int_t ngx_http_fastcgi_eval(ngx_http_request_t *r, ngx_http_fastcgi_loc_conf_t *flcf);
 #if (NGX_HTTP_CACHE)
 static ngx_int_t ngx_http_fastcgi_create_key(ngx_http_request_t *r);
 #endif
@@ -136,43 +135,29 @@ static ngx_int_t ngx_http_fastcgi_create_request(ngx_http_request_t *r);
 static ngx_int_t ngx_http_fastcgi_reinit_request(ngx_http_request_t *r);
 static ngx_int_t ngx_http_fastcgi_process_header(ngx_http_request_t *r);
 static ngx_int_t ngx_http_fastcgi_input_filter_init(void *data);
-static ngx_int_t ngx_http_fastcgi_input_filter(ngx_event_pipe_t *p,
-    ngx_buf_t *buf);
-static ngx_int_t ngx_http_fastcgi_process_record(ngx_http_request_t *r,
-    ngx_http_fastcgi_ctx_t *f);
+static ngx_int_t ngx_http_fastcgi_input_filter(ngx_event_pipe_t *p, ngx_buf_t *buf);
+static ngx_int_t ngx_http_fastcgi_process_record(ngx_http_request_t *r, ngx_http_fastcgi_ctx_t *f);
 static void ngx_http_fastcgi_abort_request(ngx_http_request_t *r);
-static void ngx_http_fastcgi_finalize_request(ngx_http_request_t *r,
-    ngx_int_t rc);
+static void ngx_http_fastcgi_finalize_request(ngx_http_request_t *r, ngx_int_t rc);
 
 static ngx_int_t ngx_http_fastcgi_add_variables(ngx_conf_t *cf);
 static void *ngx_http_fastcgi_create_loc_conf(ngx_conf_t *cf);
-static char *ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf,
-    void *parent, void *child);
-static ngx_int_t ngx_http_fastcgi_merge_params(ngx_conf_t *cf,
-    ngx_http_fastcgi_loc_conf_t *conf, ngx_http_fastcgi_loc_conf_t *prev);
+static char *ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child);
+static ngx_int_t ngx_http_fastcgi_merge_params(ngx_conf_t *cf, ngx_http_fastcgi_loc_conf_t *conf, ngx_http_fastcgi_loc_conf_t *prev);
 
-static ngx_int_t ngx_http_fastcgi_script_name_variable(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data);
-static ngx_int_t ngx_http_fastcgi_path_info_variable(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data);
-static ngx_http_fastcgi_ctx_t *ngx_http_fastcgi_split(ngx_http_request_t *r,
-    ngx_http_fastcgi_loc_conf_t *flcf);
+static ngx_int_t ngx_http_fastcgi_script_name_variable(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data);
+static ngx_int_t ngx_http_fastcgi_path_info_variable(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data);
+static ngx_http_fastcgi_ctx_t *ngx_http_fastcgi_split(ngx_http_request_t *r, ngx_http_fastcgi_loc_conf_t *flcf);
 
-static char *ngx_http_fastcgi_pass(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char *ngx_http_fastcgi_split_path_info(ngx_conf_t *cf,
-    ngx_command_t *cmd, void *conf);
-static char *ngx_http_fastcgi_store(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+static char *ngx_http_fastcgi_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_fastcgi_split_path_info(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_fastcgi_store(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 #if (NGX_HTTP_CACHE)
-static char *ngx_http_fastcgi_cache(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char *ngx_http_fastcgi_cache_key(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+static char *ngx_http_fastcgi_cache(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_fastcgi_cache_key(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 #endif
 
-static char *ngx_http_fastcgi_lowat_check(ngx_conf_t *cf, void *post,
-    void *data);
+static char *ngx_http_fastcgi_lowat_check(ngx_conf_t *cf, void *post, void *data);
 
 
 static ngx_conf_post_t  ngx_http_fastcgi_lowat_post =
@@ -579,9 +564,7 @@ ngx_http_fastcgi_handler(ngx_http_request_t *r)
     ngx_http_fastcgi_loc_conf_t  *flcf;
 
     if (r->subrequest_in_memory) {
-        ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
-                      "ngx_http_fastcgi_module does not support "
-                      "subrequest in memory");
+        ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0, "ngx_http_fastcgi_module does not support " "subrequest in memory");
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 

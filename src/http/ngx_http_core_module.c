@@ -1757,16 +1757,12 @@ ngx_http_map_uri_to_path(ngx_http_request_t *r, ngx_str_t *path, size_t *root_le
 
         captures = alias && clcf->regex;
 
-        reserved += captures ? r->add_uri_to_alias ? r->uri.len + 1 : 1
-                             : r->uri.len - alias + 1;
+        reserved += captures ? r->add_uri_to_alias ? r->uri.len + 1 : 1 : r->uri.len - alias + 1;
 #else
         reserved += r->uri.len - alias + 1;
 #endif
 
-        if (ngx_http_script_run(r, path, clcf->root_lengths->elts, reserved,
-                                clcf->root_values->elts)
-            == NULL)
-        {
+        if (ngx_http_script_run(r, path, clcf->root_lengths->elts, reserved, clcf->root_values->elts) == NULL) {
             return NULL;
         }
 
@@ -2292,17 +2288,14 @@ ngx_http_subrequest(ngx_http_request_t *r,
 
 
 ngx_int_t
-ngx_http_internal_redirect(ngx_http_request_t *r,
-    ngx_str_t *uri, ngx_str_t *args)
+ngx_http_internal_redirect(ngx_http_request_t *r, ngx_str_t *uri, ngx_str_t *args)
 {
     ngx_http_core_srv_conf_t  *cscf;
 
     r->uri_changes--;
 
     if (r->uri_changes == 0) {
-        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                      "rewrite or internal redirection cycle "
-                      "while internally redirecting to \"%V\"", uri);
+        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "rewrite or internal redirection cycle " "while internally redirecting to \"%V\"", uri);
 
         r->main->count++;
         ngx_http_finalize_request(r, NGX_HTTP_INTERNAL_SERVER_ERROR);
@@ -2318,8 +2311,7 @@ ngx_http_internal_redirect(ngx_http_request_t *r,
         ngx_str_null(&r->args);
     }
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "internal redirect: \"%V?%V\"", uri, &r->args);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "internal redirect: \"%V?%V\"", uri, &r->args);
 
     ngx_http_set_exten(r);
 

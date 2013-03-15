@@ -1,0 +1,23 @@
+digraph ngx_index_configuration {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+ 
+
+   loc_conf_array [label="<head>void **\[\]|<n1>http_core|...|<n3>http_index|..."];
+   ngx_http_core_loc_conf_t [label="<head>ngx_http_core_loc_conf_t\{\}|<root>root|<loc_conf>loc_conf|..."];
+  
+   ngx_http_index_loc_conf_t [label="<head>ngx_http_index_loc_conf_t\{\}|<indices>indices|..."];
+   ngx_http_index_t_array [label="<head>ngx_http_index_t\[\]|<n1>ngx_http_index_t|<n2>ngx_http_index_t|..."];
+   ngx_http_index_t_1 [label="<head>ngx_http_index_t\{\}|name=index.html"];
+   ngx_http_index_t_2 [label="<head>ngx_http_index_t\{\}|name=index.php"];
+   
+
+   loc_conf_array:n1:e -> ngx_http_core_loc_conf_t:head;
+   ngx_http_core_loc_conf_t:loc_conf -> loc_conf_array:head;
+ 
+   loc_conf_array:n3 -> ngx_http_index_loc_conf_t:head;
+   ngx_http_index_loc_conf_t:indices -> ngx_http_index_t_array:head;
+   ngx_http_index_t_array:n1 -> ngx_http_index_t_1:head;
+   ngx_http_index_t_array:n2 -> ngx_http_index_t_2:head;
+}

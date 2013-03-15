@@ -473,8 +473,7 @@ ngx_http_special_response_handler(ngx_http_request_t *r, ngx_int_t error)
 
 
 ngx_int_t
-ngx_http_filter_finalize_request(ngx_http_request_t *r, ngx_module_t *m,
-    ngx_int_t error)
+ngx_http_filter_finalize_request(ngx_http_request_t *r, ngx_module_t *m, ngx_int_t error)
 {
     void       *ctx;
     ngx_int_t   rc;
@@ -515,9 +514,7 @@ ngx_http_filter_finalize_request(ngx_http_request_t *r, ngx_module_t *m,
 void
 ngx_http_clean_header(ngx_http_request_t *r)
 {
-    ngx_memzero(&r->headers_out.status,
-                sizeof(ngx_http_headers_out_t)
-                    - offsetof(ngx_http_headers_out_t, status));
+    ngx_memzero(&r->headers_out.status, sizeof(ngx_http_headers_out_t) - offsetof(ngx_http_headers_out_t, status));
 
     r->headers_out.headers.part.nelts = 0;
     r->headers_out.headers.part.next = NULL;
@@ -599,15 +596,12 @@ ngx_http_send_error_page(ngx_http_request_t *r, ngx_http_err_page_t *err_page)
         return ngx_http_send_refresh(r);
     }
 
-    return ngx_http_send_special_response(r, clcf, r->err_status
-                                                   - NGX_HTTP_MOVED_PERMANENTLY
-                                                   + NGX_HTTP_OFF_3XX);
+    return ngx_http_send_special_response(r, clcf, r->err_status - NGX_HTTP_MOVED_PERMANENTLY + NGX_HTTP_OFF_3XX);
 }
 
 
 static ngx_int_t
-ngx_http_send_special_response(ngx_http_request_t *r,
-    ngx_http_core_loc_conf_t *clcf, ngx_uint_t err)
+ngx_http_send_special_response(ngx_http_request_t *r, ngx_http_core_loc_conf_t *clcf, ngx_uint_t err)
 {
     u_char       *tail;
     size_t        len;
@@ -634,8 +628,7 @@ ngx_http_send_special_response(ngx_http_request_t *r,
             && r->http_version >= NGX_HTTP_VERSION_10
             && err >= NGX_HTTP_OFF_4XX)
         {
-            r->headers_out.content_length_n +=
-                                         sizeof(ngx_http_msie_padding) - 1;
+            r->headers_out.content_length_n += sizeof(ngx_http_msie_padding) - 1;
             msie_padding = 1;
         }
 

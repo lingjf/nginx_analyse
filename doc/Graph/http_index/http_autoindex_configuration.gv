@@ -1,0 +1,19 @@
+digraph ngx_autoindex_configuration {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+ 
+
+   loc_conf_array [label="<head>void **\[\]|<n1>http_core|...|<n3>http_autoindex|..."];
+   ngx_http_core_loc_conf_t [label="<head>ngx_http_core_loc_conf_t\{\}|<root>root|<loc_conf>loc_conf|..."];
+  
+   ngx_http_autoindex_loc_conf_t [label="<head>ngx_http_autoindex_loc_conf_t\{\}|<enable>enable|localtime|exact_size"];
+
+   
+
+   loc_conf_array:n1:e -> ngx_http_core_loc_conf_t:head;
+   ngx_http_core_loc_conf_t:loc_conf -> loc_conf_array:head;
+ 
+   loc_conf_array:n3 -> ngx_http_autoindex_loc_conf_t:head;
+
+}

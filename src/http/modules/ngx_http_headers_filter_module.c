@@ -12,8 +12,7 @@
 
 typedef struct ngx_http_header_val_s  ngx_http_header_val_t;
 
-typedef ngx_int_t (*ngx_http_set_header_pt)(ngx_http_request_t *r,
-    ngx_http_header_val_t *hv, ngx_str_t *value);
+typedef ngx_int_t (*ngx_http_set_header_pt)(ngx_http_request_t *r, ngx_http_header_val_t *hv, ngx_str_t *value);
 
 
 typedef struct {
@@ -49,32 +48,23 @@ typedef struct {
 } ngx_http_headers_conf_t;
 
 
-static ngx_int_t ngx_http_set_expires(ngx_http_request_t *r,
-    ngx_http_headers_conf_t *conf);
-static ngx_int_t ngx_http_add_cache_control(ngx_http_request_t *r,
-    ngx_http_header_val_t *hv, ngx_str_t *value);
-static ngx_int_t ngx_http_add_header(ngx_http_request_t *r,
-    ngx_http_header_val_t *hv, ngx_str_t *value);
-static ngx_int_t ngx_http_set_last_modified(ngx_http_request_t *r,
-    ngx_http_header_val_t *hv, ngx_str_t *value);
+static ngx_int_t ngx_http_set_expires(ngx_http_request_t *r, ngx_http_headers_conf_t *conf);
+static ngx_int_t ngx_http_add_cache_control(ngx_http_request_t *r, ngx_http_header_val_t *hv, ngx_str_t *value);
+static ngx_int_t ngx_http_add_header(ngx_http_request_t *r, ngx_http_header_val_t *hv, ngx_str_t *value);
+static ngx_int_t ngx_http_set_last_modified(ngx_http_request_t *r, ngx_http_header_val_t *hv, ngx_str_t *value);
 
 static void *ngx_http_headers_create_conf(ngx_conf_t *cf);
-static char *ngx_http_headers_merge_conf(ngx_conf_t *cf,
-    void *parent, void *child);
+static char *ngx_http_headers_merge_conf(ngx_conf_t *cf, void *parent, void *child);
 static ngx_int_t ngx_http_headers_filter_init(ngx_conf_t *cf);
-static char *ngx_http_headers_expires(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char *ngx_http_headers_add(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+static char *ngx_http_headers_expires(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_headers_add(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 
 static ngx_http_set_header_t  ngx_http_set_headers[] = {
 
     { ngx_string("Cache-Control"), 0, ngx_http_add_cache_control },
 
-    { ngx_string("Last-Modified"),
-                 offsetof(ngx_http_headers_out_t, last_modified),
-                 ngx_http_set_last_modified },
+    { ngx_string("Last-Modified"), offsetof(ngx_http_headers_out_t, last_modified), ngx_http_set_last_modified },
 
     { ngx_null_string, 0, NULL }
 };
@@ -83,16 +73,14 @@ static ngx_http_set_header_t  ngx_http_set_headers[] = {
 static ngx_command_t  ngx_http_headers_filter_commands[] = {
 
     { ngx_string("expires"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF
-                        |NGX_CONF_TAKE12,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF |NGX_CONF_TAKE12,
       ngx_http_headers_expires,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL},
 
     { ngx_string("add_header"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF
-                        |NGX_CONF_TAKE2,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF |NGX_CONF_TAKE2,
       ngx_http_headers_add,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
@@ -214,10 +202,7 @@ ngx_http_set_expires(ngx_http_request_t *r, ngx_http_headers_conf_t *conf)
 
     if (ccp == NULL) {
 
-        if (ngx_array_init(&r->headers_out.cache_control, r->pool,
-                           1, sizeof(ngx_table_elt_t *))
-            != NGX_OK)
-        {
+        if (ngx_array_init(&r->headers_out.cache_control, r->pool, 1, sizeof(ngx_table_elt_t *)) != NGX_OK) {
             return NGX_ERROR;
         }
 
@@ -274,9 +259,7 @@ ngx_http_set_expires(ngx_http_request_t *r, ngx_http_headers_conf_t *conf)
         expires_time = ngx_next_time(conf->expires_time);
         max_age = expires_time - now;
 
-    } else if (conf->expires == NGX_HTTP_EXPIRES_ACCESS
-               || r->headers_out.last_modified_time == -1)
-    {
+    } else if (conf->expires == NGX_HTTP_EXPIRES_ACCESS || r->headers_out.last_modified_time == -1) {
         expires_time = now + conf->expires_time;
         max_age = conf->expires_time;
 
@@ -292,22 +275,19 @@ ngx_http_set_expires(ngx_http_request_t *r, ngx_http_headers_conf_t *conf)
         return NGX_OK;
     }
 
-    cc->value.data = ngx_pnalloc(r->pool,
-                                 sizeof("max-age=") + NGX_TIME_T_LEN + 1);
+    cc->value.data = ngx_pnalloc(r->pool, sizeof("max-age=") + NGX_TIME_T_LEN + 1);
     if (cc->value.data == NULL) {
         return NGX_ERROR;
     }
 
-    cc->value.len = ngx_sprintf(cc->value.data, "max-age=%T", max_age)
-                    - cc->value.data;
+    cc->value.len = ngx_sprintf(cc->value.data, "max-age=%T", max_age) - cc->value.data;
 
     return NGX_OK;
 }
 
 
 static ngx_int_t
-ngx_http_add_header(ngx_http_request_t *r, ngx_http_header_val_t *hv,
-    ngx_str_t *value)
+ngx_http_add_header(ngx_http_request_t *r, ngx_http_header_val_t *hv, ngx_str_t *value)
 {
     ngx_table_elt_t  *h;
 
@@ -537,9 +517,7 @@ ngx_http_headers_expires(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         return "invalid value";
     }
 
-    if (hcf->expires == NGX_HTTP_EXPIRES_DAILY
-        && hcf->expires_time > 24 * 60 * 60)
-    {
+    if (hcf->expires == NGX_HTTP_EXPIRES_DAILY && hcf->expires_time > 24 * 60 * 60) {
         return "daily time value must be less than 24 hours";
     }
 
@@ -565,8 +543,7 @@ ngx_http_headers_add(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     value = cf->args->elts;
 
     if (hcf->headers == NULL) {
-        hcf->headers = ngx_array_create(cf->pool, 1,
-                                        sizeof(ngx_http_header_val_t));
+        hcf->headers = ngx_array_create(cf->pool, 1, sizeof(ngx_http_header_val_t));
         if (hcf->headers == NULL) {
             return NGX_CONF_ERROR;
         }

@@ -43,27 +43,20 @@ typedef struct {
 } ngx_http_userid_ctx_t;
 
 
-static ngx_http_userid_ctx_t *ngx_http_userid_get_uid(ngx_http_request_t *r,
-    ngx_http_userid_conf_t *conf);
-static ngx_int_t ngx_http_userid_variable(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, ngx_str_t *name, uint32_t *uid);
-static ngx_int_t ngx_http_userid_set_uid(ngx_http_request_t *r,
-    ngx_http_userid_ctx_t *ctx, ngx_http_userid_conf_t *conf);
-static ngx_int_t ngx_http_userid_create_uid(ngx_http_request_t *r,
-    ngx_http_userid_ctx_t *ctx, ngx_http_userid_conf_t *conf);
+static ngx_http_userid_ctx_t *ngx_http_userid_get_uid(ngx_http_request_t *r, ngx_http_userid_conf_t *conf);
+static ngx_int_t ngx_http_userid_variable(ngx_http_request_t *r, ngx_http_variable_value_t *v, ngx_str_t *name, uint32_t *uid);
+static ngx_int_t ngx_http_userid_set_uid(ngx_http_request_t *r, ngx_http_userid_ctx_t *ctx, ngx_http_userid_conf_t *conf);
+static ngx_int_t ngx_http_userid_create_uid(ngx_http_request_t *r, ngx_http_userid_ctx_t *ctx, ngx_http_userid_conf_t *conf);
 
 static ngx_int_t ngx_http_userid_add_variables(ngx_conf_t *cf);
 static ngx_int_t ngx_http_userid_init(ngx_conf_t *cf);
 static void *ngx_http_userid_create_conf(ngx_conf_t *cf);
-static char *ngx_http_userid_merge_conf(ngx_conf_t *cf, void *parent,
-    void *child);
+static char *ngx_http_userid_merge_conf(ngx_conf_t *cf, void *parent, void *child);
 static char *ngx_http_userid_domain(ngx_conf_t *cf, void *post, void *data);
 static char *ngx_http_userid_path(ngx_conf_t *cf, void *post, void *data);
-static char *ngx_http_userid_expires(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+static char *ngx_http_userid_expires(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static char *ngx_http_userid_p3p(ngx_conf_t *cf, void *post, void *data);
-static char *ngx_http_userid_mark(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+static char *ngx_http_userid_mark(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static ngx_int_t ngx_http_userid_init_worker(ngx_cycle_t *cycle);
 
 
@@ -88,8 +81,7 @@ static ngx_conf_enum_t  ngx_http_userid_state[] = {
 };
 
 
-static ngx_conf_post_handler_pt  ngx_http_userid_domain_p =
-    ngx_http_userid_domain;
+static ngx_conf_post_handler_pt  ngx_http_userid_domain_p = ngx_http_userid_domain;
 static ngx_conf_post_handler_pt  ngx_http_userid_path_p = ngx_http_userid_path;
 static ngx_conf_post_handler_pt  ngx_http_userid_p3p_p = ngx_http_userid_p3p;
 
