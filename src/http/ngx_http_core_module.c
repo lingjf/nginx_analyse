@@ -1808,11 +1808,7 @@ ngx_http_auth_basic_user(ngx_http_request_t *r)
 
     encoded = r->headers_in.authorization->value;
 
-    if (encoded.len < sizeof("Basic ") - 1
-        || ngx_strncasecmp(encoded.data, (u_char *) "Basic ",
-                           sizeof("Basic ") - 1)
-           != 0)
-    {
+    if (encoded.len < sizeof("Basic ") - 1 || ngx_strncasecmp(encoded.data, (u_char *) "Basic ", sizeof("Basic ") - 1) != 0) {
         r->headers_in.user.data = (u_char *) "";
         return NGX_DECLINED;
     }
