@@ -156,9 +156,7 @@ ngx_http_access_inet(ngx_http_request_t *r, ngx_http_access_loc_conf_t *alcf,
     rule = alcf->rules->elts;
     for (i = 0; i < alcf->rules->nelts; i++) {
 
-        ngx_log_debug3(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                       "access: %08XD %08XD %08XD",
-                       addr, rule[i].mask, rule[i].addr);
+        ngx_log_debug3(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "access: %08XD %08XD %08XD", addr, rule[i].mask, rule[i].addr);
 
         if ((addr & rule[i].mask) == rule[i].addr) {
             return ngx_http_access_found(r, rule[i].deny);
@@ -225,8 +223,7 @@ ngx_http_access_found(ngx_http_request_t *r, ngx_uint_t deny)
         clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
 
         if (clcf->satisfy == NGX_HTTP_SATISFY_ALL) {
-            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                          "access forbidden by rule");
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "access forbidden by rule");
         }
 
         return NGX_HTTP_FORBIDDEN;
@@ -261,14 +258,12 @@ ngx_http_access_rule(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         rc = ngx_ptocidr(&value[1], &cidr);
 
         if (rc == NGX_ERROR) {
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                         "invalid parameter \"%V\"", &value[1]);
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid parameter \"%V\"", &value[1]);
             return NGX_CONF_ERROR;
         }
 
         if (rc == NGX_DONE) {
-            ngx_conf_log_error(NGX_LOG_WARN, cf, 0,
-                         "low address bits of %V are meaningless", &value[1]);
+            ngx_conf_log_error(NGX_LOG_WARN, cf, 0, "low address bits of %V are meaningless", &value[1]);
         }
     }
 
@@ -305,8 +300,7 @@ ngx_http_access_rule(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     default: /* AF_INET */
 
         if (alcf->rules == NULL) {
-            alcf->rules = ngx_array_create(cf->pool, 4,
-                                           sizeof(ngx_http_access_rule_t));
+            alcf->rules = ngx_array_create(cf->pool, 4, sizeof(ngx_http_access_rule_t));
             if (alcf->rules == NULL) {
                 return NGX_CONF_ERROR;
             }
