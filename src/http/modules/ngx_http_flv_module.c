@@ -96,8 +96,7 @@ ngx_http_flv_handler(ngx_http_request_t *r)
 
     path.len = last - path.data;
 
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, log, 0,
-                   "http flv filename: \"%V\"", &path);
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, log, 0, "http flv filename: \"%V\"", &path);
 
     clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
 
@@ -114,9 +113,7 @@ ngx_http_flv_handler(ngx_http_request_t *r)
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
-    if (ngx_open_cached_file(clcf->open_file_cache, &path, &of, r->pool)
-        != NGX_OK)
-    {
+    if (ngx_open_cached_file(clcf->open_file_cache, &path, &of, r->pool) != NGX_OK) {
         switch (of.err) {
 
         case 0:
@@ -148,8 +145,7 @@ ngx_http_flv_handler(ngx_http_request_t *r)
         }
 
         if (rc != NGX_HTTP_NOT_FOUND || clcf->log_not_found) {
-            ngx_log_error(level, log, of.err,
-                          "%s \"%s\" failed", of.failed, path.data);
+            ngx_log_error(level, log, of.err, "%s \"%s\" failed", of.failed, path.data);
         }
 
         return rc;
@@ -158,8 +154,7 @@ ngx_http_flv_handler(ngx_http_request_t *r)
     if (!of.is_file) {
 
         if (ngx_close_file(of.fd) == NGX_FILE_ERROR) {
-            ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
-                          ngx_close_file_n " \"%s\" failed", path.data);
+            ngx_log_error(NGX_LOG_ALERT, log, ngx_errno, ngx_close_file_n " \"%s\" failed", path.data);
         }
 
         return NGX_DECLINED;

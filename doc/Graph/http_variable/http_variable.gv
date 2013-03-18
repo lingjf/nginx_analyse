@@ -1,0 +1,13 @@
+digraph ngx_http_handle_request_header {
+
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+   
+   ngx_http_core_variables [shape="box3d", label="ngx_http_core_variables\[\]"];
+   ngx_http_variable_array [label="<head>ngx_http_variable_t\[\]|<host>http_host|<user_agent>http_user_agent|<remote_addr>remote_addr|..."];
+   ngx_http_variable_t [label="<head>ngx_http_variable_t\{\}|name|set|get|data"];
+   ngx_http_variable_value_t [label="<head>ngx_http_variable_value_t\{\}|len|data"];
+   
+
+}

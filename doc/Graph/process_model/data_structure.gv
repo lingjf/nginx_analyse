@@ -4,7 +4,7 @@ digraph ngx_process_data_structure {
    edge [color=forestgreen, fontname="Verdana", fontsize=10];
 
    // process
-   ngx_processes [shape="box3d", label="ngx_processes[]"];
+   ngx_processes [shape="box3d", label="ngx_processes\[\]"];
    ngx_last_process [shape="box3d", label="ngx_last_process"];
    ngx_processes_array [label="ngx_process_t\[\]|<n1>ngx_process_t|<n2>ngx_process_t||<n3>|...1024"];
    ngx_process_t [label="<h>ngx_process_t\{\}|<pid>pid|<proc>proc/data|respawn/just_spawn|exiting/exited|detached"];
