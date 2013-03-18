@@ -6,20 +6,25 @@ digraph ngx_process_data_structure {
    // process
    ngx_processes [shape="box3d", label="ngx_processes[]"];
    ngx_last_process [shape="box3d", label="ngx_last_process"];
-   ngx_processes_array [label="<1>|<2>||<3>|...1024"];
+   ngx_processes_array [label="ngx_process_t\[\]|<n1>ngx_process_t|<n2>ngx_process_t||<n3>|...1024"];
    ngx_process_t [label="<h>ngx_process_t\{\}|<pid>pid|<proc>proc/data|respawn/just_spawn|exiting/exited|detached"];
+   ngx_routine [label="<h>ngx_worker_process_cycle()|ngx_cycle"];
 
    ngx_processes:e -> ngx_processes_array:nw;
-   ngx_last_process:e -> ngx_processes_array:3;
-   ngx_processes_array:1 -> ngx_process_t:h;
+   ngx_last_process:e -> ngx_processes_array:n3;
+   ngx_processes_array:n1 -> ngx_process_t:h;
+   ngx_process_t:proc -> ngx_routine:h:nw;
 
    // cycle
    ngx_cycle [shape="box3d", label="ngx_cycle"];
    ngx_cycle_t [label="<h>ngx_cycle_t\{\}|<conf>conf|pool|<listening>listening|..."];
    ngx_core_conf_t [label="<h>ngx_core_conf_t\{\}|<daemon>daemon|<worker_processes>worker_processes|..."];
-   ngx_listening_t [label="<h>ngx_listening_t\{\}|socket|addr|..."];
-   
+   ngx_listening_array [label="<h>ngx_listening_t\[\]|<n1>ngx_listening_t|<n2>ngx_listening_t|..."];
+   ngx_listening_t [label="<h>ngx_listening_t\{\}|socket|address|..."];
+
    ngx_cycle:e->ngx_cycle_t:nw;
    ngx_cycle_t:conf -> ngx_core_conf_t:h;
-   ngx_cycle_t:listening -> ngx_listening_t:h;
+   ngx_cycle_t:listening -> ngx_listening_array:h;
+   ngx_listening_array:n1 -> ngx_listening_t:h;
+
 }

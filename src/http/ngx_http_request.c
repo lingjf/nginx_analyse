@@ -948,10 +948,7 @@ ngx_http_process_request_headers(ngx_event_t *rev)
 
                 /* there was error while a header line parsing */
 
-                ngx_log_error(NGX_LOG_INFO, c->log, 0,
-                              "client sent invalid header line: \"%*s\"",
-                              r->header_end - r->header_name_start,
-                              r->header_name_start);
+                ngx_log_error(NGX_LOG_INFO, c->log, 0, "client sent invalid header line: \"%*s\"", r->header_end - r->header_name_start, r->header_name_start);
                 continue;
             }
 
@@ -1027,10 +1024,7 @@ ngx_http_process_request_headers(ngx_event_t *rev)
 
         /* rc == NGX_HTTP_PARSE_INVALID_HEADER: "\r" is not followed by "\n" */
 
-        ngx_log_error(NGX_LOG_INFO, c->log, 0,
-                      "client sent invalid header line: \"%*s\\r...\"",
-                      r->header_end - r->header_name_start,
-                      r->header_name_start);
+        ngx_log_error(NGX_LOG_INFO, c->log, 0, "client sent invalid header line: \"%*s\\r...\"", r->header_end - r->header_name_start, r->header_name_start);
         ngx_http_finalize_request(r, NGX_HTTP_BAD_REQUEST);
         return;
     }
@@ -1228,8 +1222,7 @@ ngx_http_alloc_large_header_buffer(ngx_http_request_t *r,
 
 
 static ngx_int_t
-ngx_http_process_header_line(ngx_http_request_t *r, ngx_table_elt_t *h,
-    ngx_uint_t offset)
+ngx_http_process_header_line(ngx_http_request_t *r, ngx_table_elt_t *h, ngx_uint_t offset)
 {
     ngx_table_elt_t  **ph;
 
@@ -1255,10 +1248,7 @@ ngx_http_process_unique_header_line(ngx_http_request_t *r, ngx_table_elt_t *h, n
         return NGX_OK;
     }
 
-    ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
-                  "client sent duplicate header line: \"%V: %V\", "
-                  "previous value: \"%V: %V\"",
-                  &h->key, &h->value, &(*ph)->key, &(*ph)->value);
+    ngx_log_error(NGX_LOG_INFO, r->connection->log, 0, "client sent duplicate header line: \"%V: %V\", " "previous value: \"%V: %V\"", &h->key, &h->value, &(*ph)->key, &(*ph)->value);
 
     ngx_http_finalize_request(r, NGX_HTTP_BAD_REQUEST);
 
@@ -1302,8 +1292,7 @@ ngx_http_process_host(ngx_http_request_t *r, ngx_table_elt_t *h, ngx_uint_t offs
 
 
 static ngx_int_t
-ngx_http_process_connection(ngx_http_request_t *r, ngx_table_elt_t *h,
-    ngx_uint_t offset)
+ngx_http_process_connection(ngx_http_request_t *r, ngx_table_elt_t *h, ngx_uint_t offset)
 {
     if (ngx_strcasestrn(h->value.data, "close", 5 - 1)) {
         r->headers_in.connection_type = NGX_HTTP_CONNECTION_CLOSE;
@@ -1374,9 +1363,7 @@ ngx_http_process_user_agent(ngx_http_request_t *r, ngx_table_elt_t *h, ngx_uint_
         } else if (ngx_strstrn(user_agent, "Chrome/", 7 - 1)) {
             r->headers_in.chrome = 1;
 
-        } else if (ngx_strstrn(user_agent, "Safari/", 7 - 1)
-                   && ngx_strstrn(user_agent, "Mac OS X", 8 - 1))
-        {
+        } else if (ngx_strstrn(user_agent, "Safari/", 7 - 1) && ngx_strstrn(user_agent, "Mac OS X", 8 - 1)) {
             r->headers_in.safari = 1;
 
         } else if (ngx_strstrn(user_agent, "Konqueror", 9 - 1)) {
