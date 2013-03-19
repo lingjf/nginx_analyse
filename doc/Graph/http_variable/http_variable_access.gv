@@ -1,0 +1,22 @@
+digraph ngx_http_variable_access {
+
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   
+   ngx_http_core_main_conf_t [label="<head>ngx_http_core_main_conf_t\{\}|...|<variables>variables|..."];
+
+   ngx_http_variable_array [label="<head>ngx_http_variable_t\[\]|{1|{<head1>ngx_http_variable_t\{\}}}|{<n2>2|{<head2>ngx_http_variable_t\{\}|name=remote_addr|set_handler|get_handler|data|index=2}}|{3|{<head3>ngx_http_variable_t\{\}}}|..."];
+   ngx_http_variable_value_array [label="<head>ngx_http_variable_value_t\[\]|{{<head1>ngx_http_variable_value_t\{\}}|<n1>1}|{{<head2>ngx_http_variable_value_t\{\}|len=13|data=\"192.168.1.100\"|valid|no_cacheable|not_found}|<n2>2}|{{<head3>ngx_http_variable_value_t\{\}}|<n3>3}|..."];
+
+   ngx_http_request_t [label="<head>ngx_http_request_t\{\}|...|<variables>variables|..."];
+
+   ngx_http_core_main_conf_t:variables -> ngx_http_variable_array:head [weight=9];
+
+   ngx_http_variable_array:head1 -> ngx_http_variable_value_array:head1 [dir=both];
+   ngx_http_variable_array:head2 -> ngx_http_variable_value_array:head2 [dir=both];
+   ngx_http_variable_array:head3 -> ngx_http_variable_value_array:head3 [dir=both];
+
+   ngx_http_variable_value_array:head -> ngx_http_request_t:variables [dir=back];
+}

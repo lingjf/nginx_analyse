@@ -1,0 +1,18 @@
+digraph ngx_http_variable_hash {
+
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   
+   ngx_http_core_main_conf_t [label="<head>ngx_http_core_main_conf_t\{\}|...|<variables>variables||<variables_hash>variables_hash|..."];
+   ngx_hash_bucket_array [label="<head>ngx_hash_elt_t\[\]|<n1>ngx_hash_elt_t *|<n2>ngx_hash_elt_t *|ngx_hash_elt_t *|..."];
+   ngx_hash_elt_array [label="{1|{key= http_host|<v1>value}}|{2|{key=proxy_port|<v2>value}}"];
+   ngx_http_variable_array [label="<head>ngx_http_variable_t\[\]|{1|{<head1>ngx_http_variable_t\{\}}}|{<n2>2|{<head2>ngx_http_variable_t\{\}|name=http_host|set_handler|get_handler|data|index=2}}|{3|{<head3>ngx_http_variable_t\{\}}}|..."];
+
+
+   ngx_http_core_main_conf_t:variables_hash -> ngx_hash_bucket_array:head;
+   ngx_http_core_main_conf_t:variables -> ngx_http_variable_array:head [weight=9];
+   ngx_hash_bucket_array:n2 -> ngx_hash_elt_array:nw;
+   ngx_hash_elt_array:v1 -> ngx_http_variable_array:n2:nw;
+}
