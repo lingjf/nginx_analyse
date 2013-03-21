@@ -55,23 +55,15 @@ typedef struct {
     ngx_uint_t                   delay_log_level;
 } ngx_http_limit_req_conf_t;
 
-
 static void ngx_http_limit_req_delay(ngx_http_request_t *r);
-static ngx_int_t ngx_http_limit_req_lookup(ngx_http_limit_req_limit_t *limit,
-    ngx_uint_t hash, u_char *data, size_t len, ngx_uint_t *ep,
-    ngx_uint_t account);
-static ngx_msec_t ngx_http_limit_req_account(ngx_http_limit_req_limit_t *limits,
-    ngx_uint_t n, ngx_uint_t *ep, ngx_http_limit_req_limit_t **limit);
-static void ngx_http_limit_req_expire(ngx_http_limit_req_ctx_t *ctx,
-    ngx_uint_t n);
+static ngx_int_t ngx_http_limit_req_lookup(ngx_http_limit_req_limit_t *limit, ngx_uint_t hash, u_char *data, size_t len, ngx_uint_t *ep, ngx_uint_t account);
+static ngx_msec_t ngx_http_limit_req_account(ngx_http_limit_req_limit_t *limits, ngx_uint_t n, ngx_uint_t *ep, ngx_http_limit_req_limit_t **limit);
+static void ngx_http_limit_req_expire(ngx_http_limit_req_ctx_t *ctx, ngx_uint_t n);
 
 static void *ngx_http_limit_req_create_conf(ngx_conf_t *cf);
-static char *ngx_http_limit_req_merge_conf(ngx_conf_t *cf, void *parent,
-    void *child);
-static char *ngx_http_limit_req_zone(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char *ngx_http_limit_req(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+static char *ngx_http_limit_req_merge_conf(ngx_conf_t *cf, void *parent, void *child);
+static char *ngx_http_limit_req_zone(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_limit_req(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static ngx_int_t ngx_http_limit_req_init(ngx_conf_t *cf);
 
 
@@ -697,11 +689,9 @@ ngx_http_limit_req_merge_conf(ngx_conf_t *cf, void *parent, void *child)
         conf->limits = prev->limits;
     }
 
-    ngx_conf_merge_uint_value(conf->limit_log_level, prev->limit_log_level,
-                              NGX_LOG_ERR);
+    ngx_conf_merge_uint_value(conf->limit_log_level, prev->limit_log_level, NGX_LOG_ERR);
 
-    conf->delay_log_level = (conf->limit_log_level == NGX_LOG_INFO) ?
-                                NGX_LOG_INFO : conf->limit_log_level + 1;
+    conf->delay_log_level = (conf->limit_log_level == NGX_LOG_INFO) ? NGX_LOG_INFO : conf->limit_log_level + 1;
 
     return NGX_CONF_OK;
 }
@@ -736,8 +726,7 @@ ngx_http_limit_req_zone(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
             p = (u_char *) ngx_strchr(name.data, ':');
 
             if (p == NULL) {
-                ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                                   "invalid zone size \"%V\"", &value[i]);
+                ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid zone size \"%V\"", &value[i]);
                 return NGX_CONF_ERROR;
             }
 
@@ -749,14 +738,12 @@ ngx_http_limit_req_zone(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
             size = ngx_parse_size(&s);
 
             if (size == NGX_ERROR) {
-                ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                                   "invalid zone size \"%V\"", &value[i]);
+                ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid zone size \"%V\"", &value[i]);
                 return NGX_CONF_ERROR;
             }
 
             if (size < (ssize_t) (8 * ngx_pagesize)) {
-                ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                                   "zone \"%V\" is too small", &value[i]);
+                ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "zone \"%V\" is too small", &value[i]);
                 return NGX_CONF_ERROR;
             }
 
@@ -779,8 +766,7 @@ ngx_http_limit_req_zone(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
             rate = ngx_atoi(value[i].data + 5, len - 5);
             if (rate <= NGX_ERROR) {
-                ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                                   "invalid rate \"%V\"", &value[i]);
+                ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid rate \"%V\"", &value[i]);
                 return NGX_CONF_ERROR;
             }
 
@@ -807,29 +793,23 @@ ngx_http_limit_req_zone(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
             continue;
         }
 
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "invalid parameter \"%V\"", &value[i]);
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid parameter \"%V\"", &value[i]);
         return NGX_CONF_ERROR;
     }
 
     if (name.len == 0) {
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "\"%V\" must have \"zone\" parameter",
-                           &cmd->name);
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "\"%V\" must have \"zone\" parameter", &cmd->name);
         return NGX_CONF_ERROR;
     }
 
     if (ctx == NULL) {
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "no variable is defined for %V \"%V\"",
-                           &cmd->name, &name);
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "no variable is defined for %V \"%V\"", &cmd->name, &name);
         return NGX_CONF_ERROR;
     }
 
     ctx->rate = rate * 1000 / scale;
 
-    shm_zone = ngx_shared_memory_add(cf, &name, size,
-                                     &ngx_http_limit_req_module);
+    shm_zone = ngx_shared_memory_add(cf, &name, size, &ngx_http_limit_req_module);
     if (shm_zone == NULL) {
         return NGX_CONF_ERROR;
     }
@@ -837,9 +817,7 @@ ngx_http_limit_req_zone(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     if (shm_zone->data) {
         ctx = shm_zone->data;
 
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "%V \"%V\" is already bound to variable \"%V\"",
-                           &cmd->name, &name, &ctx->var);
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "%V \"%V\" is already bound to variable \"%V\"", &cmd->name, &name, &ctx->var);
         return NGX_CONF_ERROR;
     }
 
@@ -874,8 +852,7 @@ ngx_http_limit_req(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
             s.len = value[i].len - 5;
             s.data = value[i].data + 5;
 
-            shm_zone = ngx_shared_memory_add(cf, &s, 0,
-                                             &ngx_http_limit_req_module);
+            shm_zone = ngx_shared_memory_add(cf, &s, 0, &ngx_http_limit_req_module);
             if (shm_zone == NULL) {
                 return NGX_CONF_ERROR;
             }
@@ -887,8 +864,7 @@ ngx_http_limit_req(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
             burst = ngx_atoi(value[i].data + 6, value[i].len - 6);
             if (burst <= 0) {
-                ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                                   "invalid burst rate \"%V\"", &value[i]);
+                ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid burst rate \"%V\"", &value[i]);
                 return NGX_CONF_ERROR;
             }
 
@@ -900,32 +876,24 @@ ngx_http_limit_req(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
             continue;
         }
 
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "invalid parameter \"%V\"", &value[i]);
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid parameter \"%V\"", &value[i]);
         return NGX_CONF_ERROR;
     }
 
     if (shm_zone == NULL) {
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "\"%V\" must have \"zone\" parameter",
-                           &cmd->name);
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "\"%V\" must have \"zone\" parameter", &cmd->name);
         return NGX_CONF_ERROR;
     }
 
     if (shm_zone->data == NULL) {
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "unknown limit_req_zone \"%V\"",
-                           &shm_zone->shm.name);
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "unknown limit_req_zone \"%V\"", &shm_zone->shm.name);
         return NGX_CONF_ERROR;
     }
 
     limits = lrcf->limits.elts;
 
     if (limits == NULL) {
-        if (ngx_array_init(&lrcf->limits, cf->pool, 1,
-                           sizeof(ngx_http_limit_req_limit_t))
-            != NGX_OK)
-        {
+        if (ngx_array_init(&lrcf->limits, cf->pool, 1, sizeof(ngx_http_limit_req_limit_t)) != NGX_OK) {
             return NGX_CONF_ERROR;
         }
     }

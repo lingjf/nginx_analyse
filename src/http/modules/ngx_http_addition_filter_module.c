@@ -25,8 +25,7 @@ typedef struct {
 
 
 static void *ngx_http_addition_create_conf(ngx_conf_t *cf);
-static char *ngx_http_addition_merge_conf(ngx_conf_t *cf, void *parent,
-    void *child);
+static char *ngx_http_addition_merge_conf(ngx_conf_t *cf, void *parent, void *child);
 static ngx_int_t ngx_http_addition_filter_init(ngx_conf_t *cf);
 
 
@@ -152,9 +151,7 @@ ngx_http_addition_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
         ctx->before_body_sent = 1;
 
         if (conf->before_body.len) {
-            if (ngx_http_subrequest(r, &conf->before_body, NULL, &sr, NULL, 0)
-                != NGX_OK)
-            {
+            if (ngx_http_subrequest(r, &conf->before_body, NULL, &sr, NULL, 0) != NGX_OK) {
                 return NGX_ERROR;
             }
         }
@@ -181,9 +178,7 @@ ngx_http_addition_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
         return rc;
     }
 
-    if (ngx_http_subrequest(r, &conf->after_body, NULL, &sr, NULL, 0)
-        != NGX_OK)
-    {
+    if (ngx_http_subrequest(r, &conf->after_body, NULL, &sr, NULL, 0) != NGX_OK) {
         return NGX_ERROR;
     }
 
@@ -238,11 +233,7 @@ ngx_http_addition_merge_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_str_value(conf->before_body, prev->before_body, "");
     ngx_conf_merge_str_value(conf->after_body, prev->after_body, "");
 
-    if (ngx_http_merge_types(cf, &conf->types_keys, &conf->types,
-                             &prev->types_keys, &prev->types,
-                             ngx_http_html_default_types)
-        != NGX_OK)
-    {
+    if (ngx_http_merge_types(cf, &conf->types_keys, &conf->types, &prev->types_keys, &prev->types, ngx_http_html_default_types) != NGX_OK) {
         return NGX_CONF_ERROR;
     }
 

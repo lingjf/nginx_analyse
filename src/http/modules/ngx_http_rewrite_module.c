@@ -298,8 +298,7 @@ ngx_http_rewrite(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_http_script_regex_end_code_t  *regex_end;
     u_char                             errstr[NGX_MAX_CONF_ERRSTR];
 
-    regex = ngx_http_script_start_code(cf->pool, &lcf->codes,
-                                       sizeof(ngx_http_script_regex_code_t));
+    regex = ngx_http_script_start_code(cf->pool, &lcf->codes, sizeof(ngx_http_script_regex_code_t));
     if (regex == NULL) {
         return NGX_CONF_ERROR;
     }
@@ -364,8 +363,7 @@ ngx_http_rewrite(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
             last = 1;
 
         } else {
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "invalid parameter \"%V\"", &value[3]);
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid parameter \"%V\"", &value[3]);
             return NGX_CONF_ERROR;
         }
     }
@@ -394,9 +392,7 @@ ngx_http_rewrite(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         regex->lengths = NULL;
     }
 
-    regex_end = ngx_http_script_add_code(lcf->codes,
-                                      sizeof(ngx_http_script_regex_end_code_t),
-                                      &regex);
+    regex_end = ngx_http_script_add_code(lcf->codes, sizeof(ngx_http_script_regex_end_code_t), &regex);
     if (regex_end == NULL) {
         return NGX_CONF_ERROR;
     }
@@ -863,8 +859,7 @@ ngx_http_rewrite_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     value = cf->args->elts;
 
     if (value[1].data[0] != '$') {
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "invalid variable name \"%V\"", &value[1]);
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid variable name \"%V\"", &value[1]);
         return NGX_CONF_ERROR;
     }
 
@@ -881,11 +876,7 @@ ngx_http_rewrite_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         return NGX_CONF_ERROR;
     }
 
-    if (v->get_handler == NULL
-        && ngx_strncasecmp(value[1].data, (u_char *) "http_", 5) != 0
-        && ngx_strncasecmp(value[1].data, (u_char *) "sent_http_", 10) != 0
-        && ngx_strncasecmp(value[1].data, (u_char *) "upstream_http_", 14) != 0)
-    {
+    if (v->get_handler == NULL && ngx_strncasecmp(value[1].data, (u_char *) "http_", 5) != 0 && ngx_strncasecmp(value[1].data, (u_char *) "sent_http_", 10) != 0 && ngx_strncasecmp(value[1].data, (u_char *) "upstream_http_", 14) != 0) {
         v->get_handler = ngx_http_rewrite_var;
         v->data = index;
     }
@@ -895,8 +886,7 @@ ngx_http_rewrite_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
 
     if (v->set_handler) {
-        vhcode = ngx_http_script_start_code(cf->pool, &lcf->codes,
-                                   sizeof(ngx_http_script_var_handler_code_t));
+        vhcode = ngx_http_script_start_code(cf->pool, &lcf->codes, sizeof(ngx_http_script_var_handler_code_t));
         if (vhcode == NULL) {
             return NGX_CONF_ERROR;
         }
@@ -908,8 +898,7 @@ ngx_http_rewrite_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         return NGX_CONF_OK;
     }
 
-    vcode = ngx_http_script_start_code(cf->pool, &lcf->codes,
-                                       sizeof(ngx_http_script_var_code_t));
+    vcode = ngx_http_script_start_code(cf->pool, &lcf->codes, sizeof(ngx_http_script_var_code_t));
     if (vcode == NULL) {
         return NGX_CONF_ERROR;
     }

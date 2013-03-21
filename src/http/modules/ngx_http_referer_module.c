@@ -37,16 +37,11 @@ typedef struct {
 
 
 static void * ngx_http_referer_create_conf(ngx_conf_t *cf);
-static char * ngx_http_referer_merge_conf(ngx_conf_t *cf, void *parent,
-    void *child);
-static char *ngx_http_valid_referers(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char *ngx_http_add_referer(ngx_conf_t *cf, ngx_hash_keys_arrays_t *keys,
-    ngx_str_t *value, ngx_str_t *uri);
-static char *ngx_http_add_regex_referer(ngx_conf_t *cf,
-    ngx_http_referer_conf_t *rlcf, ngx_str_t *name, ngx_regex_t *regex);
-static int ngx_libc_cdecl ngx_http_cmp_referer_wildcards(const void *one,
-    const void *two);
+static char * ngx_http_referer_merge_conf(ngx_conf_t *cf, void *parent, void *child);
+static char *ngx_http_valid_referers(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_add_referer(ngx_conf_t *cf, ngx_hash_keys_arrays_t *keys, ngx_str_t *value, ngx_str_t *uri);
+static char *ngx_http_add_regex_referer(ngx_conf_t *cf, ngx_http_referer_conf_t *rlcf, ngx_str_t *name, ngx_regex_t *regex);
+static int ngx_libc_cdecl ngx_http_cmp_referer_wildcards(const void *one, const void *two);
 
 
 static ngx_command_t  ngx_http_referer_commands[] = {
@@ -108,8 +103,7 @@ ngx_module_t  ngx_http_referer_module = {
 
 
 static ngx_int_t
-ngx_http_referer_variable(ngx_http_request_t *r, ngx_http_variable_value_t *v,
-     uintptr_t data)
+ngx_http_referer_variable(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data)
 {
     u_char                    *p, *ref, *last;
     size_t                     len;
@@ -280,10 +274,8 @@ ngx_http_referer_merge_conf(ngx_conf_t *cf, void *parent, void *child)
 #endif
         ngx_conf_merge_value(conf->no_referer, prev->no_referer, 0);
         ngx_conf_merge_value(conf->blocked_referer, prev->blocked_referer, 0);
-        ngx_conf_merge_uint_value(conf->referer_hash_max_size,
-                                  prev->referer_hash_max_size, 2048);
-        ngx_conf_merge_uint_value(conf->referer_hash_bucket_size,
-                                  prev->referer_hash_bucket_size, 64);
+        ngx_conf_merge_uint_value(conf->referer_hash_max_size, prev->referer_hash_max_size, 2048);
+        ngx_conf_merge_uint_value(conf->referer_hash_bucket_size, prev->referer_hash_bucket_size, 64);
 
         return NGX_CONF_OK;
     }
@@ -293,19 +285,13 @@ ngx_http_referer_merge_conf(ngx_conf_t *cf, void *parent, void *child)
         && conf->keys->dns_wc_head.nelts == 0
         && conf->keys->dns_wc_tail.nelts == 0)
     {
-        ngx_log_error(NGX_LOG_EMERG, cf->log, 0,
-                      "the \"none\" or \"blocked\" referers are specified "
-                      "in the \"valid_referers\" directive "
-                      "without any valid referer");
+        ngx_log_error(NGX_LOG_EMERG, cf->log, 0, "the \"none\" or \"blocked\" referers are specified " "in the \"valid_referers\" directive " "without any valid referer");
         return NGX_CONF_ERROR;
     }
 
-    ngx_conf_merge_uint_value(conf->referer_hash_max_size,
-                              prev->referer_hash_max_size, 2048);
-    ngx_conf_merge_uint_value(conf->referer_hash_bucket_size,
-                              prev->referer_hash_bucket_size, 64);
-    conf->referer_hash_bucket_size = ngx_align(conf->referer_hash_bucket_size,
-                                               ngx_cacheline_size);
+    ngx_conf_merge_uint_value(conf->referer_hash_max_size, prev->referer_hash_max_size, 2048);
+    ngx_conf_merge_uint_value(conf->referer_hash_bucket_size, prev->referer_hash_bucket_size, 64);
+    conf->referer_hash_bucket_size = ngx_align(conf->referer_hash_bucket_size, ngx_cacheline_size);
 
     hash.key = ngx_hash_key_lc;
     hash.max_size = conf->referer_hash_max_size;
@@ -317,27 +303,19 @@ ngx_http_referer_merge_conf(ngx_conf_t *cf, void *parent, void *child)
         hash.hash = &conf->hash.hash;
         hash.temp_pool = NULL;
 
-        if (ngx_hash_init(&hash, conf->keys->keys.elts, conf->keys->keys.nelts)
-            != NGX_OK)
-        {
+        if (ngx_hash_init(&hash, conf->keys->keys.elts, conf->keys->keys.nelts) != NGX_OK) {
             return NGX_CONF_ERROR;
         }
     }
 
     if (conf->keys->dns_wc_head.nelts) {
 
-        ngx_qsort(conf->keys->dns_wc_head.elts,
-                  (size_t) conf->keys->dns_wc_head.nelts,
-                  sizeof(ngx_hash_key_t),
-                  ngx_http_cmp_referer_wildcards);
+        ngx_qsort(conf->keys->dns_wc_head.elts, (size_t) conf->keys->dns_wc_head.nelts, sizeof(ngx_hash_key_t), ngx_http_cmp_referer_wildcards);
 
         hash.hash = NULL;
         hash.temp_pool = cf->temp_pool;
 
-        if (ngx_hash_wildcard_init(&hash, conf->keys->dns_wc_head.elts,
-                                   conf->keys->dns_wc_head.nelts)
-            != NGX_OK)
-        {
+        if (ngx_hash_wildcard_init(&hash, conf->keys->dns_wc_head.elts, conf->keys->dns_wc_head.nelts) != NGX_OK) {
             return NGX_CONF_ERROR;
         }
 
@@ -346,18 +324,12 @@ ngx_http_referer_merge_conf(ngx_conf_t *cf, void *parent, void *child)
 
     if (conf->keys->dns_wc_tail.nelts) {
 
-        ngx_qsort(conf->keys->dns_wc_tail.elts,
-                  (size_t) conf->keys->dns_wc_tail.nelts,
-                  sizeof(ngx_hash_key_t),
-                  ngx_http_cmp_referer_wildcards);
+        ngx_qsort(conf->keys->dns_wc_tail.elts, (size_t) conf->keys->dns_wc_tail.nelts, sizeof(ngx_hash_key_t), ngx_http_cmp_referer_wildcards);
 
         hash.hash = NULL;
         hash.temp_pool = cf->temp_pool;
 
-        if (ngx_hash_wildcard_init(&hash, conf->keys->dns_wc_tail.elts,
-                                   conf->keys->dns_wc_tail.nelts)
-            != NGX_OK)
-        {
+        if (ngx_hash_wildcard_init(&hash, conf->keys->dns_wc_tail.elts, conf->keys->dns_wc_tail.nelts) != NGX_OK) {
             return NGX_CONF_ERROR;
         }
 
@@ -396,8 +368,7 @@ ngx_http_valid_referers(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     ngx_str_set(&name, "invalid_referer");
 
-    var = ngx_http_add_variable(cf, &name,
-                                NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOHASH);
+    var = ngx_http_add_variable(cf, &name, NGX_HTTP_VAR_CHANGEABLE|NGX_HTTP_VAR_NOHASH);
     if (var == NULL) {
         return NGX_CONF_ERROR;
     }
@@ -422,8 +393,7 @@ ngx_http_valid_referers(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     for (i = 1; i < cf->args->nelts; i++) {
         if (value[i].len == 0) {
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "invalid referer \"%V\"", &value[i]);
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid referer \"%V\"", &value[i]);
             return NGX_CONF_ERROR;
         }
 
@@ -449,10 +419,7 @@ ngx_http_valid_referers(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 #if (NGX_PCRE)
                 if (sn[n].regex) {
 
-                    if (ngx_http_add_regex_referer(cf, rlcf, &sn[n].name,
-                                                   sn[n].regex->regex)
-                        != NGX_OK)
-                    {
+                    if (ngx_http_add_regex_referer(cf, rlcf, &sn[n].name, sn[n].regex->regex) != NGX_OK) {
                         return NGX_CONF_ERROR;
                     }
 
@@ -460,9 +427,7 @@ ngx_http_valid_referers(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
                 }
 #endif
 
-                if (ngx_http_add_referer(cf, rlcf->keys, &sn[n].name, &uri)
-                    != NGX_OK)
-                {
+                if (ngx_http_add_referer(cf, rlcf->keys, &sn[n].name, &uri) != NGX_OK) {
                     return NGX_CONF_ERROR;
                 }
             }
@@ -471,8 +436,7 @@ ngx_http_valid_referers(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         }
 
         if (value[i].data[0] == '~') {
-            if (ngx_http_add_regex_referer(cf, rlcf, &value[i], NULL) != NGX_OK)
-            {
+            if (ngx_http_add_regex_referer(cf, rlcf, &value[i], NULL) != NGX_OK) {
                 return NGX_CONF_ERROR;
             }
 
@@ -497,8 +461,7 @@ ngx_http_valid_referers(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 
 static char *
-ngx_http_add_referer(ngx_conf_t *cf, ngx_hash_keys_arrays_t *keys,
-    ngx_str_t *value, ngx_str_t *uri)
+ngx_http_add_referer(ngx_conf_t *cf, ngx_hash_keys_arrays_t *keys, ngx_str_t *value, ngx_str_t *uri)
 {
     ngx_int_t   rc;
     ngx_str_t  *u;
@@ -522,13 +485,11 @@ ngx_http_add_referer(ngx_conf_t *cf, ngx_hash_keys_arrays_t *keys,
     }
 
     if (rc == NGX_DECLINED) {
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "invalid hostname or wildcard \"%V\"", value);
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid hostname or wildcard \"%V\"", value);
     }
 
     if (rc == NGX_BUSY) {
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "conflicting parameter \"%V\"", value);
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "conflicting parameter \"%V\"", value);
     }
 
     return NGX_CONF_ERROR;
@@ -536,8 +497,7 @@ ngx_http_add_referer(ngx_conf_t *cf, ngx_hash_keys_arrays_t *keys,
 
 
 static char *
-ngx_http_add_regex_referer(ngx_conf_t *cf, ngx_http_referer_conf_t *rlcf,
-    ngx_str_t *name, ngx_regex_t *regex)
+ngx_http_add_regex_referer(ngx_conf_t *cf, ngx_http_referer_conf_t *rlcf, ngx_str_t *name, ngx_regex_t *regex)
 {
 #if (NGX_PCRE)
     ngx_regex_elt_t      *re;

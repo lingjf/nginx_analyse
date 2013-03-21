@@ -8,7 +8,7 @@ digraph ngx_http_engine_evaluate1 {
 
    
    ngx_http_script_engine_t [label="<head>ngx_http_script_engine_t\{\}|...|<ip>ip|<sp>sp|...", height=2]; 
-   ngx_http_script_code_t [label="<head>ngx_http_script_code_t\[\]|<n1>ngx_http_script_var_code_t\{\}|<n2>ngx_http_script_value_code_t\{\}|<n3>ngx_http_script_equal_code_t\{\}|<n4>ngx_http_script_if_code_t\{\}|<n5>ngx_http_script_break_code_t\{\}|<n6>ngx_http_script_return_code_t\{\}"];
+   ngx_http_script_code_t [label="<head>ngx_http_script_code_t\[\]|{{<n1>1|<n2>2|<n3>3|<n4>4|<n5>5|<n6>6}|{ngx_http_script_var_code_t\{\}|ngx_http_script_value_code_t\{\}|ngx_http_script_equal_code_t\{\}|ngx_http_script_if_code_t\{\}|ngx_http_script_break_code_t\{\}|ngx_http_script_return_code_t\{\}}}"];
 
    ngx_http_script_engine_t:head:ne -> ngx_http_script_code_t:head:nw [weight=9, color=none];
 
