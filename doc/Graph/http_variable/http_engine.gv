@@ -1,0 +1,65 @@
+digraph ngx_http_engine {
+
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+   
+
+   codes [shape=box3d];
+   ngx_http_script_code_t [label="<head>ngx_http_script_code_t\[\]|<n1>ngx_http_script_var_code_t\{\}|<n2>ngx_http_script_value_code_t\{\}|<n3>ngx_http_script_equal_code_t\{\}|<n4>ngx_http_script_if_code_t\{\}|<n5>ngx_http_script_break_code_t\{\}|<n6>ngx_http_script_return_code_t\{\}", height=4];
+
+   codes:e -> ngx_http_script_code_t:head:nw;
+
+   ngx_http_script_var_code_t [label="<head>ngx_http_script_var_code_t\{\}|<code>code|$request_method"];
+   ngx_http_script_value_code_t [label="<head>ngx_http_script_value_code_t\{\}|<code>code|text= \"POST\""];
+   ngx_http_script_equal_code_t [label="<head>ngx_http_script_code_t\{\}|<code>code"];
+   ngx_http_script_if_code_t [label="<head>ngx_http_script_if_code_t\{\}|<code>code|<next>next"];
+   ngx_http_script_break_code_t [label="<head>ngx_http_script_break_code_t\{\}|<code>code"];
+   ngx_http_script_return_code_t [label="<head>ngx_http_script_return_code_t\{\}|<code>code|status=404|<text>text"];
+
+   
+   ngx_http_script_code_t:n1 -> ngx_http_script_var_code_t:head:nw;
+   ngx_http_script_code_t:n2 -> ngx_http_script_value_code_t:head:nw;
+   ngx_http_script_code_t:n3 -> ngx_http_script_equal_code_t:head:nw;
+   ngx_http_script_code_t:n4 -> ngx_http_script_if_code_t:head:nw;
+   ngx_http_script_code_t:n5 -> ngx_http_script_break_code_t:head:nw;
+   ngx_http_script_code_t:n6 -> ngx_http_script_return_code_t:head:nw;
+   
+
+   //var
+   ngx_http_script_var_code [label="ngx_http_script_var_code()|"];
+   ngx_http_script_var_code_t:code -> ngx_http_script_var_code:nw;
+
+   //value
+   ngx_http_script_value_code [label="ngx_http_script_value_code()|"];
+   ngx_http_script_value_code_t:code -> ngx_http_script_value_code:nw;
+
+   //equal
+   ngx_http_script_equal_code [label="ngx_http_script_equal_code()|"];
+   ngx_http_script_equal_code_t:code -> ngx_http_script_equal_code:nw;
+
+   // if
+   ngx_http_script_if_code [label="ngx_http_script_if_code()|"];
+   ngx_http_script_if_code_t:code -> ngx_http_script_if_code:nw; 
+   ngx_http_script_if_code_t:next -> ngx_http_script_code_t:n6:ne;
+
+   //break
+   ngx_http_script_break_code [label="ngx_http_script_break_code()|"];
+   ngx_http_script_break_code_t:code -> ngx_http_script_break_code:nw;
+   
+   // return
+   ngx_http_script_return_code [label="ngx_http_script_return_code()|"];
+   ngx_http_complex_value_t [label="<head>ngx_http_complex_value_t\{\}|<value>value|<lengths>lengths|<values>values"];  
+   ngx_http_script_return_code_t:code -> ngx_http_script_return_code:nw;
+   ngx_http_script_return_code_t:text -> ngx_http_complex_value_t:head:nw;
+
+   
+   ngx_http_script_engine_t [label="<head>ngx_http_script_engine_t\{\}|...|<ip>ip|<sp>sp|..."]; 
+
+   ngx_http_script_engine_t:ip -> ngx_http_script_code_t:head;
+
+   ngx_http_variable_value_t [label="<head>ngx_http_variable_value_t\[\]|<n1>ngx_http_variable_value_t\{\}|<n2>ngx_http_variable_value_t\{\}|..."];
+
+   ngx_http_script_engine_t:sp -> ngx_http_variable_value_t:head;
+
+}

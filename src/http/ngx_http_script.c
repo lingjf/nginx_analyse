@@ -1360,8 +1360,7 @@ ngx_http_script_equal_code(ngx_http_script_engine_t *e)
 {
     ngx_http_variable_value_t  *val, *res;
 
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, e->request->connection->log, 0,
-                   "http script equal");
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, e->request->connection->log, 0, "http script equal");
 
     e->sp--;
     val = e->sp;
@@ -1369,15 +1368,12 @@ ngx_http_script_equal_code(ngx_http_script_engine_t *e)
 
     e->ip += sizeof(uintptr_t);
 
-    if (val->len == res->len
-        && ngx_strncmp(val->data, res->data, res->len) == 0)
-    {
+    if (val->len == res->len && ngx_strncmp(val->data, res->data, res->len) == 0) {
         *res = ngx_http_variable_true_value;
         return;
     }
 
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, e->request->connection->log, 0,
-                   "http script equal: no");
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, e->request->connection->log, 0, "http script equal: no");
 
     *res = ngx_http_variable_null_value;
 }
@@ -1388,8 +1384,7 @@ ngx_http_script_not_equal_code(ngx_http_script_engine_t *e)
 {
     ngx_http_variable_value_t  *val, *res;
 
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, e->request->connection->log, 0,
-                   "http script not equal");
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, e->request->connection->log, 0, "http script not equal");
 
     e->sp--;
     val = e->sp;
@@ -1397,11 +1392,8 @@ ngx_http_script_not_equal_code(ngx_http_script_engine_t *e)
 
     e->ip += sizeof(uintptr_t);
 
-    if (val->len == res->len
-        && ngx_strncmp(val->data, res->data, res->len) == 0)
-    {
-        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, e->request->connection->log, 0,
-                       "http script not equal: no");
+    if (val->len == res->len && ngx_strncmp(val->data, res->data, res->len) == 0) {
+        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, e->request->connection->log, 0, "http script not equal: no");
 
         *res = ngx_http_variable_null_value;
         return;
@@ -1431,8 +1423,7 @@ ngx_http_script_file_code(ngx_http_script_engine_t *e)
 
     r = e->request;
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "http script file op %p \"%V\"", code->op, &path);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "http script file op %p \"%V\"", code->op, &path);
 
     clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
 
@@ -1452,15 +1443,9 @@ ngx_http_script_file_code(ngx_http_script_engine_t *e)
         return;
     }
 
-    if (ngx_open_cached_file(clcf->open_file_cache, &path, &of, r->pool)
-        != NGX_OK)
-    {
-        if (of.err != NGX_ENOENT
-            && of.err != NGX_ENOTDIR
-            && of.err != NGX_ENAMETOOLONG)
-        {
-            ngx_log_error(NGX_LOG_CRIT, r->connection->log, of.err,
-                          "%s \"%s\" failed", of.failed, value->data);
+    if (ngx_open_cached_file(clcf->open_file_cache, &path, &of, r->pool) != NGX_OK) {
+        if (of.err != NGX_ENOENT && of.err != NGX_ENOTDIR && of.err != NGX_ENAMETOOLONG) {
+            ngx_log_error(NGX_LOG_CRIT, r->connection->log, of.err, "%s \"%s\" failed", of.failed, value->data);
         }
 
         switch (code->op) {
@@ -1533,8 +1518,7 @@ ngx_http_script_file_code(ngx_http_script_engine_t *e)
 
 false_value:
 
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "http script file op false");
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "http script file op false");
 
     *value = ngx_http_variable_null_value;
     return;
@@ -1558,8 +1542,7 @@ ngx_http_script_complex_value_code(ngx_http_script_engine_t *e)
 
     e->ip += sizeof(ngx_http_script_complex_value_code_t);
 
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, e->request->connection->log, 0,
-                   "http script complex value");
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, e->request->connection->log, 0, "http script complex value");
 
     ngx_memzero(&le, sizeof(ngx_http_script_engine_t));
 

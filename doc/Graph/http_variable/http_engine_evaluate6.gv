@@ -1,0 +1,20 @@
+digraph ngx_http_engine_evaluate4 {
+
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+   
+    
+
+   
+   ngx_http_script_engine_t [label="<head>ngx_http_script_engine_t\{\}|...|<ip>ip|<sp>sp|...", height=2]; 
+   ngx_http_script_code_t [label="<head>ngx_http_script_exit_code()|"];
+
+
+   ngx_http_script_engine_t:ip -> ngx_http_script_code_t:head;
+
+   ngx_http_variable_value_t [label="<head>ngx_http_variable_value_t\[\]|{{<n1>1|<n2>2|<n3>3}|{||}}"];
+
+   ngx_http_script_engine_t:sp -> ngx_http_variable_value_t:n1;
+
+}

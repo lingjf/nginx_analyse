@@ -21,47 +21,36 @@ typedef struct {
 
 
 static void *ngx_http_rewrite_create_loc_conf(ngx_conf_t *cf);
-static char *ngx_http_rewrite_merge_loc_conf(ngx_conf_t *cf,
-    void *parent, void *child);
+static char *ngx_http_rewrite_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child);
 static ngx_int_t ngx_http_rewrite_init(ngx_conf_t *cf);
 static char *ngx_http_rewrite(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
-static char *ngx_http_rewrite_return(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char *ngx_http_rewrite_break(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char *ngx_http_rewrite_if(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char * ngx_http_rewrite_if_condition(ngx_conf_t *cf,
-    ngx_http_rewrite_loc_conf_t *lcf);
-static char *ngx_http_rewrite_variable(ngx_conf_t *cf,
-    ngx_http_rewrite_loc_conf_t *lcf, ngx_str_t *value);
-static char *ngx_http_rewrite_set(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char * ngx_http_rewrite_value(ngx_conf_t *cf,
-    ngx_http_rewrite_loc_conf_t *lcf, ngx_str_t *value);
+static char *ngx_http_rewrite_return(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_rewrite_break(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_rewrite_if(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char * ngx_http_rewrite_if_condition(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf);
+static char *ngx_http_rewrite_variable(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf, ngx_str_t *value);
+static char *ngx_http_rewrite_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char * ngx_http_rewrite_value(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf, ngx_str_t *value);
 
 
 static ngx_command_t  ngx_http_rewrite_commands[] = {
 
     { ngx_string("rewrite"),
-      NGX_HTTP_SRV_CONF|NGX_HTTP_SIF_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF
-                       |NGX_CONF_TAKE23,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_SIF_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF |NGX_CONF_TAKE23,
       ngx_http_rewrite,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
 
     { ngx_string("return"),
-      NGX_HTTP_SRV_CONF|NGX_HTTP_SIF_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF
-                       |NGX_CONF_TAKE12,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_SIF_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF |NGX_CONF_TAKE12,
       ngx_http_rewrite_return,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
 
     { ngx_string("break"),
-      NGX_HTTP_SRV_CONF|NGX_HTTP_SIF_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF
-                       |NGX_CONF_NOARGS,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_SIF_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF |NGX_CONF_NOARGS,
       ngx_http_rewrite_break,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
@@ -75,24 +64,21 @@ static ngx_command_t  ngx_http_rewrite_commands[] = {
       NULL },
 
     { ngx_string("set"),
-      NGX_HTTP_SRV_CONF|NGX_HTTP_SIF_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF
-                       |NGX_CONF_TAKE2,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_SIF_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF |NGX_CONF_TAKE2,
       ngx_http_rewrite_set,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
 
     { ngx_string("rewrite_log"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_SIF_CONF|NGX_HTTP_LOC_CONF
-                        |NGX_HTTP_LIF_CONF|NGX_CONF_FLAG,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_SIF_CONF|NGX_HTTP_LOC_CONF |NGX_HTTP_LIF_CONF|NGX_CONF_FLAG,
       ngx_conf_set_flag_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_rewrite_loc_conf_t, log),
       NULL },
 
     { ngx_string("uninitialized_variable_warn"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_SIF_CONF|NGX_HTTP_LOC_CONF
-                        |NGX_HTTP_LIF_CONF|NGX_CONF_FLAG,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_SIF_CONF|NGX_HTTP_LOC_CONF |NGX_HTTP_LIF_CONF|NGX_CONF_FLAG,
       ngx_conf_set_flag_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_rewrite_loc_conf_t, uninitialized_variable_warn),
@@ -163,8 +149,7 @@ ngx_http_rewrite_handler(ngx_http_request_t *r)
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
-    e->sp = ngx_pcalloc(r->pool,
-                        rlcf->stack_size * sizeof(ngx_http_variable_value_t));
+    e->sp = ngx_pcalloc(r->pool, rlcf->stack_size * sizeof(ngx_http_variable_value_t));
     if (e->sp == NULL) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
@@ -193,8 +178,7 @@ ngx_http_rewrite_handler(ngx_http_request_t *r)
 
 
 static ngx_int_t
-ngx_http_rewrite_var(ngx_http_request_t *r, ngx_http_variable_value_t *v,
-    uintptr_t data)
+ngx_http_rewrite_var(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data)
 {
     ngx_http_variable_t          *var;
     ngx_http_core_main_conf_t    *cmcf;
@@ -217,8 +201,7 @@ ngx_http_rewrite_var(ngx_http_request_t *r, ngx_http_variable_value_t *v,
      * so the handler is called only if the variable is not initialized
      */
 
-    ngx_log_error(NGX_LOG_WARN, r->connection->log, 0,
-                  "using uninitialized \"%V\" variable", &var[data].name);
+    ngx_log_error(NGX_LOG_WARN, r->connection->log, 0, "using uninitialized \"%V\" variable", &var[data].name);
 
     *v = ngx_http_variable_null_value;
 
@@ -253,8 +236,7 @@ ngx_http_rewrite_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     uintptr_t  *code;
 
     ngx_conf_merge_value(conf->log, prev->log, 0);
-    ngx_conf_merge_value(conf->uninitialized_variable_warn,
-                         prev->uninitialized_variable_warn, 1);
+    ngx_conf_merge_value(conf->uninitialized_variable_warn, prev->uninitialized_variable_warn, 1);
     ngx_conf_merge_uint_value(conf->stack_size, prev->stack_size, 10);
 
     if (conf->codes == NULL) {
@@ -434,8 +416,7 @@ ngx_http_rewrite(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         *code = NULL;
     }
 
-    regex->next = (u_char *) lcf->codes->elts + lcf->codes->nelts
-                                              - (u_char *) regex;
+    regex->next = (u_char *) lcf->codes->elts + lcf->codes->nelts - (u_char *) regex;
 
     return NGX_CONF_OK;
 }
@@ -451,8 +432,7 @@ ngx_http_rewrite_return(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_http_script_return_code_t     *ret;
     ngx_http_compile_complex_value_t   ccv;
 
-    ret = ngx_http_script_start_code(cf->pool, &lcf->codes,
-                                     sizeof(ngx_http_script_return_code_t));
+    ret = ngx_http_script_start_code(cf->pool, &lcf->codes, sizeof(ngx_http_script_return_code_t));
     if (ret == NULL) {
         return NGX_CONF_ERROR;
     }
@@ -469,25 +449,19 @@ ngx_http_rewrite_return(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     if (ret->status == (uintptr_t) NGX_ERROR) {
 
-        if (cf->args->nelts == 2
-            && (ngx_strncmp(p, "http://", sizeof("http://") - 1) == 0
-                || ngx_strncmp(p, "https://", sizeof("https://") - 1) == 0
-                || ngx_strncmp(p, "$scheme", sizeof("$scheme") - 1) == 0))
-        {
+        if (cf->args->nelts == 2 && (ngx_strncmp(p, "http://", sizeof("http://") - 1) == 0 || ngx_strncmp(p, "https://", sizeof("https://") - 1) == 0 || ngx_strncmp(p, "$scheme", sizeof("$scheme") - 1) == 0)) {
             ret->status = NGX_HTTP_MOVED_TEMPORARILY;
             v = &value[1];
 
         } else {
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "invalid return code \"%V\"", &value[1]);
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid return code \"%V\"", &value[1]);
             return NGX_CONF_ERROR;
         }
 
     } else {
 
         if (ret->status > 999) {
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "invalid return code \"%V\"", &value[1]);
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid return code \"%V\"", &value[1]);
             return NGX_CONF_ERROR;
         }
 
@@ -631,12 +605,10 @@ ngx_http_rewrite_if(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 
     if (elts != lcf->codes->elts) {
-        if_code = (ngx_http_script_if_code_t *)
-                   ((u_char *) if_code + ((u_char *) lcf->codes->elts - elts));
+        if_code = (ngx_http_script_if_code_t *) ((u_char *) if_code + ((u_char *) lcf->codes->elts - elts));
     }
 
-    if_code->next = (u_char *) lcf->codes->elts + lcf->codes->nelts
-                                                - (u_char *) if_code;
+    if_code->next = (u_char *) lcf->codes->elts + lcf->codes->nelts - (u_char *) if_code;
 
     /* the code array belong to parent block */
 
@@ -663,8 +635,7 @@ ngx_http_rewrite_if_condition(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf)
     last = cf->args->nelts - 1;
 
     if (value[1].len < 1 || value[1].data[0] != '(') {
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "invalid condition \"%V\"", &value[1]);
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid condition \"%V\"", &value[1]);
         return NGX_CONF_ERROR;
     }
 
@@ -678,8 +649,7 @@ ngx_http_rewrite_if_condition(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf)
     }
 
     if (value[last].len < 1 || value[last].data[value[last].len - 1] != ')') {
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "invalid condition \"%V\"", &value[last]);
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid condition \"%V\"", &value[last]);
         return NGX_CONF_ERROR;
     }
 
@@ -694,11 +664,10 @@ ngx_http_rewrite_if_condition(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf)
     len = value[cur].len;
     p = value[cur].data;
 
-    if (len > 1 && p[0] == '$') {
+    if (len > 1 && p[0] == '$') { /* "if(A op B)" or "if(A)" */
 
         if (cur != last && cur + 2 != last) {
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "invalid condition \"%V\"", &value[cur]);
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid condition \"%V\"", &value[cur]);
             return NGX_CONF_ERROR;
         }
 
@@ -706,7 +675,7 @@ ngx_http_rewrite_if_condition(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf)
             return NGX_CONF_ERROR;
         }
 
-        if (cur == last) {
+        if (cur == last) { /* "if(A)" */
             return NGX_CONF_OK;
         }
 
@@ -721,8 +690,7 @@ ngx_http_rewrite_if_condition(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf)
                 return NGX_CONF_ERROR;
             }
 
-            code = ngx_http_script_start_code(cf->pool, &lcf->codes,
-                                              sizeof(uintptr_t));
+            code = ngx_http_script_start_code(cf->pool, &lcf->codes, sizeof(uintptr_t));
             if (code == NULL) {
                 return NGX_CONF_ERROR;
             }
@@ -738,8 +706,7 @@ ngx_http_rewrite_if_condition(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf)
                 return NGX_CONF_ERROR;
             }
 
-            code = ngx_http_script_start_code(cf->pool, &lcf->codes,
-                                              sizeof(uintptr_t));
+            code = ngx_http_script_start_code(cf->pool, &lcf->codes, sizeof(uintptr_t));
             if (code == NULL) {
                 return NGX_CONF_ERROR;
             }
@@ -748,13 +715,8 @@ ngx_http_rewrite_if_condition(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf)
             return NGX_CONF_OK;
         }
 
-        if ((len == 1 && p[0] == '~')
-            || (len == 2 && p[0] == '~' && p[1] == '*')
-            || (len == 2 && p[0] == '!' && p[1] == '~')
-            || (len == 3 && p[0] == '!' && p[1] == '~' && p[2] == '*'))
-        {
-            regex = ngx_http_script_start_code(cf->pool, &lcf->codes,
-                                         sizeof(ngx_http_script_regex_code_t));
+        if ((len == 1 && p[0] == '~') || (len == 2 && p[0] == '~' && p[1] == '*') || (len == 2 && p[0] == '!' && p[1] == '~') || (len == 3 && p[0] == '!' && p[1] == '~' && p[2] == '*')) {
+            regex = ngx_http_script_start_code(cf->pool, &lcf->codes, sizeof(ngx_http_script_regex_code_t));
             if (regex == NULL) {
                 return NGX_CONF_ERROR;
             }
@@ -784,16 +746,13 @@ ngx_http_rewrite_if_condition(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf)
             return NGX_CONF_OK;
         }
 
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "unexpected \"%V\" in condition", &value[cur]);
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "unexpected \"%V\" in condition", &value[cur]);
         return NGX_CONF_ERROR;
 
-    } else if ((len == 2 && p[0] == '-')
-               || (len == 3 && p[0] == '!' && p[1] == '-'))
-    {
+    } else if ((len == 2 && p[0] == '-') || (len == 3 && p[0] == '!' && p[1] == '-')) { /* "if(op A)" */
+
         if (cur + 1 != last) {
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "invalid condition \"%V\"", &value[cur]);
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid condition \"%V\"", &value[cur]);
             return NGX_CONF_ERROR;
         }
 
@@ -804,8 +763,7 @@ ngx_http_rewrite_if_condition(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf)
             return NGX_CONF_ERROR;
         }
 
-        fop = ngx_http_script_start_code(cf->pool, &lcf->codes,
-                                          sizeof(ngx_http_script_file_code_t));
+        fop = ngx_http_script_start_code(cf->pool, &lcf->codes, sizeof(ngx_http_script_file_code_t));
         if (fop == NULL) {
             return NGX_CONF_ERROR;
         }
@@ -854,21 +812,18 @@ ngx_http_rewrite_if_condition(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf)
             }
         }
 
-        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                           "invalid condition \"%V\"", &value[cur]);
+        ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid condition \"%V\"", &value[cur]);
         return NGX_CONF_ERROR;
     }
 
-    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                       "invalid condition \"%V\"", &value[cur]);
+    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid condition \"%V\"", &value[cur]);
 
     return NGX_CONF_ERROR;
 }
 
 
 static char *
-ngx_http_rewrite_variable(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf,
-    ngx_str_t *value)
+ngx_http_rewrite_variable(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf, ngx_str_t *value)
 {
     ngx_int_t                    index;
     ngx_http_script_var_code_t  *var_code;
@@ -882,8 +837,7 @@ ngx_http_rewrite_variable(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf,
         return NGX_CONF_ERROR;
     }
 
-    var_code = ngx_http_script_start_code(cf->pool, &lcf->codes,
-                                          sizeof(ngx_http_script_var_code_t));
+    var_code = ngx_http_script_start_code(cf->pool, &lcf->codes, sizeof(ngx_http_script_var_code_t));
     if (var_code == NULL) {
         return NGX_CONF_ERROR;
     }
@@ -968,8 +922,7 @@ ngx_http_rewrite_set(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 
 static char *
-ngx_http_rewrite_value(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf,
-    ngx_str_t *value)
+ngx_http_rewrite_value(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf, ngx_str_t *value)
 {
     ngx_int_t                              n;
     ngx_http_script_compile_t              sc;
@@ -979,8 +932,7 @@ ngx_http_rewrite_value(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf,
     n = ngx_http_script_variables_count(value);
 
     if (n == 0) {
-        val = ngx_http_script_start_code(cf->pool, &lcf->codes,
-                                         sizeof(ngx_http_script_value_code_t));
+        val = ngx_http_script_start_code(cf->pool, &lcf->codes, sizeof(ngx_http_script_value_code_t));
         if (val == NULL) {
             return NGX_CONF_ERROR;
         }
@@ -999,8 +951,7 @@ ngx_http_rewrite_value(ngx_conf_t *cf, ngx_http_rewrite_loc_conf_t *lcf,
         return NGX_CONF_OK;
     }
 
-    complex = ngx_http_script_start_code(cf->pool, &lcf->codes,
-                                 sizeof(ngx_http_script_complex_value_code_t));
+    complex = ngx_http_script_start_code(cf->pool, &lcf->codes, sizeof(ngx_http_script_complex_value_code_t));
     if (complex == NULL) {
         return NGX_CONF_ERROR;
     }
