@@ -1,0 +1,26 @@
+digraph ngx_http_compile_simple {
+
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+  
+   ngx_http_script_compile_t [label="<head>ngx_http_script_compile_t\{\}|<source>source|variables= 1|<values>values|..."];  
+   ngx_str_t [label="<head>ngx_str_t\{\}|len= 20|\"home.$http_host.html\""];
+   ngx_http_script_code_t [label="<head>ngx_http_script_code_t\[\]|<n1>ngx_http_script_copy_code_t\{\}|<n2>ngx_http_script_var_code_t\{\}|<n3>ngx_http_script_copy_code_t\{\}"];  
+   ngx_http_script_copy_code_t_home [label="<head>ngx_http_script_copy_code_t\{\}|<code>code|len= 4|\"home\""]; 
+   ngx_http_script_copy_code_home [label="ngx_http_script_copy_code()|copy \"home\" to result"];
+   ngx_http_script_var_code_t [label="<head>ngx_http_script_var_code_t\{\}|<code>code|index of \"http_post\""];  
+   ngx_http_script_copy_var_code [label="ngx_http_script_copy_var_code()|ngx_http_get_indexed_variable(index)|copy variable value to result"];
+   ngx_http_script_copy_code_t_html [label="<head>ngx_http_script_copy_code_t\{\}|<code>code|len= 5|\".html\""];  
+   ngx_http_script_copy_code_html [label="ngx_http_script_copy_code()|copy \".html\" to result"];
+
+   ngx_http_script_compile_t:source -> ngx_str_t:head;
+   ngx_http_script_compile_t:values -> ngx_http_script_code_t:head;
+
+   ngx_http_script_code_t:n1 -> ngx_http_script_copy_code_t_home:head;
+   ngx_http_script_code_t:n2 -> ngx_http_script_var_code_t:head;
+   ngx_http_script_code_t:n3 -> ngx_http_script_copy_code_t_html:head;
+   ngx_http_script_copy_code_t_home:code -> ngx_http_script_copy_code_home:nw;
+   ngx_http_script_var_code_t:code -> ngx_http_script_copy_var_code:nw;
+   ngx_http_script_copy_code_t_html:code -> ngx_http_script_copy_code_html:nw;
+}

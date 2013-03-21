@@ -1,0 +1,19 @@
+digraph ngx_http_script_copy_code {
+
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+   
+
+   ngx_http_script_copy_code_t1 [label="<head>ngx_http_script_copy_code_t\{\}|<code>code|len= 5|\".html\""];  
+   ngx_http_script_copy_code1 [label="ngx_http_script_copy_code()|copy \".html\" to result"];
+
+   ngx_http_script_copy_code_t1:code -> ngx_http_script_copy_code1:nw;
+
+
+   ngx_http_script_copy_code_t2 [label="<head>ngx_http_script_copy_code_t\{\}|<code>code|len= 4|\"home\""];  
+   ngx_http_script_copy_code2 [label="ngx_http_script_copy_code()|copy \"home\" to result"];
+
+   ngx_http_script_copy_code_t2:code -> ngx_http_script_copy_code2:nw;
+
+}
