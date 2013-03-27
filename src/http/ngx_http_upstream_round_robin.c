@@ -340,14 +340,13 @@ ngx_http_upstream_create_round_robin_peer(ngx_http_request_t *r, ngx_http_upstre
     rrp->current = 0;
 
     if (rrp->peers->number <= 8 * sizeof(uintptr_t)) {
-        rrp->tried = &rrp->data;
+        rrp->tried = &rrp->data; /* small bitmap in word */
         rrp->data = 0;
 
     } else {
-        n = (rrp->peers->number + (8 * sizeof(uintptr_t) - 1))
-                / (8 * sizeof(uintptr_t));
+        n = (rrp->peers->number + (8 * sizeof(uintptr_t) - 1)) / (8 * sizeof(uintptr_t));
 
-        rrp->tried = ngx_pcalloc(r->pool, n * sizeof(uintptr_t));
+        rrp->tried = ngx_pcalloc(r->pool, n * sizeof(uintptr_t)); /* big bitmap more than word */
         if (rrp->tried == NULL) {
             return NGX_ERROR;
         }
@@ -416,9 +415,7 @@ ngx_http_upstream_get_round_robin_peer(ngx_peer_connection_t *pc, void *data)
             goto failed;
         }
 
-        ngx_log_debug2(NGX_LOG_DEBUG_HTTP, pc->log, 0,
-                       "get rr peer, current: %ui %i",
-                       rrp->current, peer->current_weight);
+        ngx_log_debug2(NGX_LOG_DEBUG_HTTP, pc->log, 0, "get rr peer, current: %ui %i", rrp->current, peer->current_weight);
     }
 
     pc->sockaddr = peer->sockaddr;
@@ -490,8 +487,8 @@ ngx_http_upstream_get_peer(ngx_http_upstream_rr_peer_data_t *rrp)
 
     for (i = 0; i < rrp->peers->number; i++) {
 
-        n = i / (8 * sizeof(uintptr_t));
-        m = (uintptr_t) 1 << i % (8 * sizeof(uintptr_t));
+        n = i / (8 * sizeof(uintptr_t)); /* bitmap 中的第n个字 */
+        m = (uintptr_t) 1 << i % (8 * sizeof(uintptr_t)); /* bitmap 中的第n个字中的第m个bit */
 
         if (rrp->tried[n] & m) {
             continue;
@@ -503,10 +500,7 @@ ngx_http_upstream_get_peer(ngx_http_upstream_rr_peer_data_t *rrp)
             continue;
         }
 
-        if (peer->max_fails
-            && peer->fails >= peer->max_fails
-            && now - peer->checked <= peer->fail_timeout)
-        {
+        if (peer->max_fails && peer->fails >= peer->max_fails && now - peer->checked <= peer->fail_timeout) {
             continue;
         }
 
@@ -543,8 +537,7 @@ ngx_http_upstream_get_peer(ngx_http_upstream_rr_peer_data_t *rrp)
 
 
 void
-ngx_http_upstream_free_round_robin_peer(ngx_peer_connection_t *pc, void *data,
-    ngx_uint_t state)
+ngx_http_upstream_free_round_robin_peer(ngx_peer_connection_t *pc, void *data, ngx_uint_t state)
 {
     ngx_http_upstream_rr_peer_data_t  *rrp = data;
 
@@ -579,9 +572,7 @@ ngx_http_upstream_free_round_robin_peer(ngx_peer_connection_t *pc, void *data,
             peer->effective_weight -= peer->weight / peer->max_fails;
         }
 
-        ngx_log_debug2(NGX_LOG_DEBUG_HTTP, pc->log, 0,
-                       "free rr peer failed: %ui %i",
-                       rrp->current, peer->effective_weight);
+        ngx_log_debug2(NGX_LOG_DEBUG_HTTP, pc->log, 0, "free rr peer failed: %ui %i", rrp->current, peer->effective_weight);
 
         if (peer->effective_weight < 0) {
             peer->effective_weight = 0;
@@ -627,9 +618,7 @@ ngx_http_upstream_set_round_robin_peer_session(ngx_peer_connection_t *pc,
 
     rc = ngx_ssl_set_session(pc->connection, ssl_session);
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, pc->log, 0,
-                   "set session: %p:%d",
-                   ssl_session, ssl_session ? ssl_session->references : 0);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, pc->log, 0, "set session: %p:%d", ssl_session, ssl_session ? ssl_session->references : 0);
 
     /* ngx_unlock_mutex(rrp->peers->mutex); */
 
@@ -638,8 +627,7 @@ ngx_http_upstream_set_round_robin_peer_session(ngx_peer_connection_t *pc,
 
 
 void
-ngx_http_upstream_save_round_robin_peer_session(ngx_peer_connection_t *pc,
-    void *data)
+ngx_http_upstream_save_round_robin_peer_session(ngx_peer_connection_t *pc, void *data)
 {
     ngx_http_upstream_rr_peer_data_t  *rrp = data;
 
@@ -652,8 +640,7 @@ ngx_http_upstream_save_round_robin_peer_session(ngx_peer_connection_t *pc,
         return;
     }
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, pc->log, 0,
-                   "save session: %p:%d", ssl_session, ssl_session->references);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, pc->log, 0, "save session: %p:%d", ssl_session, ssl_session->references);
 
     peer = &rrp->peers->peer[rrp->current];
 
@@ -667,9 +654,7 @@ ngx_http_upstream_save_round_robin_peer_session(ngx_peer_connection_t *pc,
 
     if (old_ssl_session) {
 
-        ngx_log_debug2(NGX_LOG_DEBUG_HTTP, pc->log, 0,
-                       "old session: %p:%d",
-                       old_ssl_session, old_ssl_session->references);
+        ngx_log_debug2(NGX_LOG_DEBUG_HTTP, pc->log, 0, "old session: %p:%d", old_ssl_session, old_ssl_session->references);
 
         /* TODO: may block */
 

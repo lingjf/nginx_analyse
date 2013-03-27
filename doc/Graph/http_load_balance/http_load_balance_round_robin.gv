@@ -1,0 +1,43 @@
+digraph ngx_upstream_server {
+   rankdir=LR;
+
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_http_upstream_srv_conf_t [label="<head>ngx_http_upstream_srv_conf_t\{\}|<servers>servers|host|<peer>peer|..."];
+   ngx_http_upstream_server_t_array [label="<head>ngx_http_upstream_server_t\[\]|<n1>ngx_http_upstream_server_t|<n2>ngx_http_upstream_server_t|..."];
+   ngx_http_upstream_server_t [label="<head>ngx_http_upstream_server_t\{\}|address|weight|..."];
+
+   ngx_http_upstream_peer_t [label="<head>ngx_http_upstream_peer_t\{\}|<init_upstream>init_upstream|<init>init|<data>data"];
+   ngx_http_upstream_init_round_robin [label="<head>ngx_http_upstream_init_round_robin()|..."];
+   ngx_http_upstream_init_round_robin_peer [label="<head>ngx_http_upstream_init_round_robin_peer()|..."];
+   ngx_http_upstream_rr_peers_t [label="<head>ngx_http_upstream_rr_peers_t\{\}|<next>next|{peer|{ngx_http_upstream_rr_peer_t\[\]|...|<n2>ngx_http_upstream_rr_peer_t\{\}|...}}"];
+   ngx_http_upstream_rr_peer_t [label="<head>ngx_http_upstream_rr_peer_t\{\}|address|weight|effective_weight|current_weight"];
+
+   ngx_http_upstream_srv_conf_t:servers -> ngx_http_upstream_server_t_array:head;
+   ngx_http_upstream_server_t_array:n1 -> ngx_http_upstream_server_t:head:nw;
+
+   ngx_http_upstream_srv_conf_t:peer -> ngx_http_upstream_peer_t:head;
+   ngx_http_upstream_peer_t:init_upstream -> ngx_http_upstream_init_round_robin:head;
+   ngx_http_upstream_peer_t:init -> ngx_http_upstream_init_round_robin_peer:head;
+   ngx_http_upstream_peer_t:data -> ngx_http_upstream_rr_peers_t:head:nw;
+   ngx_http_upstream_rr_peers_t:n2 -> ngx_http_upstream_rr_peer_t:head:nw;
+
+
+   ngx_http_upstream_t [label="<head>ngx_http_upstream_t\{\}|...|<peer>peer|..."];
+   ngx_peer_connection_t [label="<head>ngx_peer_connection_t\{\}|<data>data|<get>get|<free>free|<connection>connection|address"];
+   ngx_http_upstream_rr_peer_data_t [label="<head>ngx_http_upstream_rr_peer_data_t\{\}|<peers>peers|current|<tried>tried|..."];
+   ngx_http_upstream_get_round_robin_peer [label="<head>ngx_http_upstream_get_round_robin_peer()|..."];
+   ngx_http_upstream_free_round_robin_peer [label="<head>ngx_http_upstream_free_round_robin_peer()|..."];
+   bitmap [label="<head>bitmap\[\]|"];
+
+   ngx_http_upstream_t:peer -> ngx_peer_connection_t:head:nw;
+   ngx_peer_connection_t:data -> ngx_http_upstream_rr_peer_data_t:head;
+   ngx_peer_connection_t:get -> ngx_http_upstream_get_round_robin_peer:head;
+   ngx_peer_connection_t:free -> ngx_http_upstream_free_round_robin_peer:head;
+   ngx_http_upstream_rr_peer_data_t:tried -> bitmap:head;
+
+   ngx_http_upstream_rr_peer_data_t:peers -> ngx_http_upstream_rr_peers_t:head:w;
+
+   {rank=same; ngx_http_upstream_rr_peers_t; ngx_http_upstream_rr_peer_data_t};
+}
