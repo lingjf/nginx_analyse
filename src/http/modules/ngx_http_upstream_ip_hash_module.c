@@ -25,12 +25,9 @@ typedef struct {
 } ngx_http_upstream_ip_hash_peer_data_t;
 
 
-static ngx_int_t ngx_http_upstream_init_ip_hash_peer(ngx_http_request_t *r,
-    ngx_http_upstream_srv_conf_t *us);
-static ngx_int_t ngx_http_upstream_get_ip_hash_peer(ngx_peer_connection_t *pc,
-    void *data);
-static char *ngx_http_upstream_ip_hash(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+static ngx_int_t ngx_http_upstream_init_ip_hash_peer(ngx_http_request_t *r, ngx_http_upstream_srv_conf_t *us);
+static ngx_int_t ngx_http_upstream_get_ip_hash_peer(ngx_peer_connection_t *pc, void *data);
+static char *ngx_http_upstream_ip_hash(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 
 static ngx_command_t  ngx_http_upstream_ip_hash_commands[] = {
@@ -94,8 +91,7 @@ ngx_http_upstream_init_ip_hash(ngx_conf_t *cf, ngx_http_upstream_srv_conf_t *us)
 
 
 static ngx_int_t
-ngx_http_upstream_init_ip_hash_peer(ngx_http_request_t *r,
-    ngx_http_upstream_srv_conf_t *us)
+ngx_http_upstream_init_ip_hash_peer(ngx_http_request_t *r, ngx_http_upstream_srv_conf_t *us)
 {
     struct sockaddr_in                     *sin;
 #if (NGX_HAVE_INET6)
@@ -156,8 +152,7 @@ ngx_http_upstream_get_ip_hash_peer(ngx_peer_connection_t *pc, void *data)
     ngx_uint_t                    i, n, p, hash;
     ngx_http_upstream_rr_peer_t  *peer;
 
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, pc->log, 0,
-                   "get ip hash peer, try: %ui", pc->tries);
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, pc->log, 0, "get ip hash peer, try: %ui", pc->tries);
 
     /* TODO: cached */
 
@@ -199,12 +194,9 @@ ngx_http_upstream_get_ip_hash_peer(ngx_peer_connection_t *pc, void *data)
 
         if (!(iphp->rrp.tried[n] & m)) {
 
-            ngx_log_debug2(NGX_LOG_DEBUG_HTTP, pc->log, 0,
-                           "get ip hash peer, hash: %ui %04XA", p, m);
+            ngx_log_debug2(NGX_LOG_DEBUG_HTTP, pc->log, 0, "get ip hash peer, hash: %ui %04XA", p, m);
 
             peer = &iphp->rrp.peers->peer[p];
-
-            /* ngx_lock_mutex(iphp->rrp.peers->mutex); */
 
             if (!peer->down) {
 
@@ -220,8 +212,6 @@ ngx_http_upstream_get_ip_hash_peer(ngx_peer_connection_t *pc, void *data)
 
             iphp->rrp.tried[n] |= m;
 
-            /* ngx_unlock_mutex(iphp->rrp.peers->mutex); */
-
             pc->tries--;
         }
 
@@ -235,8 +225,6 @@ ngx_http_upstream_get_ip_hash_peer(ngx_peer_connection_t *pc, void *data)
     pc->sockaddr = peer->sockaddr;
     pc->socklen = peer->socklen;
     pc->name = &peer->name;
-
-    /* ngx_unlock_mutex(iphp->rrp.peers->mutex); */
 
     iphp->rrp.tried[n] |= m;
     iphp->hash = hash;
