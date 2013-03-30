@@ -1,0 +1,8 @@
+digraph ngx_str {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_str_t [label="ngx_str_t\{\}|len|data"];
+
+}

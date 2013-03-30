@@ -377,8 +377,6 @@ ngx_http_upstream_get_round_robin_peer(ngx_peer_connection_t *pc, void *data)
 
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, pc->log, 0, "get rr peer, try: %ui", pc->tries);
 
-    /* ngx_lock_mutex(rrp->peers->mutex); */
-
     if (rrp->peers->last_cached) {
 
         /* cached connection */
@@ -386,7 +384,6 @@ ngx_http_upstream_get_round_robin_peer(ngx_peer_connection_t *pc, void *data)
         c = rrp->peers->cached[rrp->peers->last_cached];
         rrp->peers->last_cached--;
 
-        /* ngx_unlock_mutex(ppr->peers->mutex); */
 
 #if (NGX_THREADS)
         c->read->lock = c->read->own_lock;
@@ -422,7 +419,6 @@ ngx_http_upstream_get_round_robin_peer(ngx_peer_connection_t *pc, void *data)
     pc->socklen = peer->socklen;
     pc->name = &peer->name;
 
-    /* ngx_unlock_mutex(rrp->peers->mutex); */
 
     if (pc->tries == 1 && rrp->peers->next) {
         pc->tries += rrp->peers->next->number;

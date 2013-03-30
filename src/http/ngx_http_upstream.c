@@ -4241,8 +4241,7 @@ ngx_http_upstream_bind_set_slot(ngx_conf_t *cf, ngx_command_t *cmd,
 
 
 char *
-ngx_http_upstream_param_set_slot(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf)
+ngx_http_upstream_param_set_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
     char  *p = conf;
 
@@ -4272,8 +4271,7 @@ ngx_http_upstream_param_set_slot(ngx_conf_t *cf, ngx_command_t *cmd,
 
     if (cf->args->nelts == 4) {
         if (ngx_strcmp(value[3].data, "if_not_empty") != 0) {
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "invalid parameter \"%V\"", &value[3]);
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid parameter \"%V\"", &value[3]);
             return NGX_CONF_ERROR;
         }
 

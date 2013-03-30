@@ -181,10 +181,7 @@ ngx_http_limit_req_handler(ngx_http_request_t *r)
         }
 
         if (len > 65535) {
-            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                          "the value of the \"%V\" variable "
-                          "is more than 65535 bytes: \"%v\"",
-                          &ctx->var, vv);
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "the value of the \"%V\" variable " "is more than 65535 bytes: \"%v\"", &ctx->var, vv);
             continue;
         }
 
@@ -192,14 +189,11 @@ ngx_http_limit_req_handler(ngx_http_request_t *r)
 
         ngx_shmtx_lock(&ctx->shpool->mutex);
 
-        rc = ngx_http_limit_req_lookup(limit, hash, vv->data, len, &excess,
-                                       (n == lrcf->limits.nelts - 1));
+        rc = ngx_http_limit_req_lookup(limit, hash, vv->data, len, &excess, (n == lrcf->limits.nelts - 1));
 
         ngx_shmtx_unlock(&ctx->shpool->mutex);
 
-        ngx_log_debug4(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                       "limit_req[%ui]: %i %ui.%03ui",
-                       n, rc, excess / 1000, excess % 1000);
+        ngx_log_debug4(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "limit_req[%ui]: %i %ui.%03ui", n, rc, excess / 1000, excess % 1000);
 
         if (rc != NGX_AGAIN) {
             break;
@@ -215,10 +209,7 @@ ngx_http_limit_req_handler(ngx_http_request_t *r)
     if (rc == NGX_BUSY || rc == NGX_ERROR) {
 
         if (rc == NGX_BUSY) {
-            ngx_log_error(lrcf->limit_log_level, r->connection->log, 0,
-                          "limiting requests, excess: %ui.%03ui by zone \"%V\"",
-                          excess / 1000, excess % 1000,
-                          &limit->shm_zone->shm.name);
+            ngx_log_error(lrcf->limit_log_level, r->connection->log, 0, "limiting requests, excess: %ui.%03ui by zone \"%V\"", excess / 1000, excess % 1000, &limit->shm_zone->shm.name);
         }
 
         while (n--) {
@@ -302,8 +293,7 @@ ngx_http_limit_req_delay(ngx_http_request_t *r)
 
 
 static void
-ngx_http_limit_req_rbtree_insert_value(ngx_rbtree_node_t *temp,
-    ngx_rbtree_node_t *node, ngx_rbtree_node_t *sentinel)
+ngx_http_limit_req_rbtree_insert_value(ngx_rbtree_node_t *temp, ngx_rbtree_node_t *node, ngx_rbtree_node_t *sentinel)
 {
     ngx_rbtree_node_t          **p;
     ngx_http_limit_req_node_t   *lrn, *lrnt;
@@ -323,8 +313,7 @@ ngx_http_limit_req_rbtree_insert_value(ngx_rbtree_node_t *temp,
             lrn = (ngx_http_limit_req_node_t *) &node->color;
             lrnt = (ngx_http_limit_req_node_t *) &temp->color;
 
-            p = (ngx_memn2cmp(lrn->data, lrnt->data, lrn->len, lrnt->len) < 0)
-                ? &temp->left : &temp->right;
+            p = (ngx_memn2cmp(lrn->data, lrnt->data, lrn->len, lrnt->len) < 0) ? &temp->left : &temp->right;
         }
 
         if (*p == sentinel) {
@@ -343,8 +332,7 @@ ngx_http_limit_req_rbtree_insert_value(ngx_rbtree_node_t *temp,
 
 
 static ngx_int_t
-ngx_http_limit_req_lookup(ngx_http_limit_req_limit_t *limit, ngx_uint_t hash,
-    u_char *data, size_t len, ngx_uint_t *ep, ngx_uint_t account)
+ngx_http_limit_req_lookup(ngx_http_limit_req_limit_t *limit, ngx_uint_t hash, u_char *data, size_t len, ngx_uint_t *ep, ngx_uint_t account)
 {
     size_t                      size;
     ngx_int_t                   rc, excess;
@@ -610,10 +598,7 @@ ngx_http_limit_req_init_zone(ngx_shm_zone_t *shm_zone, void *data)
 
     if (octx) {
         if (ngx_strcmp(ctx->var.data, octx->var.data) != 0) {
-            ngx_log_error(NGX_LOG_EMERG, shm_zone->shm.log, 0,
-                          "limit_req \"%V\" uses the \"%V\" variable "
-                          "while previously it used the \"%V\" variable",
-                          &shm_zone->shm.name, &ctx->var, &octx->var);
+            ngx_log_error(NGX_LOG_EMERG, shm_zone->shm.log, 0, "limit_req \"%V\" uses the \"%V\" variable " "while previously it used the \"%V\" variable", &shm_zone->shm.name, &ctx->var, &octx->var);
             return NGX_ERROR;
         }
 
@@ -638,8 +623,7 @@ ngx_http_limit_req_init_zone(ngx_shm_zone_t *shm_zone, void *data)
 
     ctx->shpool->data = ctx->sh;
 
-    ngx_rbtree_init(&ctx->sh->rbtree, &ctx->sh->sentinel,
-                    ngx_http_limit_req_rbtree_insert_value);
+    ngx_rbtree_init(&ctx->sh->rbtree, &ctx->sh->sentinel, ngx_http_limit_req_rbtree_insert_value);
 
     ngx_queue_init(&ctx->sh->queue);
 
@@ -650,8 +634,7 @@ ngx_http_limit_req_init_zone(ngx_shm_zone_t *shm_zone, void *data)
         return NGX_ERROR;
     }
 
-    ngx_sprintf(ctx->shpool->log_ctx, " in limit_req zone \"%V\"%Z",
-                &shm_zone->shm.name);
+    ngx_sprintf(ctx->shpool->log_ctx, " in limit_req zone \"%V\"%Z", &shm_zone->shm.name);
 
     return NGX_OK;
 }

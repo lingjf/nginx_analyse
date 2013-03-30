@@ -31,8 +31,7 @@ typedef struct {
 } ngx_http_scgi_loc_conf_t;
 
 
-static ngx_int_t ngx_http_scgi_eval(ngx_http_request_t *r,
-    ngx_http_scgi_loc_conf_t *scf);
+static ngx_int_t ngx_http_scgi_eval(ngx_http_request_t *r, ngx_http_scgi_loc_conf_t *scf);
 static ngx_int_t ngx_http_scgi_create_request(ngx_http_request_t *r);
 static ngx_int_t ngx_http_scgi_reinit_request(ngx_http_request_t *r);
 static ngx_int_t ngx_http_scgi_process_status_line(ngx_http_request_t *r);
@@ -41,21 +40,16 @@ static void ngx_http_scgi_abort_request(ngx_http_request_t *r);
 static void ngx_http_scgi_finalize_request(ngx_http_request_t *r, ngx_int_t rc);
 
 static void *ngx_http_scgi_create_loc_conf(ngx_conf_t *cf);
-static char *ngx_http_scgi_merge_loc_conf(ngx_conf_t *cf, void *parent,
-    void *child);
-static ngx_int_t ngx_http_scgi_merge_params(ngx_conf_t *cf,
-    ngx_http_scgi_loc_conf_t *conf, ngx_http_scgi_loc_conf_t *prev);
+static char *ngx_http_scgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child);
+static ngx_int_t ngx_http_scgi_merge_params(ngx_conf_t *cf, ngx_http_scgi_loc_conf_t *conf, ngx_http_scgi_loc_conf_t *prev);
 
 static char *ngx_http_scgi_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
-static char *ngx_http_scgi_store(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+static char *ngx_http_scgi_store(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 #if (NGX_HTTP_CACHE)
 static ngx_int_t ngx_http_scgi_create_key(ngx_http_request_t *r);
-static char *ngx_http_scgi_cache(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char *ngx_http_scgi_cache_key(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+static char *ngx_http_scgi_cache(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_scgi_cache_key(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 #endif
 
 
@@ -394,9 +388,7 @@ ngx_http_scgi_handler(ngx_http_request_t *r)
     ngx_http_scgi_loc_conf_t  *scf;
 
     if (r->subrequest_in_memory) {
-        ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
-                      "ngx_http_scgi_module does not support "
-                      "subrequests in memory");
+        ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0, "ngx_http_scgi_module does not support " "subrequests in memory");
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
@@ -464,10 +456,7 @@ ngx_http_scgi_eval(ngx_http_request_t *r, ngx_http_scgi_loc_conf_t * scf)
 
     ngx_memzero(&url, sizeof(ngx_url_t));
 
-    if (ngx_http_script_run(r, &url.url, scf->scgi_lengths->elts, 0,
-                            scf->scgi_values->elts)
-        == NULL)
-    {
+    if (ngx_http_script_run(r, &url.url, scf->scgi_lengths->elts, 0, scf->scgi_values->elts) == NULL) {
         return NGX_ERROR;
     }
 
@@ -475,8 +464,7 @@ ngx_http_scgi_eval(ngx_http_request_t *r, ngx_http_scgi_loc_conf_t * scf)
 
     if (ngx_parse_url(r->pool, &url) != NGX_OK) {
         if (url.err) {
-            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                          "%s in upstream \"%V\"", url.err, &url.url);
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "%s in upstream \"%V\"", url.err, &url.url);
         }
 
         return NGX_ERROR;
@@ -547,8 +535,7 @@ ngx_http_scgi_create_request(ngx_http_request_t *r)
     ngx_http_script_len_code_pt   lcode;
     static ngx_str_t              zero = ngx_string("0");
 
-    content_length = r->headers_in.content_length ?
-                         &r->headers_in.content_length->value : &zero;
+    content_length = r->headers_in.content_length ? &r->headers_in.content_length->value : &zero;
 
     len = sizeof("CONTENT_LENGTH") + content_length->len + 1;
 
@@ -653,8 +640,7 @@ ngx_http_scgi_create_request(ngx_http_request_t *r)
                 }
             }
 
-            len += sizeof("HTTP_") - 1 + header[i].key.len + 1
-                + header[i].value.len + 1;
+            len += sizeof("HTTP_") - 1 + header[i].key.len + 1 + header[i].value.len + 1;
         }
     }
 
@@ -672,11 +658,7 @@ ngx_http_scgi_create_request(ngx_http_request_t *r)
 
     cl->buf = b;
 
-    b->last = ngx_snprintf(b->last,
-                           NGX_SIZE_T_LEN + 1 + sizeof("CONTENT_LENGTH")
-                           + NGX_OFF_T_LEN + 1,
-                           "%ui:CONTENT_LENGTH%Z%V%Z",
-                           len, content_length);
+    b->last = ngx_snprintf(b->last, NGX_SIZE_T_LEN + 1 + sizeof("CONTENT_LENGTH") + NGX_OFF_T_LEN + 1, "%ui:CONTENT_LENGTH%Z%V%Z", len, content_length);
 
     if (scf->params_len) {
         ngx_memzero(&e, sizeof(ngx_http_script_engine_t));
@@ -731,8 +713,7 @@ ngx_http_scgi_create_request(ngx_http_request_t *r)
             *e.pos++ = '\0';
             e.ip += sizeof(uintptr_t);
 
-            ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                           "scgi param: \"%s: %s\"", key, val);
+            ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "scgi param: \"%s: %s\"", key, val);
         }
 
         b->last = e.pos;
@@ -783,8 +764,7 @@ ngx_http_scgi_create_request(ngx_http_request_t *r)
             b->last = ngx_copy(val, header[i].value.data, header[i].value.len);
             *b->last++ = (u_char) 0;
 
-            ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                           "scgi param: \"%s: %s\"", key, val);
+            ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "scgi param: \"%s: %s\"", key, val);
 
         next:
 
@@ -893,9 +873,7 @@ ngx_http_scgi_process_status_line(ngx_http_request_t *r)
 
     ngx_memcpy(u->headers_in.status_line.data, status->start, len);
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "http scgi status %ui \"%V\"",
-                   u->headers_in.status_n, &u->headers_in.status_line);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "http scgi status %ui \"%V\"", u->headers_in.status_n, &u->headers_in.status_line);
 
     u->process_header = ngx_http_scgi_process_header;
 
@@ -933,9 +911,7 @@ ngx_http_scgi_process_header(ngx_http_request_t *r)
             h->key.len = r->header_name_end - r->header_name_start;
             h->value.len = r->header_end - r->header_start;
 
-            h->key.data = ngx_pnalloc(r->pool,
-                                      h->key.len + 1 + h->value.len + 1
-                                      + h->key.len);
+            h->key.data = ngx_pnalloc(r->pool, h->key.len + 1 + h->value.len + 1 + h->key.len);
             if (h->key.data == NULL) {
                 return NGX_ERROR;
             }
@@ -955,15 +931,13 @@ ngx_http_scgi_process_header(ngx_http_request_t *r)
                 ngx_strlow(h->lowcase_key, h->key.data, h->key.len);
             }
 
-            hh = ngx_hash_find(&umcf->headers_in_hash, h->hash,
-                               h->lowcase_key, h->key.len);
+            hh = ngx_hash_find(&umcf->headers_in_hash, h->hash, h->lowcase_key, h->key.len);
 
             if (hh && hh->handler(r, h, hh->offset) != NGX_OK) {
                 return NGX_ERROR;
             }
 
-            ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                           "http scgi header: \"%V: %V\"", &h->key, &h->value);
+            ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "http scgi header: \"%V: %V\"", &h->key, &h->value);
 
             continue;
         }
@@ -972,8 +946,7 @@ ngx_http_scgi_process_header(ngx_http_request_t *r)
 
             /* a whole header has been parsed successfully */
 
-            ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                           "http scgi header done");
+            ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "http scgi header done");
 
             u = r->upstream;
 
@@ -986,9 +959,7 @@ ngx_http_scgi_process_header(ngx_http_request_t *r)
 
                 status = ngx_atoi(status_line->data, 3);
                 if (status == NGX_ERROR) {
-                    ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                                  "upstream sent invalid status \"%V\"",
-                                  status_line);
+                    ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "upstream sent invalid status \"%V\"", status_line);
                     return NGX_HTTP_UPSTREAM_INVALID_HEADER;
                 }
 
@@ -997,8 +968,7 @@ ngx_http_scgi_process_header(ngx_http_request_t *r)
 
             } else if (u->headers_in.location) {
                 u->headers_in.status_n = 302;
-                ngx_str_set(&u->headers_in.status_line,
-                            "302 Moved Temporarily");
+                ngx_str_set(&u->headers_in.status_line, "302 Moved Temporarily");
 
             } else {
                 u->headers_in.status_n = 200;
@@ -1018,8 +988,7 @@ ngx_http_scgi_process_header(ngx_http_request_t *r)
 
         /* there was error while a header line parsing */
 
-        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                      "upstream sent invalid header");
+        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "upstream sent invalid header");
 
         return NGX_HTTP_UPSTREAM_INVALID_HEADER;
     }
@@ -1029,8 +998,7 @@ ngx_http_scgi_process_header(ngx_http_request_t *r)
 static void
 ngx_http_scgi_abort_request(ngx_http_request_t *r)
 {
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "abort http scgi request");
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "abort http scgi request");
 
     return;
 }
@@ -1039,8 +1007,7 @@ ngx_http_scgi_abort_request(ngx_http_request_t *r)
 static void
 ngx_http_scgi_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
 {
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "finalize http scgi request");
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "finalize http scgi request");
 
     return;
 }
@@ -1687,9 +1654,7 @@ ngx_http_scgi_store(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 #if (NGX_HTTP_CACHE)
 
-    if (scf->upstream.cache != NGX_CONF_UNSET_PTR
-        && scf->upstream.cache != NULL)
-    {
+    if (scf->upstream.cache != NGX_CONF_UNSET_PTR && scf->upstream.cache != NULL) {
         return "is incompatible with \"scgi_cache\"";
     }
 
@@ -1745,8 +1710,7 @@ ngx_http_scgi_cache(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         return "is incompatible with \"scgi_store\"";
     }
 
-    scf->upstream.cache = ngx_shared_memory_add(cf, &value[1], 0,
-                                                &ngx_http_scgi_module);
+    scf->upstream.cache = ngx_shared_memory_add(cf, &value[1], 0, &ngx_http_scgi_module);
     if (scf->upstream.cache == NULL) {
         return NGX_CONF_ERROR;
     }
