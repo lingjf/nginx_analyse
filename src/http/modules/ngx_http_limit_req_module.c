@@ -243,9 +243,7 @@ ngx_http_limit_req_handler(ngx_http_request_t *r)
         return NGX_DECLINED;
     }
 
-    ngx_log_error(lrcf->delay_log_level, r->connection->log, 0,
-                  "delaying request, excess: %ui.%03ui, by zone \"%V\"",
-                  excess / 1000, excess % 1000, &limit->shm_zone->shm.name);
+    ngx_log_error(lrcf->delay_log_level, r->connection->log, 0, "delaying request, excess: %ui.%03ui, by zone \"%V\"", excess / 1000, excess % 1000, &limit->shm_zone->shm.name);
 
     if (ngx_handle_read_event(r->connection->read, 0) != NGX_OK) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
@@ -264,8 +262,7 @@ ngx_http_limit_req_delay(ngx_http_request_t *r)
 {
     ngx_event_t  *wev;
 
-    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "limit_req delay");
+    ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "limit_req delay");
 
     wev = r->connection->write;
 
@@ -405,9 +402,7 @@ ngx_http_limit_req_lookup(ngx_http_limit_req_limit_t *limit, ngx_uint_t hash, u_
 
     *ep = 0;
 
-    size = offsetof(ngx_rbtree_node_t, color)
-           + offsetof(ngx_http_limit_req_node_t, data)
-           + len;
+    size = offsetof(ngx_rbtree_node_t, color) + offsetof(ngx_http_limit_req_node_t, data) + len;
 
     ngx_http_limit_req_expire(ctx, 1);
 
@@ -451,8 +446,7 @@ ngx_http_limit_req_lookup(ngx_http_limit_req_limit_t *limit, ngx_uint_t hash, u_
 
 
 static ngx_msec_t
-ngx_http_limit_req_account(ngx_http_limit_req_limit_t *limits, ngx_uint_t n,
-    ngx_uint_t *ep, ngx_http_limit_req_limit_t **limit)
+ngx_http_limit_req_account(ngx_http_limit_req_limit_t *limits, ngx_uint_t n, ngx_uint_t *ep, ngx_http_limit_req_limit_t **limit)
 {
     ngx_int_t                   excess;
     ngx_time_t                 *tp;
@@ -550,10 +544,7 @@ ngx_http_limit_req_expire(ngx_http_limit_req_ctx_t *ctx, ngx_uint_t n)
 
         if (lr->count) {
 
-            /*
-             * There is not much sense in looking further,
-             * because we bump nodes on the lookup stage.
-             */
+            /* There is not much sense in looking further, because we bump nodes on the lookup stage. */
 
             return;
         }
@@ -576,8 +567,7 @@ ngx_http_limit_req_expire(ngx_http_limit_req_ctx_t *ctx, ngx_uint_t n)
 
         ngx_queue_remove(q);
 
-        node = (ngx_rbtree_node_t *)
-                   ((u_char *) lr - offsetof(ngx_rbtree_node_t, color));
+        node = (ngx_rbtree_node_t *) ((u_char *) lr - offsetof(ngx_rbtree_node_t, color));
 
         ngx_rbtree_delete(&ctx->sh->rbtree, node);
 

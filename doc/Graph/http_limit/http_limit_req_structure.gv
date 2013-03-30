@@ -1,0 +1,28 @@
+digraph ngx_http_limit_req_structure {
+
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+   
+
+   ngx_http_limit_req_conf_t [label="<head>ngx_http_limit_req_conf_t\{\}|{limits|{ngx_http_limit_req_limit_t\[\]|<n1>ngx_http_limit_req_limit_t|<n2>ngx_http_limit_req_limit_t|...}}|"];
+   ngx_http_limit_req_limit_t [label="<head>ngx_http_limit_req_limit_t\{\}|<shm_zone>shm_zone|burst|nodelay"];
+   ngx_shm_zone_t [label="<head>ngx_shm_zone_t\{\}|<data>data|<shm>shm|init|tag"];
+   ngx_shm_t [label="<head>ngx_shm_t\{\}|<addr>addr|size|name"];
+   ngx_http_limit_req_ctx_t [label="<head>ngx_http_limit_req_ctx_t\{\}|<sh>shared|rate|<variable>variable"];
+   ngx_http_limit_req_shctx_t [label="<head>ngx_http_limit_req_shctx_t\{\}|<rbtree>rbtree|<queue>queue"];
+   ngx_http_limit_req_node_ts [label="<head>ngx_http_limit_req_node_t\<\>|<n1>ngx_http_limit_req_node_t|<n2>ngx_http_limit_req_node_t|ngx_http_limit_req_node_t|..."];
+   ngx_http_limit_req_node_t [label="<head>ngx_http_limit_req_node_t\{\}|last|excess|count|{<value>|{len|data}}"];
+
+   ngx_http_limit_req_conf_t:n1 -> ngx_http_limit_req_limit_t:head:nw;
+   ngx_http_limit_req_limit_t:shm_zone -> ngx_shm_zone_t:head:nw;
+   ngx_shm_zone_t:data -> ngx_http_limit_req_ctx_t:head;
+   ngx_shm_zone_t:shm -> ngx_shm_t:head;
+   ngx_http_limit_req_ctx_t:sh -> ngx_http_limit_req_shctx_t:head;
+   ngx_shm_t:addr -> ngx_http_limit_req_shctx_t:head [style=dotted, dir=none];
+   ngx_http_limit_req_shctx_t:rbtree -> ngx_http_limit_req_node_ts:head:nw [label="data"];
+   ngx_http_limit_req_shctx_t:queue -> ngx_http_limit_req_node_ts:head [label="last"];
+   ngx_http_limit_req_node_ts:n2 -> ngx_http_limit_req_node_t:head:nw;
+
+   ngx_http_limit_req_ctx_t:variable -> ngx_http_limit_req_node_t:value [label="variable value"];
+}
