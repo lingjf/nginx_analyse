@@ -1,0 +1,41 @@
+digraph ngx_accept_mutex_flow {
+   rankdir = TB;
+   ranksep = 0.3;
+   
+   node [shape=oval, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   start [shape = oval, label="start"];
+   end [shape = oval, label="end"];
+   trylock [shape = diamond, label="trylock"];
+   already_locked1 [shape = diamond, label="already locked"];
+   already_locked2 [shape = diamond, label="already locked"];
+
+   disable_accept_events [shape = record, style=rounded, label="{disable accept events|already locked = no|set epoll_wait timeout}"];
+   enable_accept_events [shape = record, style=rounded, label="{enable accept events|already locked = yes|set postpone flag}"];
+
+   epoll_wait [shape = rect, style=rounded, label="epoll_wait"];
+   process_accept_events [shape = rect, style=rounded, label="process accept events"];
+   has_locked [shape = diamond, label="already locked"];
+   unlock [shape = rect, style=rounded, label="unlock"];
+   process_other [shape = record, style=rounded, label="{process timer events|process read/write events}"];
+
+   start -> trylock;
+   trylock:w -> already_locked1 [label="unlocked"];
+   trylock:e -> already_locked2 [label="locked"];
+
+   already_locked1 -> disable_accept_events [label="yes"];
+   already_locked2 -> enable_accept_events [label=" no"];
+
+   disable_accept_events -> epoll_wait;
+   enable_accept_events -> epoll_wait;  
+   already_locked1:e -> epoll_wait [label="no"];
+   already_locked2:w -> epoll_wait [label="yes"];
+
+   epoll_wait -> process_accept_events;
+   process_accept_events -> has_locked;
+   has_locked -> unlock [label="yes"];
+   has_locked:e -> process_other [label="no"];
+   unlock -> process_other;
+   process_other -> end;
+}
