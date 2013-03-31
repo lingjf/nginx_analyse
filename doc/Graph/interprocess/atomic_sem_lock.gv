@@ -1,0 +1,17 @@
+digraph atomic_lock {
+
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+   
+
+   ngx_shm_t [label="<head>ngx_shm_t\{\}|<addr>addr|size|name"];
+
+   ngx_shmtx_t [label="<head>ngx_shmtx_t\{\}|<lock>lock|<wait>wait|sem|spin"];
+   ngx_shm_sh_t [label="<head>Shared Memory Block|ngx_shm_sh_t\{\}|<lock>lock|<wait>wait"];
+
+   ngx_shm_t:addr -> ngx_shm_sh_t:head;
+
+   ngx_shmtx_t:lock -> ngx_shm_sh_t:lock;
+   ngx_shmtx_t:wait -> ngx_shm_sh_t:wait;
+}
