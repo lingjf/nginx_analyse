@@ -56,8 +56,7 @@ static ngx_command_t  ngx_http_access_commands[] = {
       NULL },
 
     { ngx_string("deny"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LMT_CONF
-                        |NGX_CONF_TAKE1,
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LMT_CONF |NGX_CONF_TAKE1,
       ngx_http_access_rule,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
@@ -147,8 +146,7 @@ ngx_http_access_handler(ngx_http_request_t *r)
 
 
 static ngx_int_t
-ngx_http_access_inet(ngx_http_request_t *r, ngx_http_access_loc_conf_t *alcf,
-    in_addr_t addr)
+ngx_http_access_inet(ngx_http_request_t *r, ngx_http_access_loc_conf_t *alcf, in_addr_t addr)
 {
     ngx_uint_t               i;
     ngx_http_access_rule_t  *rule;
@@ -274,8 +272,7 @@ ngx_http_access_rule(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     case 0: /* all */
 
         if (alcf->rules6 == NULL) {
-            alcf->rules6 = ngx_array_create(cf->pool, 4,
-                                            sizeof(ngx_http_access_rule6_t));
+            alcf->rules6 = ngx_array_create(cf->pool, 4, sizeof(ngx_http_access_rule6_t));
             if (alcf->rules6 == NULL) {
                 return NGX_CONF_ERROR;
             }
