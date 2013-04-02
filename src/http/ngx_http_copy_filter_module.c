@@ -16,8 +16,7 @@ typedef struct {
 
 
 #if (NGX_HAVE_FILE_AIO)
-static void ngx_http_copy_aio_handler(ngx_output_chain_ctx_t *ctx,
-    ngx_file_t *file);
+static void ngx_http_copy_aio_handler(ngx_output_chain_ctx_t *ctx, ngx_file_t *file);
 static void ngx_http_copy_aio_event_handler(ngx_event_t *ev);
 #if (NGX_HAVE_AIO_SENDFILE)
 static void ngx_http_copy_aio_sendfile_event_handler(ngx_event_t *ev);
@@ -25,8 +24,7 @@ static void ngx_http_copy_aio_sendfile_event_handler(ngx_event_t *ev);
 #endif
 
 static void *ngx_http_copy_filter_create_conf(ngx_conf_t *cf);
-static char *ngx_http_copy_filter_merge_conf(ngx_conf_t *cf,
-    void *parent, void *child);
+static char *ngx_http_copy_filter_merge_conf(ngx_conf_t *cf, void *parent, void *child);
 static ngx_int_t ngx_http_copy_filter_init(ngx_conf_t *cf);
 
 
@@ -88,8 +86,7 @@ ngx_http_copy_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
     c = r->connection;
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                   "http copy filter: \"%V?%V\"", &r->uri, &r->args);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0, "http copy filter: \"%V?%V\"", &r->uri, &r->args);
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_copy_filter_module);
 
@@ -105,8 +102,7 @@ ngx_http_copy_filter(ngx_http_request_t *r, ngx_chain_t *in)
         clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
 
         ctx->sendfile = c->sendfile;
-        ctx->need_in_memory = r->main_filter_need_in_memory
-                              || r->filter_need_in_memory;
+        ctx->need_in_memory = r->main_filter_need_in_memory || r->filter_need_in_memory;
         ctx->need_in_temp = r->filter_need_temporary;
 
         ctx->alignment = clcf->directio_alignment;
@@ -115,8 +111,7 @@ ngx_http_copy_filter(ngx_http_request_t *r, ngx_chain_t *in)
         ctx->bufs = conf->bufs;
         ctx->tag = (ngx_buf_tag_t) &ngx_http_copy_filter_module;
 
-        ctx->output_filter = (ngx_output_chain_filter_pt)
-                                  ngx_http_next_body_filter;
+        ctx->output_filter = (ngx_output_chain_filter_pt) ngx_http_next_body_filter;
         ctx->filter_ctx = r;
 
 #if (NGX_HAVE_FILE_AIO)

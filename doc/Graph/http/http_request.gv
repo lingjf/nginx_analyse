@@ -1,12 +1,12 @@
-digraph ngx_array {
+digraph ngx_request {
+
    rankdir=LR;
    node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
    edge [color=forestgreen, fontname="Verdana", fontsize=10];
 
    ngx_connection_t [label="<head>ngx_connection_t\{\}|socket|<data>data|event read|event write|..."];
    ngx_http_connection_t [label="<head>ngx_http_connection_t\{\}|<request>request|busy|free"];
-   ngx_http_request_t [label="<head>ngx_http_request_t\{\}|<connection>connection|main_conf|srv_conf|loc_conf\
-   |header_in|<headers_in>headers_in|method|uri|<request_body>request_body|<headers_out>headers_out|<out>out|variables|<http_connection>http_connection|"];
+   ngx_http_request_t [label="<head>ngx_http_request_t\{\}|<connection>connection|header_in|<headers_in>headers_in|method|uri|<request_body>request_body|<headers_out>headers_out|variables|<out>out|<http_connection>http_connection|main_conf|srv_conf|loc_conf|"];
 
    ngx_http_headers_in_t [label="<head>ngx_http_headers_in_t\{\}|host|user_agent|content_length|..."];
    ngx_http_headers_out_t [label="<head>ngx_http_headers_out_t\{\}|status|server|content_length|..."];
@@ -18,11 +18,11 @@ digraph ngx_array {
    ngx_http_request_t:connection -> ngx_connection_t:head:ne [weight=100];
    ngx_http_connection_t:request -> ngx_http_request_t:head;
    ngx_http_request_t:http_connection -> ngx_http_connection_t:head;
-   ngx_http_request_t:headers_in -> ngx_http_headers_in_t:head:nw;
-   ngx_http_request_t:headers_out -> ngx_http_headers_out_t:head:nw;
-   ngx_http_request_t:request_body -> ngx_http_request_body_t:head:nw;
+   ngx_http_request_t:headers_in -> ngx_http_headers_in_t:head;
+   ngx_http_request_t:headers_out -> ngx_http_headers_out_t:head;
+   ngx_http_request_t:request_body -> ngx_http_request_body_t:head;
    ngx_http_request_t:out -> ngx_chain_t_1:head:nw;
-   ngx_chain_t_1:next -> ngx_chain_t_2:head;
+   ngx_chain_t_1:next -> ngx_chain_t_2:head:nw;
 
 
    {rank=same; ngx_connection_t; ngx_http_connection_t; };

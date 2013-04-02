@@ -70,34 +70,7 @@ ngx_http_write_filter(ngx_http_request_t *r, ngx_chain_t *in)
     for (cl = r->out; cl; cl = cl->next) {
         ll = &cl->next;
 
-        ngx_log_debug7(NGX_LOG_DEBUG_EVENT, c->log, 0,
-                       "write old buf t:%d f:%d %p, pos %p, size: %z "
-                       "file: %O, size: %z",
-                       cl->buf->temporary, cl->buf->in_file,
-                       cl->buf->start, cl->buf->pos,
-                       cl->buf->last - cl->buf->pos,
-                       cl->buf->file_pos,
-                       cl->buf->file_last - cl->buf->file_pos);
-
-#if 1
-        if (ngx_buf_size(cl->buf) == 0 && !ngx_buf_special(cl->buf)) {
-            ngx_log_error(NGX_LOG_ALERT, c->log, 0,
-                          "zero size buf in writer "
-                          "t:%d r:%d f:%d %p %p-%p %p %O-%O",
-                          cl->buf->temporary,
-                          cl->buf->recycled,
-                          cl->buf->in_file,
-                          cl->buf->start,
-                          cl->buf->pos,
-                          cl->buf->last,
-                          cl->buf->file,
-                          cl->buf->file_pos,
-                          cl->buf->file_last);
-
-            ngx_debug_point();
-            return NGX_ERROR;
-        }
-#endif
+        ngx_log_debug7(NGX_LOG_DEBUG_EVENT, c->log, 0, "write old buf t:%d f:%d %p, pos %p, size: %z " "file: %O, size: %z", cl->buf->temporary, cl->buf->in_file, cl->buf->start, cl->buf->pos, cl->buf->last - cl->buf->pos, cl->buf->file_pos, cl->buf->file_last - cl->buf->file_pos);
 
         size += ngx_buf_size(cl->buf);
 
@@ -122,34 +95,7 @@ ngx_http_write_filter(ngx_http_request_t *r, ngx_chain_t *in)
         *ll = cl;
         ll = &cl->next;
 
-        ngx_log_debug7(NGX_LOG_DEBUG_EVENT, c->log, 0,
-                       "write new buf t:%d f:%d %p, pos %p, size: %z "
-                       "file: %O, size: %z",
-                       cl->buf->temporary, cl->buf->in_file,
-                       cl->buf->start, cl->buf->pos,
-                       cl->buf->last - cl->buf->pos,
-                       cl->buf->file_pos,
-                       cl->buf->file_last - cl->buf->file_pos);
-
-#if 1
-        if (ngx_buf_size(cl->buf) == 0 && !ngx_buf_special(cl->buf)) {
-            ngx_log_error(NGX_LOG_ALERT, c->log, 0,
-                          "zero size buf in writer "
-                          "t:%d r:%d f:%d %p %p-%p %p %O-%O",
-                          cl->buf->temporary,
-                          cl->buf->recycled,
-                          cl->buf->in_file,
-                          cl->buf->start,
-                          cl->buf->pos,
-                          cl->buf->last,
-                          cl->buf->file,
-                          cl->buf->file_pos,
-                          cl->buf->file_last);
-
-            ngx_debug_point();
-            return NGX_ERROR;
-        }
-#endif
+        ngx_log_debug7(NGX_LOG_DEBUG_EVENT, c->log, 0, "write new buf t:%d f:%d %p, pos %p, size: %z " "file: %O, size: %z", cl->buf->temporary, cl->buf->in_file, cl->buf->start, cl->buf->pos, cl->buf->last - cl->buf->pos, cl->buf->file_pos, cl->buf->file_last - cl->buf->file_pos);
 
         size += ngx_buf_size(cl->buf);
 

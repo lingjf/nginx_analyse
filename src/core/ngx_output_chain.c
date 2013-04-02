@@ -57,8 +57,7 @@ ngx_output_chain(ngx_output_chain_ctx_t *ctx, ngx_chain_t *in)
 #if (NGX_SENDFILE_LIMIT)
             && !(in->buf->in_file && in->buf->file_last > NGX_SENDFILE_LIMIT)
 #endif
-            && ngx_output_chain_as_is(ctx, in->buf))
-        {
+            && ngx_output_chain_as_is(ctx, in->buf)) {
             return ctx->output_filter(ctx->filter_ctx, in);
         }
     }
@@ -94,18 +93,7 @@ ngx_output_chain(ngx_output_chain_ctx_t *ctx, ngx_chain_t *in)
 
             if (bsize == 0 && !ngx_buf_special(ctx->in->buf)) {
 
-                ngx_log_error(NGX_LOG_ALERT, ctx->pool->log, 0,
-                              "zero size buf in output "
-                              "t:%d r:%d f:%d %p %p-%p %p %O-%O",
-                              ctx->in->buf->temporary,
-                              ctx->in->buf->recycled,
-                              ctx->in->buf->in_file,
-                              ctx->in->buf->start,
-                              ctx->in->buf->pos,
-                              ctx->in->buf->last,
-                              ctx->in->buf->file,
-                              ctx->in->buf->file_pos,
-                              ctx->in->buf->file_last);
+                ngx_log_error(NGX_LOG_ALERT, ctx->pool->log, 0, "zero size buf in output " "t:%d r:%d f:%d %p %p-%p %p %O-%O", ctx->in->buf->temporary, ctx->in->buf->recycled, ctx->in->buf->in_file, ctx->in->buf->start, ctx->in->buf->pos, ctx->in->buf->last, ctx->in->buf->file, ctx->in->buf->file_pos, ctx->in->buf->file_last);
 
                 ngx_debug_point();
 
@@ -280,10 +268,7 @@ ngx_output_chain_add_copy(ngx_pool_t *pool, ngx_chain_t **chain, ngx_chain_t *in
 
         buf = in->buf;
 
-        if (buf->in_file
-            && buf->file_pos < NGX_SENDFILE_LIMIT
-            && buf->file_last > NGX_SENDFILE_LIMIT)
-        {
+        if (buf->in_file && buf->file_pos < NGX_SENDFILE_LIMIT && buf->file_last > NGX_SENDFILE_LIMIT) {
             /* split a file buf on two bufs by the sendfile limit */
 
             b = ngx_calloc_buf(pool);
@@ -388,18 +373,12 @@ ngx_output_chain_get_buf(ngx_output_chain_ctx_t *ctx, off_t bsize)
 
         if (bsize < (off_t) size) {
 
-            /*
-             * allocate a small temp buf for a small last buf
-             * or its small last part
-             */
+            /* allocate a small temp buf for a small last buf or its small last part */
 
             size = (size_t) bsize;
             recycled = 0;
 
-        } else if (!ctx->directio
-                   && ctx->bufs.num == 1
-                   && (bsize < (off_t) (size + size / 4)))
-        {
+        } else if (!ctx->directio && ctx->bufs.num == 1 && (bsize < (off_t) (size + size / 4))) {
             /*
              * allocate a temp buf that equals to a last buf,
              * if there is no directio, the last buf size is lesser

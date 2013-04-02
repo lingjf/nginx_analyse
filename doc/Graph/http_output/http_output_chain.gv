@@ -1,0 +1,17 @@
+digraph ngx_upstream_server {
+   rankdir=LR;
+
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+  
+
+   ngx_connection_t [label="<head>ngx_connection_t\{\}|socket|event|recv send|..."];
+
+
+   ngx_output_chain_ctx_t [label="<head>ngx_output_chain_ctx_t\{\}|buf|in |busy |free|output_filter|..."];
+   ngx_chain_writer_ctx_t   [label="<head>ngx_chain_writer_ctx_t\{\}|out|last|<connection>connection|limit"];
+
+    
+   
+}

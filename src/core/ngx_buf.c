@@ -227,7 +227,7 @@ u_char *jeff_buf_tustring(ngx_buf_t *b)
    static u_char buffer[1024 * 8];
    memset(buffer, 0, sizeof(buffer));
    if (!b) return "NULL";
-   ngx_snprintf(buffer, sizeof(buffer), "ngx_buf_t{end-start=%d,last-pos=%d", b->end - b->start, b->last - b->pos);
+   ngx_snprintf(buffer, sizeof(buffer), "ngx_buf_t{pos/last/end=%d/%d/%d", b->pos - b->start, b->last - b->start, b->end - b->start);
    if (b->temporary) {
       ngx_snstrcatf(buffer, sizeof(buffer), ",temporary");
    }

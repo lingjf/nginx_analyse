@@ -1339,9 +1339,7 @@ ngx_conf_set_enum_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     e = cmd->post;
 
     for (i = 0; e[i].name.len != 0; i++) {
-        if (e[i].name.len != value[1].len
-            || ngx_strcasecmp(e[i].name.data, value[1].data) != 0)
-        {
+        if (e[i].name.len != value[1].len || ngx_strcasecmp(e[i].name.data, value[1].data) != 0) {
             continue;
         }
 
@@ -1350,8 +1348,7 @@ ngx_conf_set_enum_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         return NGX_CONF_OK;
     }
 
-    ngx_conf_log_error(NGX_LOG_WARN, cf, 0,
-                       "invalid value \"%s\"", value[1].data);
+    ngx_conf_log_error(NGX_LOG_WARN, cf, 0, "invalid value \"%s\"", value[1].data);
 
     return NGX_CONF_ERROR;
 }
