@@ -182,7 +182,7 @@ ngx_chain_get_free_buf(ngx_pool_t *p, ngx_chain_t **free)
 }
 
 /*
- * 将out中已处理掉的挂入free， 未处理掉的挂入busy
+ * 将out中已处理掉的挂入free， 正在处理的挂入busy
  */
 void
 ngx_chain_update_chains(ngx_pool_t *p, ngx_chain_t **free, ngx_chain_t **busy, ngx_chain_t **out, ngx_buf_tag_t tag)

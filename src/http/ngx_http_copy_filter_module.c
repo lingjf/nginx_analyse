@@ -144,8 +144,7 @@ ngx_http_copy_filter(ngx_http_request_t *r, ngx_chain_t *in)
             r->buffered |= NGX_HTTP_COPY_BUFFERED;
         }
 
-        ngx_log_debug3(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                       "http copy filter: %i \"%V?%V\"", rc, &r->uri, &r->args);
+        ngx_log_debug3(NGX_LOG_DEBUG_HTTP, c->log, 0, "http copy filter: %i \"%V?%V\"", rc, &r->uri, &r->args);
 
 #if (NGX_HAVE_FILE_AIO && NGX_HAVE_AIO_SENDFILE)
 
@@ -168,9 +167,7 @@ ngx_http_copy_filter(ngx_http_request_t *r, ngx_chain_t *in)
                 file->aio->last_offset = offset;
 
                 if (c->aio_sendfile == 0) {
-                    ngx_log_error(NGX_LOG_ALERT, c->log, 0,
-                                  "sendfile(%V) returned busy again",
-                                  &file->name);
+                    ngx_log_error(NGX_LOG_ALERT, c->log, 0, "sendfile(%V) returned busy again", &file->name);
                 }
             }
 

@@ -198,7 +198,14 @@ ngx_output_chain(ngx_output_chain_ctx_t *ctx, ngx_chain_t *in)
     }
 }
 
-
+/*
+ * if buffer need copy, return false, else return true.
+ *
+ * case 1: file-buffer + directio  --- need copy
+ * case 2: file-buffer + sendfile  --- no copy
+ * case 3: file-buffer + not sendfile  ---- need copy
+ * case 4: required   ---- need copy
+ */
 static ngx_inline ngx_int_t
 ngx_output_chain_as_is(ngx_output_chain_ctx_t *ctx, ngx_buf_t *buf)
 {
@@ -427,7 +434,9 @@ ngx_output_chain_get_buf(ngx_output_chain_ctx_t *ctx, off_t bsize)
     return NGX_OK;
 }
 
-
+/*
+ * Copy ctx.in[0].buf to ctx.buf
+ */
 static ngx_int_t
 ngx_output_chain_copy_buf(ngx_output_chain_ctx_t *ctx)
 {

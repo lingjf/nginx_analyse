@@ -1,0 +1,26 @@
+digraph ngx_header_filter {
+
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_chain_t1 [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|HTTP/1.1 200 OK\\r\\n \nContent-Length: 49\\r\\n \n\\r\\n}}"];
+
+   ngx_http_top_header_filter [shape=box3d];
+   //ngx_http_omitted_filter [shape=none, label="......"];
+   ngx_http_header_filter [shape=box3d];
+   ngx_http_write_filter [shape=box3d];
+
+   out [shape=box3d];
+   ngx_chain_t2 [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|HTTP/1.1 200 OK\\r\\n \nContent-Length: 49\\r\\n \n\\r\\n}}"];
+  
+   ngx_chain_t1 -> ngx_http_top_header_filter -> ngx_http_header_filter -> ngx_http_write_filter [weight=9, style="dashed"];
+
+   ngx_http_write_filter -> out;
+   out:e -> ngx_chain_t2:head:nw;
+
+
+   {rank=same; ngx_chain_t1;ngx_http_top_header_filter;};
+
+   {rank=same; ngx_http_write_filter;out;};
+}
