@@ -1941,8 +1941,7 @@ ngx_http_terminate_request(ngx_http_request_t *r, ngx_int_t rc)
 
     mr = r->main;
 
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "http terminate request count:%d", mr->count);
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "http terminate request count:%d", mr->count);
 
     if (rc > 0 && (mr->headers_out.status == 0 || mr->connection->sent == 0)) {
         mr->headers_out.status = rc;
@@ -1959,9 +1958,7 @@ ngx_http_terminate_request(ngx_http_request_t *r, ngx_int_t rc)
         cln = cln->next;
     }
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "http terminate cleanup count:%d blk:%d",
-                   mr->count, mr->blocked);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "http terminate cleanup count:%d blk:%d", mr->count, mr->blocked);
 
     if (mr->write_event_handler) {
 
@@ -1983,8 +1980,7 @@ ngx_http_terminate_request(ngx_http_request_t *r, ngx_int_t rc)
 static void
 ngx_http_terminate_handler(ngx_http_request_t *r)
 {
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "http terminate handler count:%d", r->count);
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "http terminate handler count:%d", r->count);
 
     r->count = 1;
 
@@ -2014,11 +2010,7 @@ ngx_http_finalize_connection(ngx_http_request_t *r)
         return;
     }
 
-    if (!ngx_terminate
-         && !ngx_exiting
-         && r->keepalive
-         && clcf->keepalive_timeout > 0)
-    {
+    if (!ngx_terminate && !ngx_exiting && r->keepalive && clcf->keepalive_timeout > 0) {
         ngx_http_set_keepalive(r);
         return;
     }
@@ -2293,8 +2285,7 @@ ngx_http_set_keepalive(ngx_http_request_t *r)
             cscf = ngx_http_get_module_srv_conf(r, ngx_http_core_module);
 
             if (hc->free == NULL) {
-                hc->free = ngx_palloc(c->pool,
-                  cscf->large_client_header_buffers.num * sizeof(ngx_buf_t *));
+                hc->free = ngx_palloc(c->pool, cscf->large_client_header_buffers.num * sizeof(ngx_buf_t *));
 
                 if (hc->free == NULL) {
                     ngx_http_close_request(r, 0);
@@ -2352,8 +2343,7 @@ ngx_http_set_keepalive(ngx_http_request_t *r)
      * To keep a memory footprint as small as possible for an idle
      * keepalive connection we try to free the ngx_http_request_t and
      * c->buffer's memory if they were allocated outside the c->pool.
-     * The large header buffers are always allocated outside the c->pool and
-     * are freed too.
+     * The large header buffers are always allocated outside the c->pool and are freed too.
      */
 
     if (ngx_pfree(c->pool, r) == NGX_OK) {
@@ -2364,10 +2354,7 @@ ngx_http_set_keepalive(ngx_http_request_t *r)
 
     if (ngx_pfree(c->pool, b->start) == NGX_OK) {
 
-        /*
-         * the special note for ngx_http_keepalive_handler() that
-         * c->buffer's memory was freed
-         */
+        /* the special note for ngx_http_keepalive_handler() that c->buffer's memory was freed */
 
         b->pos = NULL;
 
@@ -2387,8 +2374,7 @@ ngx_http_set_keepalive(ngx_http_request_t *r)
         hc->nfree = 0;
     }
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0, "hc busy: %p %d",
-                   hc->busy, hc->nbusy);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0, "hc busy: %p %d", hc->busy, hc->nbusy);
 
     if (hc->busy) {
         for (i = 0; i < hc->nbusy; i++) {
@@ -2430,23 +2416,16 @@ ngx_http_set_keepalive(ngx_http_request_t *r)
         tcp_nodelay = 1;
     }
 
-    if (tcp_nodelay
-        && clcf->tcp_nodelay
-        && c->tcp_nodelay == NGX_TCP_NODELAY_UNSET)
-    {
+    if (tcp_nodelay && clcf->tcp_nodelay && c->tcp_nodelay == NGX_TCP_NODELAY_UNSET) {
         ngx_log_debug0(NGX_LOG_DEBUG_HTTP, c->log, 0, "tcp_nodelay");
 
-        if (setsockopt(c->fd, IPPROTO_TCP, TCP_NODELAY,
-                       (const void *) &tcp_nodelay, sizeof(int))
-            == -1)
-        {
+        if (setsockopt(c->fd, IPPROTO_TCP, TCP_NODELAY, (const void *) &tcp_nodelay, sizeof(int)) == -1) {
 #if (NGX_SOLARIS)
             /* Solaris returns EINVAL if a socket has been shut down */
             c->log_error = NGX_ERROR_IGNORE_EINVAL;
 #endif
 
-            ngx_connection_error(c, ngx_socket_errno,
-                                 "setsockopt(TCP_NODELAY) failed");
+            ngx_connection_error(c, ngx_socket_errno, "setsockopt(TCP_NODELAY) failed");
 
             c->log_error = NGX_ERROR_INFO;
             ngx_http_close_connection(c);
@@ -2492,9 +2471,7 @@ ngx_http_keepalive_handler(ngx_event_t *rev)
     if (ngx_event_flags & NGX_USE_KQUEUE_EVENT) {
         if (rev->pending_eof) {
             c->log->handler = NULL;
-            ngx_log_error(NGX_LOG_INFO, c->log, rev->kq_errno,
-                          "kevent() reported that client %V closed "
-                          "keepalive connection", &c->addr_text);
+            ngx_log_error(NGX_LOG_INFO, c->log, rev->kq_errno, "kevent() reported that client %V closed " "keepalive connection", &c->addr_text);
 #if (NGX_HTTP_SSL)
             if (c->ssl) {
                 c->ssl->no_send_shutdown = 1;
@@ -2529,10 +2506,7 @@ ngx_http_keepalive_handler(ngx_event_t *rev)
         b->end = b->pos + size;
     }
 
-    /*
-     * MSIE closes a keepalive connection with RST flag
-     * so we ignore ECONNRESET here.
-     */
+    /* MSIE closes a keepalive connection with RST flag so we ignore ECONNRESET here. */
 
     c->log_error = NGX_ERROR_IGNORE_ECONNRESET;
     ngx_set_socket_errno(0);
@@ -2556,8 +2530,7 @@ ngx_http_keepalive_handler(ngx_event_t *rev)
     c->log->handler = NULL;
 
     if (n == 0) {
-        ngx_log_error(NGX_LOG_INFO, c->log, ngx_socket_errno,
-                      "client %V closed keepalive connection", &c->addr_text);
+        ngx_log_error(NGX_LOG_INFO, c->log, ngx_socket_errno, "client %V closed keepalive connection", &c->addr_text);
         ngx_http_close_connection(c);
         return;
     }
@@ -2774,8 +2747,7 @@ ngx_http_close_request(ngx_http_request_t *r, ngx_int_t rc)
     r = r->main;
     c = r->connection;
 
-    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                   "http request count:%d blk:%d", r->count, r->blocked);
+    ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0, "http request count:%d blk:%d", r->count, r->blocked);
 
     if (r->count == 0) {
         ngx_log_error(NGX_LOG_ALERT, c->log, 0, "http request count is zero");
@@ -2845,11 +2817,8 @@ ngx_http_free_request(ngx_http_request_t *r, ngx_int_t rc)
             linger.l_onoff = 1;
             linger.l_linger = 0;
 
-            if (setsockopt(r->connection->fd, SOL_SOCKET, SO_LINGER,
-                           (const void *) &linger, sizeof(struct linger)) == -1)
-            {
-                ngx_log_error(NGX_LOG_ALERT, log, ngx_socket_errno,
-                              "setsockopt(SO_LINGER) failed");
+            if (setsockopt(r->connection->fd, SOL_SOCKET, SO_LINGER, (const void *) &linger, sizeof(struct linger)) == -1) {
+                ngx_log_error(NGX_LOG_ALERT, log, ngx_socket_errno, "setsockopt(SO_LINGER) failed");
             }
         }
     }
@@ -2889,8 +2858,7 @@ ngx_http_close_connection(ngx_connection_t *c)
 {
     ngx_pool_t  *pool;
 
-    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0,
-                   "close http connection: %d", c->fd);
+    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, c->log, 0, "close http connection: %d", c->fd);
 
 #if (NGX_HTTP_SSL)
 

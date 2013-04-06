@@ -14,13 +14,11 @@ digraph ngx_header_filter {
    out [shape=box3d];
    ngx_chain_t2 [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|HTTP/1.1 200 OK\\r\\n \nContent-Length: 49\\r\\n \n\\r\\n}}"];
   
-   ngx_chain_t1 -> ngx_http_top_header_filter -> ngx_http_header_filter -> ngx_http_write_filter [weight=9, style="dashed"];
+   ngx_chain_t1:head -> ngx_http_top_header_filter -> ngx_http_header_filter -> ngx_http_write_filter [weight=9, style="dashed"];
 
    ngx_http_write_filter -> out;
    out:e -> ngx_chain_t2:head:nw;
 
-
-   {rank=same; ngx_chain_t1;ngx_http_top_header_filter;};
 
    {rank=same; ngx_http_write_filter;out;};
 }

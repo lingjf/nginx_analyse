@@ -5,22 +5,51 @@ digraph ngx_body_filter {
    edge [color=forestgreen, fontname="Verdana", fontsize=10];
 
    ngx_chain_t1 [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|HTTP/1.1 200 OK\\r\\n \nContent-Length: 49\\r\\n \n\\r\\n}}"];
-
+   ngx_chain_t2 [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_file|\<html\>ABCD...XYZ\</html\>}}"];
+   ngx_chain_t3 [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|\<!--END--\>}}"];
+   
    ngx_http_top_header_filter [shape=box3d];
+   ngx_http_top_body_filter [shape=box3d];
    //ngx_http_omitted_filter [shape=none, label="......"];
    ngx_http_header_filter [shape=box3d];
+   ngx_http_copy_filter [shape=box3d];
    ngx_http_write_filter [shape=box3d];
 
    out [shape=box3d];
-   ngx_chain_t2 [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|HTTP/1.1 200 OK\\r\\n \nContent-Length: 49\\r\\n \n\\r\\n}}"];
-  
-   ngx_chain_t1 -> ngx_http_top_header_filter -> ngx_http_header_filter -> ngx_http_write_filter [weight=9, style="dashed"];
+   ngx_chain_t1e [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|HTTP/1.1 200 OK\\r\\n \nContent-Length: 49\\r\\n \n\\r\\n}}"];
 
+   ctx [shape=box3d];
+   ngx_output_chain_ctx_t [label="<head>ngx_output_chain_ctx_t\{\}|<in>in |<busy>busy |<free>free|..."];
+   
+   ngx_chain_t2a [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_file|UVWXYZ\</html\>}}"];
+   ngx_chain_t2b [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|\<html\>ABCDEFG}}"];
+   ngx_chain_t2c [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|HIJKLMNOPQRST}}"];
+   
+   ngx_chain_t3a [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|\<!--END--\>}}"];
+   
+   ngx_chain_t2e [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|\<html\>ABCDEFG}}"];
+   ngx_chain_t2f [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|HIJKLMNOPQRST}}"];
+   
+     
+   ngx_chain_t1:head -> ngx_http_top_header_filter:w [weight=5, style="dashed", label="1"];
+   ngx_http_top_header_filter:e -> ngx_http_header_filter:w [weight=5, style="dashed"];
+   ngx_http_header_filter:e -> ngx_http_write_filter:w [weight=5, style="dashed"];
+   ngx_chain_t2:head -> ngx_http_top_body_filter:w [style="dashed", label="2"];
+   ngx_chain_t3:head -> ngx_http_top_body_filter:w [style="dashed", label="3"];
+   ngx_http_top_body_filter:e -> ngx_http_copy_filter:w [weight=3, style="dashed"];
+   ngx_http_copy_filter:e -> ngx_http_write_filter:w [style="dashed"];
    ngx_http_write_filter -> out;
-   out:e -> ngx_chain_t2:head:nw;
-
-
-   {rank=same; ngx_chain_t1;ngx_http_top_header_filter;};
+   out:e -> ngx_chain_t1e:head:nw;
+   ngx_chain_t1e:next -> ngx_chain_t2e:head:nw;
+   ngx_chain_t2e:next -> ngx_chain_t2f:head:nw;
+   
+   ngx_http_copy_filter -> ctx;
+   ctx:e -> ngx_output_chain_ctx_t:head:nw;
+   ngx_output_chain_ctx_t:in -> ngx_chain_t2a:head;
+   ngx_chain_t2a:next -> ngx_chain_t3a:head:nw;
+   ngx_output_chain_ctx_t:busy -> ngx_chain_t2b:head;
+   ngx_chain_t2b:next -> ngx_chain_t2c:head:nw;
 
    {rank=same; ngx_http_write_filter;out;};
+   {rank=same; ngx_http_copy_filter;ctx;};
 }

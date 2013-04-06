@@ -1,0 +1,33 @@
+digraph ngx_output_done {
+
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+ 
+   ngx_http_top_body_filter [shape=box3d];
+   ngx_http_copy_filter [shape=box3d];
+   ngx_http_write_filter [shape=box3d];
+
+   out [shape=box3d];
+
+   ctx [shape=box3d];
+   ngx_output_chain_ctx_t [label="<head>ngx_output_chain_ctx_t\{\}|<in>in |<busy>busy |<free>free|..."];
+   
+   ngx_chain_t2a [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|13 bytes}}"];
+   ngx_chain_t2e [label="<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|13 bytes}}"];
+   
+     
+   ngx_http_top_body_filter:e -> ngx_http_copy_filter:w [weight=3, style="dashed"];
+   ngx_http_copy_filter:e -> ngx_http_write_filter:w [style="dashed"];
+   ngx_http_write_filter -> out;
+   
+   ngx_http_copy_filter -> ctx;
+   ctx:e -> ngx_output_chain_ctx_t:head:nw;
+   
+   ngx_output_chain_ctx_t:free -> ngx_chain_t2a:head:nw;
+   ngx_chain_t2a:next -> ngx_chain_t2e:head:nw;
+
+   {rank=same; ngx_http_write_filter;out;};
+   {rank=same; ngx_http_copy_filter;ctx;};
+}
