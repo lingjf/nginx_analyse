@@ -4,9 +4,7 @@ digraph ngx_output_content {
    edge [color=forestgreen, fontname="Verdana", fontsize=10];
 
 
-   ngx_chain_t1 [label="{<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|HTTP/1.1 200 OK\\r\\n \nContent-Length: 49\\r\\n \n\\r\\n}}}"];
-
-   ngx_chain_t2 [label="{<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_file|\<html\>ABCD...XYZ\</html\>}}}"];
-
-   ngx_chain_t3 [label="{<head>ngx_chain_t\{\}|<next>next|{buf|{ngx_buf_t\{\}|in_memory|\<!--END--\>}}}"];
+   ngx_buf_t1 [label="{ngx_http_headers_out_t\{\}|HTTP/1.1 200 OK\\r\\n \nContent-Length: 49\\r\\n \n\\r\\n}"];
+   ngx_buf_t2 [label="{ngx_buf_t\{\}|in_file|\<html\>ABCD...XYZ\</html\>}"];
+   ngx_buf_t3 [label="{ngx_buf_t\{\}|in_memory|\<!--END--\>}"];
 }
