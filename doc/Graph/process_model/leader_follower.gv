@@ -1,0 +1,13 @@
+digraph ngx_process_leader_follower {
+   rankdir=LR;
+   
+   node [shape=box3d, width=1.3, height=0.8, color=skyblue, fontname="Verdana", fontsize=12];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+  
+   Leader [label="Leader", height=0.8];
+   Follower1 [label="Follower", height=0.6];
+   Follower2 [label="Follower", height=0.6];
+
+   Leader -> Follower1 [label="accept/fork/kill"];
+   Leader -> Follower2 [label="accept/fork/kill"];
+}

@@ -1,0 +1,15 @@
+digraph ngx_process_apache_prefork {
+   rankdir=LR;
+   
+   node [shape=box3d, width=1.3, height=0.8, color=skyblue, fontname="Verdana", fontsize=12];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+  
+   Parent [label="Parent", height=0.8];
+   Child1 [label="Child", height=0.6];
+   Child2 [label="Child", height=0.6];
+   Child3 [label="Child", height=0.6];
+
+   Parent -> Child1 [label="pre-fork"];
+   Parent -> Child2 [label="pre-fork"];
+   Parent -> Child3 [label="fork/kill"];
+}

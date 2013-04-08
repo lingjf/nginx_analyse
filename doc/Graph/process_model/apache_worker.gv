@@ -1,0 +1,31 @@
+digraph ngx_process_apache_worker {
+   rankdir=LR;
+   
+   node [shape=box3d, width=1.3, height=0.8, color=skyblue, fontname="Verdana", fontsize=12];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+  
+   Parent [label="Parent", height=0.8];
+   Child1 [label="Child", height=0.6];
+   Child2 [label="Child", height=0.6];
+
+   Listener1 [label="Listener", height=0.6];
+   
+   Worker1 [label="Worker", height=0.6];
+   Worker2 [label="Worker", height=0.6];
+   
+   Listener2 [label="Listener", height=0.6];
+   
+   Worker3 [label="Worker", height=0.6];
+   Worker4 [label="Worker", height=0.6];
+
+   Parent:e -> Child1:w [label="pre-fork"];
+   Parent:e -> Child2:w [label="fork/kill"];
+   
+   Child1:e -> Listener1:w [label="one thread"];
+   Child1:e -> Worker1:w [label="fix thread", weight=3];
+   Child1:e -> Worker2:w [label="accept"];
+   
+   Child2:e -> Listener2:w [label="one thread"];
+   Child2:e -> Worker3:w [label="fix thread", weight=3];
+   Child2:e -> Worker4:w [label="accept"];
+}
