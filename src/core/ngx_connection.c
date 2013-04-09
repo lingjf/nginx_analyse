@@ -868,6 +868,7 @@ ngx_drain_connections(void)
 
         c->close = 1;
         c->read->handler(c->read);
+        /* ngx_http_keepalive_handler() -> ngx_http_close_connection() -> ngx_close_connection() */
     }
 }
 

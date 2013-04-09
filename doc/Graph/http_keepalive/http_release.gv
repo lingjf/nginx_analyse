@@ -1,0 +1,27 @@
+digraph ngx_http_release {
+   rankdir = TB;
+   
+   node [shape=oval, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+
+   ngx_http_free_request1 [label="ngx_http_free_request"];
+   ngx_http_free_request2 [label="ngx_http_free_request"];
+
+   continue1 [label="continue"];
+   continue2 [label="continue"];
+
+   ngx_http_finalize_request -> ngx_http_set_write_handler:n; 
+   ngx_http_set_write_handler -> continue1;
+   
+   ngx_http_finalize_request ->ngx_http_finalize_connection -> ngx_http_close_request -> ngx_http_free_request1 -> ngx_http_close_connection -> ngx_close_connection -> return [weight=9];
+
+   ngx_http_finalize_connection:e -> ngx_http_set_keepalive:n; 
+   ngx_http_set_keepalive-> ngx_http_free_request2 -> ngx_reusable_connection -> continue2 [weight=7];
+
+ 
+
+
+  
+   
+}

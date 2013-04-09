@@ -1,0 +1,26 @@
+digraph g {
+   rankdir=LR;
+
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_cycle_t [label="<h>ngx_cycle_t\{\}|...|<connections>connections|<free_connections>free_connections|<reusable_connections>reusable_connections|...", height=2.5];
+
+   connections [label="<h>ngx_connection_t\[\]|<n1>ngx_connection_t|<n2>ngx_connection_t|...|..1024"];
+   ngx_connection_t0 [label="<h>ngx_connection_t\{\}|..."];
+   ngx_cycle_t:connections -> connections:h;
+   connections:n1 -> ngx_connection_t0:h:nw;
+
+   ngx_connection_t1 [label="<h>ngx_connection_t\{\}|<data>data"];
+   ngx_connection_t2 [label="<h>ngx_connection_t\{\}|<data>data"];
+
+   ngx_cycle_t:free_connections -> ngx_connection_t1:h:nw;
+   ngx_connection_t1:data -> ngx_connection_t2:h:nw;
+
+   ngx_connection_t3 [label="<h>ngx_connection_t\{\}|socket|<next>next"];
+   ngx_connection_t4 [label="<h>ngx_connection_t\{\}|socket|<next>next"];
+
+   ngx_cycle_t:reusable_connections -> ngx_connection_t3:h;
+   ngx_connection_t3:next -> ngx_connection_t4:h:nw;
+
+}
