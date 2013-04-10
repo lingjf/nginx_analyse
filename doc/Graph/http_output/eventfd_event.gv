@@ -1,0 +1,26 @@
+digraph ngx_eventfd_event {
+
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+ 
+   ngx_eventfd_event [shape=box3d];
+   ngx_eventfd_conn [shape=box3d];
+   ngx_eventfd [shape=box3d];
+   
+   ngx_connection_t [label="<h>ngx_connection_t\{\}|<fd>fd|<r>read event|<w>write event|..."];
+   ngx_event_t [label="<h>ngx_event_t\{\}|<data>data|<handler>handler|..."];
+
+   ngx_epoll_eventfd_handler [label="<h>ngx_epoll_eventfd_handler()|"];
+   
+   ngx_eventfd_conn:e -> ngx_connection_t:h:nw;
+   ngx_connection_t:fd -> ngx_eventfd;
+   ngx_eventfd_event:e -> ngx_event_t:h:nw;
+   ngx_event_t:handler -> ngx_epoll_eventfd_handler:h;
+   ngx_connection_t:r:e -> ngx_event_t:h:e;
+   ngx_event_t:data:w -> ngx_connection_t:h:w;
+   
+   {rank=same; ngx_eventfd_conn;ngx_eventfd_event;};
+   {rank=same; ngx_connection_t;ngx_event_t;};
+}

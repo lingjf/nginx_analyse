@@ -1,0 +1,33 @@
+digraph ngx_kernel_aio_event {
+
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+ 
+   ngx_file_t [label="<h>ngx_file_t\{\}|<aio>aio|<fd>fd = nn|name|directio|..."];
+   ngx_event_aio_t [label="<h>ngx_event_aio_t\{\}|<fd>fd = nn|<file>file|<event>event|<data>data|<aiocb>aiocb|res|<handler>handler|..."];
+   ngx_event_t [label="<h>ngx_event_t\{\}|<data>data|<handler>handler|ready = 0|compete = 0|..."];
+   ngx_request_t [label="<h>ngx_request_t\{\}|"];
+   ngx_file_aio_event_handler [label="<h>ngx_file_aio_event_handler()|"];
+   iocb [label="<h>iocb\{\}|<data>aio_data|aio_lio_opcode=IOCB_CMD_PREAD|aio_files = nn|<buf>aio_buf|aio_nbytes|aio_offset|<resfd>aio_resfd"];
+   aiobuf [label="<h>byte\[\]|...aio_nbytes"];
+   ngx_eventfd [shape=box3d];
+   ngx_http_copy_aio_event_handler [label="<h>ngx_http_copy_aio_event_handler()|"];
+   
+   ngx_file_t:aio -> ngx_event_aio_t:h:nw;
+   ngx_event_aio_t:event -> ngx_event_t:h;
+   ngx_event_aio_t:file -> ngx_file_t:h;
+   ngx_event_aio_t:data -> ngx_request_t:h:nw;
+   ngx_event_aio_t:aiocb -> iocb:h:nw;
+   ngx_event_aio_t:handler -> ngx_http_copy_aio_event_handler:h;
+   
+   ngx_event_t:data -> ngx_event_aio_t:h;
+   ngx_event_t:handler -> ngx_file_aio_event_handler:h;
+   
+   iocb:data:e -> ngx_event_t:h:e;
+   iocb:buf -> aiobuf:h;
+   iocb:resfd -> ngx_eventfd;
+   
+   {rank=same; ngx_event_t;iocb;};
+}

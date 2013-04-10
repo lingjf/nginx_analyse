@@ -208,8 +208,7 @@ io_destroy(aio_context_t ctx)
 
 
 static int
-io_getevents(aio_context_t ctx, long min_nr, long nr, struct io_event *events,
-    struct timespec *tmo)
+io_getevents(aio_context_t ctx, long min_nr, long nr, struct io_event *events, struct timespec *tmo)
 {
     return syscall(SYS_io_getevents, ctx, min_nr, nr, events, tmo);
 }
@@ -224,26 +223,22 @@ ngx_epoll_aio_init(ngx_cycle_t *cycle, ngx_epoll_conf_t *epcf)
     ngx_eventfd = syscall(SYS_eventfd, 0);
 
     if (ngx_eventfd == -1) {
-        ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
-                      "eventfd() failed");
+        ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno, "eventfd() failed");
         ngx_file_aio = 0;
         return;
     }
 
-    ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
-                   "eventfd: %d", ngx_eventfd);
+    ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0, "eventfd: %d", ngx_eventfd);
 
     n = 1;
 
     if (ioctl(ngx_eventfd, FIONBIO, &n) == -1) {
-        ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
-                      "ioctl(eventfd, FIONBIO) failed");
+        ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno, "ioctl(eventfd, FIONBIO) failed");
         goto failed;
     }
 
     if (io_setup(epcf->aio_requests, &ngx_aio_ctx) == -1) {
-        ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
-                      "io_setup() failed");
+        ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno, "io_setup() failed");
         goto failed;
     }
 
@@ -262,19 +257,16 @@ ngx_epoll_aio_init(ngx_cycle_t *cycle, ngx_epoll_conf_t *epcf)
         return;
     }
 
-    ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
-                  "epoll_ctl(EPOLL_CTL_ADD, eventfd) failed");
+    ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno, "epoll_ctl(EPOLL_CTL_ADD, eventfd) failed");
 
     if (io_destroy(ngx_aio_ctx) == -1) {
-        ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
-                      "io_destroy() failed");
+        ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno, "io_destroy() failed");
     }
 
 failed:
 
     if (close(ngx_eventfd) == -1) {
-        ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
-                      "eventfd close() failed");
+        ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno, "eventfd close() failed");
     }
 
     ngx_eventfd = -1;
@@ -705,8 +697,7 @@ ngx_epoll_eventfd_handler(ngx_event_t *ev)
             return;
         }
 
-        ngx_log_error(NGX_LOG_ALERT, ev->log, 0,
-                      "read(eventfd) returned only %d bytes", n);
+        ngx_log_error(NGX_LOG_ALERT, ev->log, 0, "read(eventfd) returned only %d bytes", n);
         return;
     }
 
@@ -717,18 +708,14 @@ ngx_epoll_eventfd_handler(ngx_event_t *ev)
 
         events = io_getevents(ngx_aio_ctx, 1, 64, event, &ts);
 
-        ngx_log_debug1(NGX_LOG_DEBUG_EVENT, ev->log, 0,
-                       "io_getevents: %l", events);
+        ngx_log_debug1(NGX_LOG_DEBUG_EVENT, ev->log, 0, "io_getevents: %l", events);
 
         if (events > 0) {
             ready -= events;
 
             for (i = 0; i < events; i++) {
 
-                ngx_log_debug4(NGX_LOG_DEBUG_EVENT, ev->log, 0,
-                               "io_event: %uXL %uXL %L %L",
-                                event[i].data, event[i].obj,
-                                event[i].res, event[i].res2);
+                ngx_log_debug4(NGX_LOG_DEBUG_EVENT, ev->log, 0, "io_event: %uXL %uXL %L %L", event[i].data, event[i].obj, event[i].res, event[i].res2);
 
                 e = (ngx_event_t *) (uintptr_t) event[i].data;
 
@@ -750,8 +737,7 @@ ngx_epoll_eventfd_handler(ngx_event_t *ev)
         }
 
         /* events == -1 */
-        ngx_log_error(NGX_LOG_ALERT, ev->log, ngx_errno,
-                      "io_getevents() failed");
+        ngx_log_error(NGX_LOG_ALERT, ev->log, ngx_errno, "io_getevents() failed");
         return;
     }
 }
