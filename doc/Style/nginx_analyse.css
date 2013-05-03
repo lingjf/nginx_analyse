@@ -69,41 +69,23 @@ hr {
 	background-color: #a0a0a0 ;
 }
 
-:target {
-	background-color: #F8F8F8 ;
-	padding: 8px ;
-	border: solid #a0a0a0 2px ;
+
+pre {
+	background-color:#f8f8f8;
+	border:1px solid #ccc;
+	font-size:13px;
+	line-height:19px;
+	overflow:auto;
+	padding:6px 10px;
+	border-radius:3px;
 }
 
-.footer {
-	color: gray ;
-	font-size: small ;
+code {
+	font-size: 12px ;
+	font-family: Consolas, "Liberation Mono", Courier, monospace ;
+	line-height: 19px ;
+	background-color: transparent;
+	background: transparent;
+	border-radius: 3px;
 }
 
-input[type=text] {
-	border: solid #a0a0a0 2px ;
-	border-radius: 2em ;
-	-moz-border-radius: 2em ;
-	background-image: url('images/search.png') ;
-	background-repeat: no-repeat;
-	background-position: 4px center ;
-	padding-left: 20px ;
-	height: 2em ;
-}
-
-h3 code {
-	font-family: inherit ;
-	font-size: inherit ;
-}
-
-pre, code {
-	font-size: 12pt ;
-}
-
-span.apii {
-	float: right ;
-	font-family: inherit ;
-	font-style: normal ;
-	font-size: small ;
-	color: gray ;
-}

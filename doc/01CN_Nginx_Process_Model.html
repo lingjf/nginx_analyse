@@ -92,6 +92,7 @@ lingjf@dell:/usr/local/nginx$sudo ./nginx
 		<pre>
 lingjf@dell:/usr/local/nginx$sudo ./nginx -s quit 
 		</pre>
+		<img src="Graph/process_model/graceful_shutdown_interact.png">
 		<ul>
 			<li>新创建的nginx进程（Signaller）从pid文件(nginx.pid)中获得Master进程号(pid)。</li>
 			<li>Signaller通过系统调用kill向Master发送SIGQUIT（NGX_SHUTDOWN_SIGNAL）信号，并退出。</li>
@@ -113,6 +114,7 @@ main()--ngx_signal_process()--ngx_os_signal_process()--kill()--ngx_signal_handle
 		<pre>
 lingjf@dell:/usr/local/nginx$sudo ./nginx -s stop 
 		</pre>
+		<img src="Graph/process_model/fast_shutdown_interact.png">
 		<p> 过程基本和Graceful Shutdown相同，不同点有：
 		<ul>
 			<li>发送的信号是SIGTERM (NGX_TERMINATE_SIGNAL)。</li>
@@ -120,6 +122,7 @@ lingjf@dell:/usr/local/nginx$sudo ./nginx -s stop
 		</ul>
 		
 	<h2> 5.4 - Worker Exception </h2>
+		<img src="Graph/process_model/worker_exception_interact.png">
 		<ul>
 			<li>Worker异常退出后，OS会向Master发送SIGCHLD信号。</li>
 			<li>Master收到信号后会调用waitpid()获得Worker的pid和状态并更新ngx_processes数组。</li>
@@ -133,6 +136,7 @@ ngx_signal_handler()--ngx_worker_process_cycle()--ngx_reap_children()--ngx_spawn
 		<pre>
 lingjf@dell:/usr/local/nginx$sudo ./nginx -s reload 
 		</pre>
+		<img src="Graph/process_model/change_configuration_interact.png">
 		<ul>
 			<li>新创建的nginx进程（Signaller）从pid文件(nginx.pid)中获得Master进程号。</li>
 			<li>Signaller通过系统调用kill向Master发送SIGHUP（NGX_RECONFIGURE_SIGNAL）信号，并退出。</li>
@@ -158,12 +162,13 @@ lingjf@dell:/usr/local/nginx$sudo kill -WATCH `cat logs/nginx.pid`
 		
 
 	<h2> 5.8 - Upgrade binary on fly </h2>
-		<pre>
+		<pre> 
 lingjf@dell:/usr/local/nginx$mv nginx nginx_old
 lingjf@dell:/usr/local/nginx$cp nginx_new nginx
 lingjf@dell:/usr/local/nginx$sudo kill -USR2 `cat logs/nginx.pid`
 lingjf@dell:/usr/local/nginx$sudo kill -QUIT `cat logs/nginx.pid.oldbin`
 		</pre>
+		<img src="Graph/process_model/upgrade_binary_interact.png">
 		<ul>
 			<li>使用新的二进制文件替换老的文件。</li>
 			<li>向老Master发送SIGUSR2(NGX_CHANGEBIN_SIGNAL)信号。</li>
