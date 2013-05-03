@@ -1,0 +1,250 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+
+<head>
+	<title>Nginx Process Model</title>
+	<link rel="stylesheet" type="text/css" href="Style/nginx_analyse.css">
+	<META HTTP-EQUIV="content-type" CONTENT="text/html; charset=utf8">
+</head>
+
+<body>
+
+<h1> 1 - 概述  </h1>
+
+	<p>
+	Nginx采用Master/Worker进程模型。Master管理Worker(s)，推荐采用一个CPU核对应一个Worker，以减少进程或线程切换开销，对于读磁盘文件多的应用，则推荐一个CPU核对应2个Worker，以便利用IO等待的时间。
+	<p>
+	相对应于Apache的 “hybrid multi-threaded multi-process”，Nginx的进程模型是“single threaded multi-process”。进程模型的差异是Nginx比Apache快的一个原因。得到高性能的同时，牺牲了模块开发的简单性，增加了业务状态机的复杂性，因为单线程的模型中不能有堵塞的操作(读磁盘文件操作是堵塞的，但可以配置AIO成异步非阻塞的)。
+
+<h1> 2 - Nginx Master/Worker </h1>
+	<p>
+	<a href="Graph/process_model/master_worker.gv"> <img src="Graph/process_model/master_worker.png"> </a>
+	<p>
+	在启动时，Master进程打开Listen Socket(s)并创建若干个子进程Worker。Master此后负责监控Worker，而不处理具体的业务。
+	Worker同时监听Listen Socket(s)和Accepted Socket(s)，并且以异步非阻塞的方式接受新连接和处理请求。
+
+<h1> 3 - 数据结构  </h1>
+	<p>
+	<a href="Graph/process_model/data_structure.gv"> <img src="Graph/process_model/data_structure.png"> </a>
+	
+	<h2> 3.1 - Cycle </h2>
+		<p>
+		全局变量ngx_cycle主要是保存了配置数据、内存管理池、Listen Socket(s)等数据。
+		<h3> ngx_core_conf_t </h3>
+			<p> 配置参数
+		<h3> ngx_pool_t </h3>
+			<p> Cycle层次的内存池，即整个生命周期都要用的数据从这个池分配
+		<h3> ngx_listening_t </h3>
+			<p> Listen Socket数据结构，关键信息是Listen Socket句柄
+	<h2> 3.2 - Process </h2>
+		<h3> ngx_processes </h3>
+			<p> 全局变量ngx_processes是一个ngx_process_t的数组（1024个），用以管理Wokers。
+		<h3> ngx_last_process </h3>
+			<p> 全局变量ngx_last_process记录ngx_processes数组已用的位置。
+		<h3> ngx_process_t </h3>
+			<p> ngx_process_t 是一个关键的结构体，它抽象了一个Worker进程:
+			<ul>
+				<li> pid : Worker的进程号， -1表示在ngx_processes数组中空闲。</li>
+				<li> proc/data : Worker 运行的函数和参数，它通常是ngx_worker_process_cycle(ngx_cycle)。</li>
+				<li> respawn : 表示如果Worker退出，需要重新创建它。</li>
+				<li> just_spawn : 表示 Worker刚被创建，不接收Master发的信号。</li>
+				<li> exited : 表示 Worker已经退出。</li>
+				<li> exiting : 表示 Master命令Worker退出。</li>
+				<li> detached : 用于upgrade binary。</li>
+			</ul>
+
+
+<h1> 4 - 启动过程  </h1>
+	<p>
+	<a href="Graph/process_model/construction.gv"> <img src="Graph/process_model/construction.png"> </a>
+	<h3> 4.1	ngx_init_cycle() </h3>
+		<p> 读取配置数据到ngx_cycle中，并打开Listen Sockets
+	<h3> 4.2	ngx_init_signals() </h3>
+		<p> 安装信号处理函数
+	<h3> 4.3	ngx_daemon() </h3>
+		<p> fork后台进程，标准输入输出定向到/dev/null
+	<h3> 4.4	ngx_master_process_cycle() </h3>
+		<p> Master进程的主循环，先创建Wokers，再进入等待信号/处理信号的循环中
+	<h3> 4.5	ngx_setproctitle() </h3>
+		<p> 设置进程的title，ps 命令显示
+	<h3> 4.6	ngx_start_worker_processes() </h3>
+		<p> 创建若干个Worker，Worker个数可通过worker_processes项配置
+	<h3> 4.7	ngx_spawn_process() </h3>
+		<p> 从全局变量数组ngx_processes中找一个空位，通过系统调用fork出一个Worker，它继承了Master的信号处理、Cycle、Listen Sockets、文件句柄等。
+	<h3> 4.8	ngx_worker_process_cycle() </h3>
+		<p> Worker进程的主循环（等待事件/处理事件）
+	<h3> 4.9	ngx_worker_process_init() </h3>
+		<p> 初始化Worker进程，设置资源限制、用户和组，绑定CPU
+
+
+<h1> 5 - 情境分析  </h1>
+	<h2> 5.1 - Startup </h2>
+		<pre>
+lingjf@dell:/usr/local/nginx$sudo ./nginx   
+
+  PID  PPID USER   COMMAND
+33126     1 root   nginx: master process /usr/local/nginx
+33127 33126 nobody nginx: worker process 
+33128 33126 nobody nginx: worker process
+		</pre>
+
+	<h2> 5.2 - Graceful Shutdown </h2>
+		<pre>
+lingjf@dell:/usr/local/nginx$sudo ./nginx -s quit 
+		</pre>
+		<ul>
+			<li>新创建的nginx进程（Signaller）从pid文件(nginx.pid)中获得Master进程号(pid)。</li>
+			<li>Signaller通过系统调用kill向Master发送SIGQUIT（NGX_SHUTDOWN_SIGNAL）信号，并退出。</li>
+			<li>Master收到SIGQUIT后向所有的Worker通过kill发SIGQUIT。</li>
+			<li>Worker收到信号后关闭资源（Sockets、Pool等）退出(exit)。</li>
+			<li>OS向Master发送SIGCHLD。</li>
+			<li>Master收到SIGCHLD后调用系统调用waitpid()获得Worker的pid和状态并更新ngx_processes数组(信号处理函数中)。</li>
+			<li>Master检查是否所有的Worker都退出，如果还有没退出，则在sigsuspend()继续等待。</li>
+			<li>Master删除pid文件，清理资源并退出。</li>
+		</ul>
+		<pre>
+main()--ngx_signal_process()--ngx_os_signal_process()--kill()--ngx_signal_handler()--ngx_master_process_cycle()
+--ngx_signal_worker_processes()--kill()--ngx_signal_handler()--ngx_worker_process_cycle()--ngx_worker_process_exit()
+--ngx_signal_handler()--ngx_process_get_status()--waitpid()--ngx_master_process_cycle()--ngx_master_process_exit()
+		</pre>
+
+
+	<h2> 5.3 - Fast Shutdown </h2>
+		<pre>
+lingjf@dell:/usr/local/nginx$sudo ./nginx -s stop 
+		</pre>
+		<p> 过程基本和Graceful Shutdown相同，不同点有：
+		<ul>
+			<li>发送的信号是SIGTERM (NGX_TERMINATE_SIGNAL)。</li>
+			<li>Master等待超时后向Worker发SIGKILL，强制Worker退出。</li>
+		</ul>
+		
+	<h2> 5.4 - Worker Exception </h2>
+		<ul>
+			<li>Worker异常退出后，OS会向Master发送SIGCHLD信号。</li>
+			<li>Master收到信号后会调用waitpid()获得Worker的pid和状态并更新ngx_processes数组。</li>
+			<li>Master再根据ngx_processes重新创建Worker。</li>
+		</ul>
+		<pre>
+ngx_signal_handler()--ngx_worker_process_cycle()--ngx_reap_children()--ngx_spawn_process()
+		</pre>
+			
+	<h2> 5.5 - Change configuration </h2>
+		<pre>
+lingjf@dell:/usr/local/nginx$sudo ./nginx -s reload 
+		</pre>
+		<ul>
+			<li>新创建的nginx进程（Signaller）从pid文件(nginx.pid)中获得Master进程号。</li>
+			<li>Signaller通过系统调用kill向Master发送SIGHUP（NGX_RECONFIGURE_SIGNAL）信号，并退出。</li>
+			<li>Master收到信号后根据新的配置生成新的Cycle。</li>
+			<li>创建若干个新的Worker，此时新老Worker并存。</li>
+			<li>Master向老Workers发送SIGQUIT(NGX_SHUTDOWN_SIGNAL)，并更新ngx_processes中的exiting为1，以此来确保老Worker不会被重新创建。</li>
+			<li>老Workers退出。</li>
+			<li>OS向Master发送SIGCHLD信号。</li>
+			<li>Master收到信号后，将ngx_processes中老Worker项设为空闲（pid设为-1）。</li>
+		</ul>
+
+
+	<h2> 5.6 - Rotate log files </h2>
+		<pre>
+lingjf@dell:/usr/local/nginx$sudo ./nginx -s reopen 
+		</pre>
+
+
+	<h2> 5.7 - No Accept </h2>
+		<pre>
+lingjf@dell:/usr/local/nginx$sudo kill -WATCH `cat logs/nginx.pid` 
+		</pre>
+		
+
+	<h2> 5.8 - Upgrade binary on fly </h2>
+		<pre>
+lingjf@dell:/usr/local/nginx$mv nginx nginx_old
+lingjf@dell:/usr/local/nginx$cp nginx_new nginx
+lingjf@dell:/usr/local/nginx$sudo kill -USR2 `cat logs/nginx.pid`
+lingjf@dell:/usr/local/nginx$sudo kill -QUIT `cat logs/nginx.pid.oldbin`
+		</pre>
+		<ul>
+			<li>使用新的二进制文件替换老的文件。</li>
+			<li>向老Master发送SIGUSR2(NGX_CHANGEBIN_SIGNAL)信号。</li>
+			<li>老Master收到信号后，把Listening Sockets fd 存入环境变量NGINX。</li>
+			<li>老Master把pid文件更名为nginx.pid.oldbin。</li>
+			<li>老Master通过系统调用fork()、execve() 运行新的二进制文件，同时继承文件描述表。</li>
+			<li>新Master解析环境变量NGINX，并继承Listening Sockets。</li>
+			<li>新二进制文件启动完成。此时有新老Master和新老Workers以及新老pid文件。</li>
+			<li>向老Master发送SIGQUIT信号。</li>
+			<li>老Master/Workers退出。</li>
+		</ul>		
+		
+
+<h1> 6 - 其它进程模型  </h1>
+	<h2> 6.1 - Leader/Follower </h2>
+		<img src="Graph/process_model/leader_follower.png">
+		<p> Leader进程负责监听Listen Socket(s)，当有新连接到达时，Accept该新连接，创建(fork)一个子进程Follower，
+		<p> 该Follower专职监听Accepted Socket，并处理此连接中的请求。
+		<p> 请求处理完毕，Follower退出。一个请求对应一个进程实例，并且是阻塞同步的。
+		<h3> 优点  </h3>
+		因为各个请求处理在独立的进程，互相隔离，所以有高稳定性。
+		<h3> 缺点  </h3>
+		进程的创建和销毁资源消耗大、并发性差。
+		
+	<h2> 6.2 - Apaceh Prefork </h2>
+		<img src="Graph/process_model/apache_prefork.png">
+		<p> 针对Leader/Follower模型的不足，Apache Prefork模型作了部分优化。
+		<p> 总管理进程Parent预先创建若干个子进程(Child)，它们首先处于空闲状态，此时监听Listen Socket(s)，
+		<p> 一旦接受到新连接后，便不再监听Listen Socket(s)，而只监听Accepted Socket，并处理此连接中的请求，
+		<p> 处理完后，继续监听Listen Socket(s)。
+		<p> 当预先创建的Child不够时，Parent新创建Child，处理新的连接与请求。
+		<p> Parent根据配置，调整空闲Child的数量。
+		<p> 当Child处理一定数量的请求后，将退出，以释放可能泄漏的内存。
+		<p> 一个请求独占一个进程，并且是阻塞同步的。
+		
+		<h3> 优点  </h3>
+		稳定
+		<h3> 缺点  </h3>
+		并发性差
+		
+	<h2> 6.3 - Apaceh Worker </h2>
+		<img src="Graph/process_model/apache_worker.png">
+		<p> 总管理进程Parent预先创建若干个子进程(Child)，各个Child创建一个只用于监听Listen Socket(s)的线程Listener， 和若干专用于处理连接请求的线程Worker。
+		<p> 当Listener接收到一个Accepted Socket后，将其交给一个空闲的Worker处理，如果没有空闲的，则创建一个新的Worker。
+Worker只监听Accepted Socket，并处理此连接中的请求，处理完后，又处理空闲状等待Listener给的Accepted Socket。
+Child根据配置调整空闲Worker的数量。 Parent根据配置调整Child的数量。 当Child处理一定数量的请求后，将退出，以释放可能泄漏的内存。
+		<p>一个请求独占一个线程，并且是阻塞同步的。
+
+		<p> 这是Apache主流的进程模型。稳定性和Apache Prefork模型相比，略差，因为同一进程下的线程之间是互相影响的。
+		<p> 并发能力比Apache Prefork模型好，因为线程比进程开销要小。但并发能力也受限于线程数。
+		<p> 测试benchmark显示Apache Worker模型比Nginx Master/Worker模型要差。
+		<p>另一个严重的缺点是对KeepAlive的支持很差，因为要支持KeepAlive，每一个连接就要有一个线程Worker来维护，导致线程数量过多，线程切换开销过大。
+		
+
+<h1> 7 - 其它问题  </h1>		
+	<h2> 7.1 - Master循环等待信号 </h2>
+		<p>
+		Master循环的工作只是等待信号并处理。有二种OS API可以选择pause()和sigsuspend()。
+		pause() 使调用进程（线程）进入睡眠，直到有信号来而且处理函数已经返回。
+		sigsuspend() 临时替换信号阻塞集合并进入睡眠，直到有信号来而且处理函数已经返回。在sigsuspend()返回之前，信号阻塞集合恢复调用它之前的。
+		Nginx选用sigsuspend()方案，以实现信号处理过程当中不会被其它信号干拢。
+		首先将所有关心的信号加入信号阻塞集合。等待信号时用sigsuspend()特性解除阻塞。
+		有信号来，sigsuspend()返回前又阻塞信号。在真正处理信号时，因为所有信号是被阻塞的，也就不会被干拢。
+		
+	<h2> 7.2 - Replace a running executable in linux </h2>
+		<p>
+		Windows不可以替换正在运行的文件，但Linux是可以的。
+		参见：http://stackoverflow.com/questions/1712033/replacing-a-running-executable-in-linux
+		Linux无法直接使用cp命令覆盖原文件，而需要先删除(rm)或重命令(mv)原文件，再拷贝(cp)过去。
+		但是在Ubuntu12.4上无法用上述方法？
+		
+<h1> 8 - Prototype  </h1>	
+	<p> <a href="https://github.com/lingjf/nginx_analyse/tree/master/prototype/nginx_process"> https://github.com/lingjf/nginx_analyse/tree/master/prototype/nginx_process </a>
+
+	<p> Prototype删除了和进程模型不相关的功能，以及出错处理等代码。
+	
+<h1> 9 - Latest Version  </h1>			
+	<p> <a href="https://github.com/lingjf/nginx_analyse/tree/master/doc/01CN_Nginx_Process_Model.html"> https://github.com/lingjf/nginx_analyse/tree/master/doc/01CN_Nginx_Process_Model.html </a>
+
+	<p> Ling Jianfa  lingjf@gmail.com   <a href="https://github.com/lingjf"> https://github.com/lingjf </a>
+						
+</body>
+
+</html>
