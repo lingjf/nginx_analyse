@@ -1,10 +1,11 @@
 #!/bin/sh
 
+#sudo apt-get install libpcre3 libpcre3-dev
+
+BASED=`pwd`
 
 ./configure \
-	--without-http_rewrite_module \
-	--without-http_gzip_module \
 	--with-file-aio \
-	--prefix=`pwd`/objs  	
+	--prefix=${BASED}/objs  	
 
 	
