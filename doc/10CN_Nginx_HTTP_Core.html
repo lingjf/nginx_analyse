@@ -9,7 +9,129 @@
 
 <body>
 
-<h1> 1 - 概述  </h1>
+<h1> 1 - 概述 </h1>
+<h1> 2 - Server </h1>
+<h1> 3 - Location </h1>
+<h1> 4 - Request </h1>
+<h1> 5 - Phase Handler </h1>
+	<p> Nginx对Request的处理划分为10个阶段(Phase)。
+	<ul>
+		<li>POST_READ </li>
+			读取Request body数据。
+		<li>SERVER_REWRITE</li>
+			Server请求地址重写。
+		<li>FIND_CONFIG</li>
+			Server已经在处理Request Header时找到，现在从Server中查找Location。
+		<li>REWRITE</li>
+			Location请求地址重写。
+		<li>POST_REWRITE</li>
+			请求地址重写后。
+		<li>PREACCESS</li>
+			预权限检查。
+		<li>ACCESS</li>
+			权限检查。
+		<li>POST_ACCESS</li>
+			后权限检查。
+		<li>TRY_FILES</li>
+			TODO
+		<li>CONTENT</li>
+			响应内容产生。
+	</ul>
+	<h2> 5.1 - Phases </h2>
+		<p> 各个HTTP Phase Handler类型的模块在postconfiguration回调函数中向各阶段注册回调函数来实现模块功能。
+		注册完成后如下图的phases所管理二维数组所示：
+		<p> <img src="Graph/http_core/http_phase_table.png">
+		<p> Nginx遍历此二维数组，即可完成请求处理。但为了达到更佳的性能，由phase_engine重新组织了二维数组。
+	<h2> 5.2 - Phase Engine </h2>
+		<p> 遍历一维数组优于遍历二维数组。<code>ngx_http_init_phase_handlers()</code>将二维数组归并为一个一维数组，并用next指示出下一阶段开始的index。
+		<p> <img src="Graph/http_core/http_phase_engine.png">
+		<p> Nginx依次调用此一维数组的回调函数，当所属的阶段需结束处理，则通过next找到下一阶段的回调函数继续处理。
+		ngx_http_request_t的phase_handler是此一维数组的index，表示正在处理的回调函数。
+		当资源没有就绪时，遍历过程暂时停止，一旦就绪，在事件回调函数中从phase_handler所指的位置继续遍历。
+	<h2> 5.3 - Phase Run </h2>
+		<p> 由函数<code>ngx_http_core_run_phases()</code>遍历并调用回调处理函数。下表是关于回调函数返回值的处理方法小结：
+		<p>
+		<table class="table002">
+			<tr>
+				<td> Phase </td>
+				<td> 下一回调 </td>
+				<td> 下一阶段 </td>
+				<td> 暂时停止 </td>
+				<td> 结束遍历 </td>
+			</tr>
+			<tr>
+				<td> POST_READ </td>
+				<td> NGX_DECLINED </td>
+				<td> NGX_OK </td>
+				<td> NGX_AGAIN, NGX_DONE </td>
+				<td> ERRORS </td>
+			</tr>
+			<tr>
+				<td> SERVER_REWRITE </td>
+				<td> NGX_DECLINED </td>
+				<td> -- </td>
+				<td> -- </td>
+				<td> ERRORS </td>
+			</tr>
+			<tr>
+				<td> FIND_CONFIG </td>
+				<td> -- </td>
+				<td> -- </td>
+				<td> -- </td>
+				<td> -- </td>
+			</tr>
+			<tr>
+				<td> REWRITE </td>
+				<td> NGX_DECLINED </td>
+				<td> -- </td>
+				<td> -- </td>
+				<td> ERRORS </td>
+			</tr>
+			<tr>
+				<td> POST_REWRITE </td>
+				<td> -- </td>
+				<td> -- </td>
+				<td> -- </td>
+				<td> -- </td>
+			</tr>
+			<tr>
+				<td> PREACCESS </td>
+				<td> NGX_DECLINED </td>
+				<td> NGX_OK </td>
+				<td> NGX_AGAIN, NGX_DONE </td>
+				<td> ERRORS </td>
+			</tr>
+			<tr>
+				<td> ACCESS </td>
+				<td> NGX_DECLINED <p>if satisfy_all NGX_OK </td>
+				<td> if satisfy_any NGX_OK </td>
+				<td> NGX_AGAIN, NGX_DONE </td>
+				<td> ERRORS </td>
+			</tr>
+			<tr>
+				<td> POST_ACCESS </td>
+				<td> -- </td>
+				<td> -- </td>
+				<td> -- </td>
+				<td> -- </td>
+			</tr>
+			<tr>
+				<td> TRY_FILES </td>
+				<td> -- </td>
+				<td> -- </td>
+				<td> -- </td>
+				<td> -- </td>
+			</tr>
+			<tr>
+				<td> CONTENT </td>
+				<td> NGX_DECLINED </td>
+				<td> -- </td>
+				<td> -- </td>
+				<td> NOT NGX_DECLINED </td>
+			</tr>
+		</table>
+	
+<h1> 6 - Filter Chain </h1>
 
 					
 </body>

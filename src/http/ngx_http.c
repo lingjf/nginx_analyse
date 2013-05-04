@@ -836,7 +836,7 @@ ngx_http_cmp_locations(const ngx_queue_t *one, const ngx_queue_t *two)
 static ngx_int_t
 ngx_http_join_exact_locations(ngx_conf_t *cf, ngx_queue_t *locations)
 {
-    /* Г§жи */
+    /* remove duplicated locations */
     ngx_queue_t                *q, *x;
     ngx_http_location_queue_t  *lq, *lx;
     q = ngx_queue_head(locations);

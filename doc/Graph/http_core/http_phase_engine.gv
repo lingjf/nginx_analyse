@@ -1,0 +1,27 @@
+digraph ngx_http_phase_engine {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_http_core_main_conf_t [label="ngx_http_core_main_conf_t\{\}|...|<phase_engine>phase_engine|..."];
+   ngx_http_request_t [label="ngx_http_request_t\{\}|...|<phase_handler>phase_handler|..."];
+
+   ngx_http_phase_engine_t [label="<head>ngx_http_phase_engine_t\{\}|<handlers>handlers|server_rewrite_index|location_rewrite_index"];
+   ngx_http_phase_handler_t_array [label="<head>ngx_http_phase_handler_t\[\]|{phase 1|{<n1>ngx_http_phase_handler_t|<n2>ngx_http_phase_handler_t}}|{phase 2|{<n3>ngx_http_phase_handler_t|<n4>ngx_http_phase_handler_t}}|...", height=4];
+   ngx_http_phase_handler_t_1 [label="<head>ngx_http_phase_handler_t\{\}|<next>next|checker|handler"];
+   ngx_http_phase_handler_t_2 [label="<head>ngx_http_phase_handler_t\{\}|<next>next|checker|handler"];
+   ngx_http_phase_handler_t_4 [label="<head>ngx_http_phase_handler_t\{\}|<next>next|checker|handler"];
+
+   ngx_http_core_main_conf_t:phase_engine -> ngx_http_phase_engine_t:head:nw;
+   ngx_http_phase_engine_t:handlers -> ngx_http_phase_handler_t_array:head;
+   ngx_http_phase_handler_t_array:n1 -> ngx_http_phase_handler_t_1:head;
+   ngx_http_phase_handler_t_array:n2 -> ngx_http_phase_handler_t_2:head;
+   ngx_http_phase_handler_t_array:n4 -> ngx_http_phase_handler_t_4:head;
+   ngx_http_phase_handler_t_1:next -> ngx_http_phase_handler_t_array:n3;
+   ngx_http_phase_handler_t_2:next -> ngx_http_phase_handler_t_array:n3;
+   
+   ngx_http_request_t:phase_handler -> ngx_http_phase_handler_t_array:n4:w;
+   
+   {rank=same;ngx_http_core_main_conf_t;ngx_http_request_t;};
+
+}

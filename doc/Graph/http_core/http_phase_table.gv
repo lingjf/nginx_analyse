@@ -1,0 +1,41 @@
+digraph ngx_http_phase_table {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_http_core_main_conf_t [label="ngx_http_core_main_conf_t\{\}|...|<phases>phases|..."];
+   ngx_http_phase_t_array [label="<head>ngx_http_phase_t\[\]|<post_read>POST_READ|<server_rewrite>SERVER_REWRITE|<find_config>FIND_CONFIG|<rewrite>REWRITE|<post_rewrite>POST_REWRITE|<preaccess>PREACCESS|<access>ACCESS|<post_access>POST_ACCESS|<try_files>TRY_FILES|<content>CONTENT", height=7];
+   ngx_http_core_main_conf_t:phases -> ngx_http_phase_t_array:head;
+   
+   ngx_http_phase_t_post_read [label="<head>ngx_http_phase_t\{\}|<handlers>handlers"];
+   ngx_http_handler_pt_post_read [label="<head>ngx_http_handler_pt\[\]|<n1>ngx_http_realip_handler()"];
+   ngx_http_phase_t_array:post_read -> ngx_http_phase_t_post_read:head;
+   ngx_http_phase_t_post_read:handlers -> ngx_http_handler_pt_post_read:head;
+   
+   ngx_http_phase_t_server_rewrite [label="<head>ngx_http_phase_t\{\}|<handlers>handlers"];
+   ngx_http_handler_pt_server_rewrite [label="<head>ngx_http_handler_pt\[\]|<n1>ngx_http_rewrite_handler()"];
+   ngx_http_phase_t_array:server_rewrite -> ngx_http_phase_t_server_rewrite:head;
+   ngx_http_phase_t_server_rewrite:handlers -> ngx_http_handler_pt_server_rewrite:head;
+
+   ngx_http_phase_t_rewrite [label="<head>ngx_http_phase_t\{\}|<handlers>handlers"];
+   ngx_http_handler_pt_rewrite [label="<head>ngx_http_handler_pt\[\]|<n1>ngx_http_rewrite_handler()"];
+   ngx_http_phase_t_array:rewrite -> ngx_http_phase_t_rewrite:head;
+   ngx_http_phase_t_rewrite:handlers -> ngx_http_handler_pt_rewrite:head;
+   
+   
+   ngx_http_phase_t_preaccess [label="<head>ngx_http_phase_t\{\}|<handlers>handlers"];
+   ngx_http_handler_pt_preaccess [label="<head>ngx_http_handler_pt\[\]|ngx_http_limit_conn_handler()|ngx_http_limit_req_handler()|ngx_http_realip_handler()"];
+   ngx_http_phase_t_array:preaccess -> ngx_http_phase_t_preaccess:head;
+   ngx_http_phase_t_preaccess:handlers -> ngx_http_handler_pt_preaccess:head;
+   
+   ngx_http_phase_t_access [label="<head>ngx_http_phase_t\{\}|<handlers>handlers"];
+   ngx_http_handler_pt_access [label="<head>ngx_http_handler_pt\[\]|ngx_http_auth_basic_handler()|ngx_http_access_handler()"];
+   ngx_http_phase_t_array:access -> ngx_http_phase_t_access:head;
+   ngx_http_phase_t_access:handlers -> ngx_http_handler_pt_access:head;
+   
+   ngx_http_phase_t_content [label="<head>ngx_http_phase_t\{\}|<handlers>handlers"];
+   ngx_http_handler_pt_content [label="<head>ngx_http_handler_pt\[\]|ngx_http_static_handler()|ngx_http_autoindex_handler()|ngx_http_index_handler()"];
+   ngx_http_phase_t_array:content -> ngx_http_phase_t_content:head;
+   ngx_http_phase_t_content:handlers -> ngx_http_handler_pt_content:head;
+   
+}
