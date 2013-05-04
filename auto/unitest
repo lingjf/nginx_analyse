@@ -2,7 +2,7 @@
 # Copyright (C) Igor Sysoev
 # Copyright (C) Nginx, Inc.
 
-NGX_UNITEST_MAKEFILE=$NGX_OBJS/Unitest.mk
+NGX_UNITEST_MAKEFILE=$NGX_OBJS/Unitest 
 
 echo "creating $NGX_UNITEST_MAKEFILE"
 

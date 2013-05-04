@@ -5,7 +5,9 @@
 BASED=`pwd`
 
 ./configure \
+	--prefix=${BASED}/objs \
 	--with-file-aio \
-	--prefix=${BASED}/objs  	
+	--add-module=${BASED}/modules/http_concat_module
+	  	
 
 	

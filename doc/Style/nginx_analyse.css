@@ -76,12 +76,13 @@ pre {
 }
 
 code {
-	font-size: 12px ;
+	font-size: 13px ;
 	font-family: Consolas, "Liberation Mono", Courier, monospace ;
 	line-height: 19px ;
-	background-color: transparent;
-	background: transparent;
+	background-color:#f8f8f8;
+	border:1px solid #ccc;
 	border-radius: 3px;
+	padding:3px 5px;
 }
 
 
