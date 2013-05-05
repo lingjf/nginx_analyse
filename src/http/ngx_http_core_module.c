@@ -2691,7 +2691,7 @@ ngx_http_core_server(ngx_conf_t *cf, ngx_command_t *cmd, void *dummy)
     *cf = pcf;
 
     if (rv == NGX_CONF_OK && !cscf->listen) {
-        /* 这个 Server 中没有配置listen， 于是就给一个默认的 80 / 8000 */
+        /* if 'listen' is not specified, give a default value */
         ngx_memzero(&lsopt, sizeof(ngx_http_listen_opt_t));
 
         sin = &lsopt.u.sockaddr_in;

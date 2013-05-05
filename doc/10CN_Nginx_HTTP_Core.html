@@ -11,6 +11,30 @@
 
 <h1> 1 - 概述 </h1>
 <h1> 2 - Server </h1>
+	<p> Server代表一个Web（虚拟）服务器， 对应于配置文件中的一个server指令。
+	<h2> 2.1 - Server 管理 </h2>	
+		<p> 每个模块可以有专有的数据结构来表示，并用模块的回调函数<code>create_srv_conf</code>来创建。
+		<ul>
+			<li>HTTP Core模块对应的数据结构为：<code>ngx_http_core_srv_conf_t</code></li>
+			<li>HTTP Upstream KeepAlive模块对应的数据结构为：<code>ngx_http_upstream_keepalive_srv_conf_t</code> </li>
+			<li>HTTP Upstream Least Conn模块对应的数据结构为：<code>ngx_http_upstream_least_conn_conf_t</code> </li>
+			<li>其它模块没有对应的数据结构 </li>
+		</ul>
+		<p> 一个Server对应的多个数据结构如下表示：
+		<p> <img src="Graph/http_core/http_server_structure.png">
+		<p> <code>ngx_http_???_srv_conf_t[]</code>数组管理所有HTTP Module对应的Server数据结构指针，如果模块没有Server数据结构则指针为空。
+		<p> 多个Server以如下方式管理：
+		<p> <img src="Graph/http_core/http_server_manager.png">
+		<p> 从上述二图可以推出由全局变量<code>ngx_cycle</code>出发可以找到任何一个模块的Server数据结构。
+	<h2> 2.2 - Address/Port 管理 </h2>	
+		<p> Server Address Port配置解析完成后管理如下：
+		<p> <img src="Graph/http_core/http_server_address_port.png">
+		<p> <code>ngx_http_optimize_servers()</code> 根据上述数据创建<code>ngx_listening_t</code> (参见Nginx Event Mechanism)
+		<p> <img src="Graph/http_core/http_server_listening.png">
+		<p> 
+	<h2> 2.3 - 查找 Server </h2>
+		<p>	当收到请求后，需要根据Address Port URL Host找到所属的Server。
+		<p> 在<code>ngx_http_init_request()</code>中根据上图先找到默认的Server，当URL Host得到后再通过<code>ngx_http_find_virtual_server()</code>重新查找所属的Server。
 <h1> 3 - Location </h1>
 <h1> 4 - Request </h1>
 <h1> 5 - Phase Handler </h1>
@@ -37,10 +61,39 @@
 		<li>CONTENT</li>
 			响应内容产生。
 	</ul>
-	<h2> 5.1 - Phases </h2>
+	<h2> 5.1 - Phase Register </h2>
 		<p> 各个HTTP Phase Handler类型的模块在postconfiguration回调函数中向各阶段注册回调函数来实现模块功能。
-		注册完成后如下图的phases所管理二维数组所示：
+		例如<code>http_static_module</code>模块在<code>ngx_http_static_init()</code>向NGX_HTTP_CONTENT_PHASE阶段注册了<code>ngx_http_static_handler()</code>：
+		<pre>
+ngx_http_module_t  ngx_http_static_module_ctx = {
+    NULL,                                  /* preconfiguration */
+    ngx_http_static_init,                  /* postconfiguration */
+    ...
+};
+
+......
+		
+static ngx_int_t ngx_http_static_init(ngx_conf_t *cf)
+{
+    ngx_http_handler_pt        *h;
+    ngx_http_core_main_conf_t  *cmcf;
+
+    cmcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_core_module);
+
+    h = ngx_array_push(&cmcf->phases[NGX_HTTP_CONTENT_PHASE].handlers);
+    if (h == NULL) {
+        return NGX_ERROR;
+    }
+    *h = ngx_http_static_handler;
+
+    return NGX_OK;
+}		
+		</pre>
+		<p> 注册完成后如下图的phases所管理二维数组所示：
 		<p> <img src="Graph/http_core/http_phase_table.png">
+		<p> 因为是在模块的postconfiguration回调函数注册的，所以各个模块的次序决定了各个阶段处理函的次序。
+		各个内部模块的次序是在配置脚本中(硬编码)指定的，这是一个很不方便也是容易出错的方法，另一方面外部模块总是在末尾(参见<code>auto/modules HTTP_MODULES</code>)。
+		建议在各模块中设定优先级，启动时根据优先级排序。
 		<p> Nginx遍历此二维数组，即可完成请求处理。但为了达到更佳的性能，由phase_engine重新组织了二维数组。
 	<h2> 5.2 - Phase Engine </h2>
 		<p> 遍历一维数组优于遍历二维数组。<code>ngx_http_init_phase_handlers()</code>将二维数组归并为一个一维数组，并用next指示出下一阶段开始的index。
@@ -131,9 +184,71 @@
 			</tr>
 		</table>
 	
+	<h2> 5.3 - External Phase Handler Module </h2>
+	<p> 参考 <code> http_concat_module </code>
+	<ul>
+		<li> 将模块源文件加入宏NGX_ADDON_SRCS，使得模块源代码可以进入编译链接。</li>
+		<li> 将模块加入宏HTTP_MODULES，使得模块注册进入全局模块数组 <code>ngx_modules[]</code> 。 </li>
+	</ul>
+	以上的工作在外部模块的目录下的<code>config</code>脚本中完成。如何让<code>configure</code>执行<code>config</code>呢？
+	<p> 在<code>configure</code>加入<code>--add-module=/path/to/module</code>参数指定外部模块的目录。<code>configure</code>执行时根据它找到<code>config</code>并执行。	
+	
 <h1> 6 - Filter Chain </h1>
+	<p> 共有二个过滤器串：Header和Body。
+	<p> <img src="Graph/http_core/http_filters.png">	
+	<h2> 6.1 - Header Filter </h2>
+		<p> Header过滤器串的作用是对Response Header作检查、修改，最后由<code>ngx_http_header_filter</code>
+		将<code>ngx_http_request_t::headers_out</code>组成字符串并由<code>ngx_http_write_filter</code>
+		加入发送队列<code>ngx_http_request_t::out</code>。
+	<h2> 6.2 - Body Filter </h2>
+		<p> Body过滤器串的作用是对Response Body作检查、修改，最后由<code>ngx_http_write_filter</code>加入发送队列<code>ngx_http_request_t::out</code>并将Response发送出去。
+	<h2> 6.3 - Filter Register </h2>	
+		<p> <img src="Graph/http_core/http_filter_chain.png">	
+		<p> 在源文件<code>ngx_http_core_module.c</code>中有二个全局函数指针变量 <code>ngx_http_top_header_filter</code>和<code>ngx_http_top_body_filter</code>。
+			它们分别是Header过滤器串和Body过滤器串的开始。
+		<p> 各个HTTP Filter 类型的模块在postconfiguration回调函数中注册回调函数来实现模块功能。
+		各个内部模块的次序是在配置脚本中(硬编码)指定的。
+		外部Header过滤器总是被加在http_headers_filter之后http_userid_filter之前。
+		外部Body过滤器总是被加在http_copy_filter之后http_charset_boy_filter之前。
+		
+		<p> 例如<code>http_not_modified_filter_module</code>模块在<code>ngx_http_not_modified_filter_init()</code>向Header过滤器串注册了<code>ngx_http_not_modified_header_filter()</code>：
+		<pre>
+static ngx_http_module_t  ngx_http_not_modified_filter_module_ctx = {
+    NULL,                                  /* preconfiguration */
+    ngx_http_not_modified_filter_init,     /* postconfiguration */
+    ...
+};
 
-					
+......
+
+static ngx_int_t ngx_http_not_modified_filter_init(ngx_conf_t *cf)
+{
+    ngx_http_next_header_filter = ngx_http_top_header_filter;
+    ngx_http_top_header_filter = ngx_http_not_modified_header_filter;
+
+    return NGX_OK;
+}			
+		</pre>	
+		<p> <code>ngx_http_top_header_filter</code>指向源文件<code>ngx_http_not_modified_filter_module.c</code>的函数<code>ngx_http_not_modified_header_filter()</code>。
+		<p> 在源文件<code>ngx_http_not_modified_filter_module.c</code>有函数指针<code>ngx_http_next_header_filter</code>，它指向源文件<code>ngx_http_header_filter_module.c</code>的函数<code>ngx_header_header_filter()</code>。
+		<p> <code>ngx_header_header_filter()</code>的下一个过滤器一定是<code>ngx_http_write_filter()</code>，所以源文件<code>ngx_http_header_filter_module.c</code>中没有<code>ngx_http_next_header_filter</code>。
+		<p> <code>ngx_http_write_filter()</code>作为最后一个过滤器，所以源文件<code>ngx_http_write_filter_module.c</code>中没有<code>ngx_http_next_body_filter</code>。
+	<h2> 6.3 - Filter Run </h2>	
+		<ul>
+			<li> <code>ngx_http_send_header()</code>调用由<code>ngx_http_top_header_filter</code>指向的<code>ngx_http_not_modified_header_filter()</code>。</li>
+			<li> <code>ngx_http_not_modified_header_filter()</code>做完自身的过滤操作后，调用由<code>ngx_http_next_header_filter</code>指向的<code>ngx_header_header_filter()</code>。</li>
+			<li> <code>ngx_header_header_filter()</code>做完过滤操作后，调用<code>ngx_http_write_filter()</code>后Header过滤完成。</li>
+		</ul>
+		<p> Body同理。
+		
+	<h2> 5.3 - External Filter Module </h2>
+	<p> 参考 <code> http_copyleft_module </code>
+	<ul>
+		<li> 将模块源文件加入宏NGX_ADDON_SRCS，使得模块源代码可以进入编译链接。</li>
+		<li> 将模块加入宏HTTP_FILTER_MODULES，使得模块注册进入过滤器串。 </li>
+	</ul>
+	以上的工作在外部模块的目录下的<code>config</code>脚本中完成。如何让<code>configure</code>执行<code>config</code>呢？
+	<p> 在<code>configure</code>加入<code>--add-module=/path/to/module</code>参数指定外部模块的目录。<code>configure</code>执行时根据它找到<code>config</code>并执行。		
 </body>
 
 </html>

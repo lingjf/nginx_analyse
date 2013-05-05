@@ -1,0 +1,26 @@
+digraph ngx_http_server_structure {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_http_conf_ctx_t [label="<head>ngx_http_conf_ctx_t|<main>main_conf|<srv>srv_conf|<loc>loc_conf"];
+   
+   srv_conf_array [label="<head>ngx_http_???_srv_conf_t*\[\]|<core>http_core|...|http_static = null|...|<uk>http_upstream_keepalive|..."];
+   
+   ngx_http_core_srv_conf_t [label="<head>ngx_http_core_srv_conf_t\{\}|<ctx>ctx|{server_names|{ngx_http_server_name_t[]|<sn1>*.example.com|<sn2>www.example.*}}|server_name = example.com|..."];
+   ngx_http_server_name_t1 [label="<head>ngx_http_server_name_t\{\}|<server>server|name=*.example.com"];
+   ngx_http_server_name_t2 [label="<head>ngx_http_server_name_t\{\}|<server>server|name=www.example.*"];
+   
+   ngx_http_upstream_keepalive_srv_conf_t [label="<head>ngx_http_upstream_keepalive_srv_conf_t\{\}|..."];
+
+   ngx_http_conf_ctx_t:srv -> srv_conf_array:head;
+   srv_conf_array:core -> ngx_http_core_srv_conf_t:head;
+   ngx_http_core_srv_conf_t:ctx -> ngx_http_conf_ctx_t:head;
+   ngx_http_core_srv_conf_t:sn1 -> ngx_http_server_name_t1:head;	
+   ngx_http_core_srv_conf_t:sn2 -> ngx_http_server_name_t2:head;	
+   
+   ngx_http_server_name_t1:server -> ngx_http_core_srv_conf_t:head:ne;
+   ngx_http_server_name_t2:server:e -> ngx_http_core_srv_conf_t:head;
+
+   srv_conf_array:uk -> ngx_http_upstream_keepalive_srv_conf_t:head;
+}

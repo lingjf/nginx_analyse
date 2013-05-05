@@ -709,7 +709,7 @@ ngx_http_core_server(ngx_conf_t *cf, ngx_command_t *cmd, void *dummy)
     *cf = pcf;
 
     if (rv == NGX_CONF_OK && !cscf->listen) {
-        /* Õâ¸ö Server ÖĞÃ»ÓĞÅäÖÃlisten£¬ ÓÚÊÇ¾Í¸øÒ»¸öÄ¬ÈÏµÄ 80 / 8000 */
+        /* ï¿½ï¿½ï¿½ Server ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½listenï¿½ï¿½ ï¿½ï¿½ï¿½Ç¾Í¸ï¿½Ò»ï¿½ï¿½Ä¬ï¿½Ïµï¿½ 80 / 8000 */
         ngx_memzero(&lsopt, sizeof(ngx_http_listen_opt_t));
 
         sin = &lsopt.u.sockaddr_in;
