@@ -136,24 +136,6 @@ static ngx_command_t  ngx_core_commands[] = {
       0,
       NULL },
 
-#if (NGX_THREADS)
-
-    { ngx_string("worker_threads"),
-      NGX_MAIN_CONF|NGX_DIRECT_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_num_slot,
-      0,
-      offsetof(ngx_core_conf_t, worker_threads),
-      NULL },
-
-    { ngx_string("thread_stack_size"),
-      NGX_MAIN_CONF|NGX_DIRECT_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_size_slot,
-      0,
-      offsetof(ngx_core_conf_t, thread_stack_size),
-      NULL },
-
-#endif
-
       ngx_null_command
 };
 
@@ -378,16 +360,14 @@ int ngx_cdecl main(int argc, char *const *argv)
     if (cycle->log->file->fd != ngx_stderr) {
 
         if (ngx_set_stderr(cycle->log->file->fd) == NGX_FILE_ERROR) {
-            ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
-                          ngx_set_stderr_n " failed");
+            ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno, ngx_set_stderr_n " failed");
             return 1;
         }
     }
 
     if (log->file->fd != ngx_stderr) {
         if (ngx_close_file(log->file->fd) == NGX_FILE_ERROR) {
-            ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
-                          ngx_close_file_n " built-in log failed");
+            ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno, ngx_close_file_n " built-in log failed");
         }
     }
 

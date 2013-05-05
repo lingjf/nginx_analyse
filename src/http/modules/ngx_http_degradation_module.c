@@ -29,10 +29,8 @@ static ngx_conf_enum_t  ngx_http_degrade[] = {
 
 static void *ngx_http_degradation_create_main_conf(ngx_conf_t *cf);
 static void *ngx_http_degradation_create_loc_conf(ngx_conf_t *cf);
-static char *ngx_http_degradation_merge_loc_conf(ngx_conf_t *cf, void *parent,
-    void *child);
-static char *ngx_http_degradation(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+static char *ngx_http_degradation_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child);
+static char *ngx_http_degradation(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static ngx_int_t ngx_http_degradation_init(ngx_conf_t *cf);
 
 
@@ -118,8 +116,6 @@ ngx_http_degraded(ngx_http_request_t *r)
         log = 0;
         now = ngx_time();
 
-        /* lock mutex */
-
         if (now != sbrk_time) {
 
             /*
@@ -134,13 +130,9 @@ ngx_http_degraded(ngx_http_request_t *r)
             log = 1;
         }
 
-        /* unlock mutex */
-
         if (sbrk_size >= dmcf->sbrk_size) {
             if (log) {
-                ngx_log_error(NGX_LOG_NOTICE, r->connection->log, 0,
-                              "degradation sbrk:%uzM",
-                              sbrk_size / (1024 * 1024));
+                ngx_log_error(NGX_LOG_NOTICE, r->connection->log, 0, "degradation sbrk:%uzM", sbrk_size / (1024 * 1024));
             }
 
             return 1;
@@ -209,16 +201,14 @@ ngx_http_degradation(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
         dmcf->sbrk_size = ngx_parse_size(&s);
         if (dmcf->sbrk_size == (size_t) NGX_ERROR) {
-            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                               "invalid sbrk size \"%V\"", &value[1]);
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid sbrk size \"%V\"", &value[1]);
             return NGX_CONF_ERROR;
         }
 
         return NGX_CONF_OK;
     }
 
-    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                       "invalid parameter \"%V\"", &value[1]);
+    ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "invalid parameter \"%V\"", &value[1]);
 
     return NGX_CONF_ERROR;
 }

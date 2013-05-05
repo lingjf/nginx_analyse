@@ -84,8 +84,7 @@ ngx_signal_t  signals[] = {
 
 
 ngx_pid_t
-ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
-    char *name, ngx_int_t respawn)
+ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data, char *name, ngx_int_t respawn)
 {
     u_long     on;
     ngx_pid_t  pid;
@@ -404,14 +403,10 @@ ngx_signal_handler(int signo)
         break;
     }
 
-    ngx_log_error(NGX_LOG_NOTICE, ngx_cycle->log, 0,
-                  "signal %d (%s) received%s", signo, sig->signame, action);
+    ngx_log_error(NGX_LOG_NOTICE, ngx_cycle->log, 0, "signal %d (%s) received%s", signo, sig->signame, action);
 
     if (ignore) {
-        ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, 0,
-                      "the changing binary signal is ignored: "
-                      "you should shutdown or terminate "
-                      "before either old or new binary's process");
+        ngx_log_error(NGX_LOG_CRIT, ngx_cycle->log, 0, "the changing binary signal is ignored: you should shutdown or terminate before either old or new binary's process");
     }
 
     if (signo == SIGCHLD) {
@@ -464,15 +459,13 @@ ngx_process_get_status(void)
              */
 
             if (err == NGX_ECHILD) {
-                ngx_log_error(NGX_LOG_INFO, ngx_cycle->log, err,
-                              "waitpid() failed");
+                ngx_log_error(NGX_LOG_INFO, ngx_cycle->log, err, "waitpid() failed");
                 return;
             }
 
 #endif
 
-            ngx_log_error(NGX_LOG_ALERT, ngx_cycle->log, err,
-                          "waitpid() failed");
+            ngx_log_error(NGX_LOG_ALERT, ngx_cycle->log, err, "waitpid() failed");
             return;
         }
 
@@ -491,27 +484,17 @@ ngx_process_get_status(void)
 
         if (WTERMSIG(status)) {
 #ifdef WCOREDUMP
-            ngx_log_error(NGX_LOG_ALERT, ngx_cycle->log, 0,
-                          "%s %P exited on signal %d%s",
-                          process, pid, WTERMSIG(status),
-                          WCOREDUMP(status) ? " (core dumped)" : "");
+            ngx_log_error(NGX_LOG_ALERT, ngx_cycle->log, 0, "%s %P exited on signal %d%s", process, pid, WTERMSIG(status), WCOREDUMP(status) ? " (core dumped)" : "");
 #else
-            ngx_log_error(NGX_LOG_ALERT, ngx_cycle->log, 0,
-                          "%s %P exited on signal %d",
-                          process, pid, WTERMSIG(status));
+            ngx_log_error(NGX_LOG_ALERT, ngx_cycle->log, 0, "%s %P exited on signal %d", process, pid, WTERMSIG(status));
 #endif
 
         } else {
-            ngx_log_error(NGX_LOG_NOTICE, ngx_cycle->log, 0,
-                          "%s %P exited with code %d",
-                          process, pid, WEXITSTATUS(status));
+            ngx_log_error(NGX_LOG_NOTICE, ngx_cycle->log, 0, "%s %P exited with code %d", process, pid, WEXITSTATUS(status));
         }
 
         if (WEXITSTATUS(status) == 2 && ngx_processes[i].respawn) {
-            ngx_log_error(NGX_LOG_ALERT, ngx_cycle->log, 0,
-                          "%s %P exited with fatal code %d "
-                          "and cannot be respawned",
-                          process, pid, WEXITSTATUS(status));
+            ngx_log_error(NGX_LOG_ALERT, ngx_cycle->log, 0, "%s %P exited with fatal code %d " "and cannot be respawned", process, pid, WEXITSTATUS(status));
             ngx_processes[i].respawn = 0;
         }
 
@@ -528,19 +511,13 @@ ngx_unlock_mutexes(ngx_pid_t pid)
     ngx_list_part_t  *part;
     ngx_slab_pool_t  *sp;
 
-    /*
-     * unlock the accept mutex if the abnormally exited process
-     * held it
-     */
+    /* unlock the accept mutex if the abnormally exited process held it */
 
     if (ngx_accept_mutex_ptr) {
         (void) ngx_shmtx_force_unlock(&ngx_accept_mutex, pid);
     }
 
-    /*
-     * unlock shared memory mutexes if held by the abnormally exited
-     * process
-     */
+    /* unlock shared memory mutexes if held by the abnormally exited process */
 
     part = (ngx_list_part_t *) &ngx_cycle->shared_memory.part;
     shm_zone = part->elts;
@@ -559,9 +536,7 @@ ngx_unlock_mutexes(ngx_pid_t pid)
         sp = (ngx_slab_pool_t *) shm_zone[i].shm.addr;
 
         if (ngx_shmtx_force_unlock(&sp->mutex, pid)) {
-            ngx_log_error(NGX_LOG_ALERT, ngx_cycle->log, 0,
-                          "shared memory zone \"%V\" was locked by %P",
-                          &shm_zone[i].shm.name, pid);
+            ngx_log_error(NGX_LOG_ALERT, ngx_cycle->log, 0, "shared memory zone \"%V\" was locked by %P", &shm_zone[i].shm.name, pid);
         }
     }
 }

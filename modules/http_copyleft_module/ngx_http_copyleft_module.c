@@ -85,12 +85,12 @@ ngx_http_copyleft_header_filter(ngx_http_request_t *r)
        return NGX_ERROR;
     }
 
-    if (!ngx_strncasecmp(r->headers_out.content_type.data, "text/html", ngx_min(sizeof("text/html"), r->headers_out.content_type.len))) {
+    if (!ngx_strncasecmp(r->headers_out.content_type.data, "text/html", sizeof("text/html"))) {
        ctx->copyleft.len = sizeof("<!-- ") + lcf->copyleft.len + sizeof(" -->\n");
        ctx->copyleft.data = ngx_pcalloc(r->pool, ctx->copyleft.len + 1);
        ngx_sprintf(ctx->copyleft.data, "<!-- %V -->\n", &lcf->copyleft);
 
-    } else if (!ngx_strncasecmp(r->headers_out.content_type.data, "text/css", ngx_min(sizeof("text/css"), r->headers_out.content_type.len))){
+    } else if (!ngx_strncasecmp(r->headers_out.content_type.data, "text/css", sizeof("text/css"))){
        ctx->copyleft.len = sizeof("/* ") + lcf->copyleft.len + sizeof(" */\n");
        ctx->copyleft.data = ngx_pcalloc(r->pool, ctx->copyleft.len + 1);
        ngx_sprintf(ctx->copyleft.data, "/* %V */\n", &lcf->copyleft);

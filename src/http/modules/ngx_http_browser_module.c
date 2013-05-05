@@ -55,28 +55,19 @@ typedef struct {
 } ngx_http_browser_conf_t;
 
 
-static ngx_int_t ngx_http_msie_variable(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data);
-static ngx_int_t ngx_http_browser_variable(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data);
+static ngx_int_t ngx_http_msie_variable(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data);
+static ngx_int_t ngx_http_browser_variable(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data);
 
-static ngx_uint_t ngx_http_browser(ngx_http_request_t *r,
-    ngx_http_browser_conf_t *cf);
+static ngx_uint_t ngx_http_browser(ngx_http_request_t *r, ngx_http_browser_conf_t *cf);
 
 static ngx_int_t ngx_http_browser_add_variable(ngx_conf_t *cf);
 static void *ngx_http_browser_create_conf(ngx_conf_t *cf);
-static char *ngx_http_browser_merge_conf(ngx_conf_t *cf, void *parent,
-    void *child);
-static int ngx_libc_cdecl ngx_http_modern_browser_sort(const void *one,
-    const void *two);
-static char *ngx_http_modern_browser(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char *ngx_http_ancient_browser(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char *ngx_http_modern_browser_value(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
-static char *ngx_http_ancient_browser_value(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+static char *ngx_http_browser_merge_conf(ngx_conf_t *cf, void *parent, void *child);
+static int ngx_libc_cdecl ngx_http_modern_browser_sort(const void *one, const void *two);
+static char *ngx_http_modern_browser(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_ancient_browser(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_modern_browser_value(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char *ngx_http_ancient_browser_value(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 
 static ngx_command_t  ngx_http_browser_commands[] = {
@@ -220,10 +211,8 @@ static ngx_http_modern_browser_mask_t  ngx_http_modern_browser_masks[] = {
 
 static ngx_http_browser_variable_t  ngx_http_browsers[] = {
     { ngx_string("msie"), ngx_http_msie_variable, 0 },
-    { ngx_string("modern_browser"), ngx_http_browser_variable,
-          NGX_HTTP_MODERN_BROWSER },
-    { ngx_string("ancient_browser"), ngx_http_browser_variable,
-          NGX_HTTP_ANCIENT_BROWSER },
+    { ngx_string("modern_browser"), ngx_http_browser_variable, NGX_HTTP_MODERN_BROWSER },
+    { ngx_string("ancient_browser"), ngx_http_browser_variable, NGX_HTTP_ANCIENT_BROWSER },
     { ngx_null_string, NULL, 0 }
 };
 

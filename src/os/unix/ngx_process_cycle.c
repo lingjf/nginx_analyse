@@ -54,11 +54,6 @@ ngx_uint_t    ngx_noaccepting;
 ngx_uint_t    ngx_restart;
 
 
-#if (NGX_THREADS)
-volatile ngx_thread_t  ngx_threads[NGX_MAX_THREADS];
-ngx_int_t              ngx_threads_n;
-#endif
-
 
 uint64_t       cpu_affinity;
 static u_char  master_process[] = "master process";
@@ -165,8 +160,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
 
         ngx_time_update();
 
-        ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
-                       "wake up, sigio %i", sigio);
+        ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0, "wake up, sigio %i", sigio);
 
         if (ngx_reap) {
             ngx_reap = 0;
@@ -176,6 +170,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
         }
 
         if (!live && (ngx_terminate || ngx_quit)) {
+            /* 唯一退出通道 */
             ngx_master_process_exit(cycle);
         }
 
@@ -562,37 +557,21 @@ ngx_reap_children(ngx_cycle_t *cycle)
                 ch.slot = i;
 
                 for (n = 0; n < ngx_last_process; n++) {
-                    if (ngx_processes[n].exited
-                        || ngx_processes[n].pid == -1
-                        || ngx_processes[n].channel[0] == -1)
-                    {
+                    if (ngx_processes[n].exited || ngx_processes[n].pid == -1 || ngx_processes[n].channel[0] == -1) {
                         continue;
                     }
 
-                    ngx_log_debug3(NGX_LOG_DEBUG_CORE, cycle->log, 0,
-                                   "pass close channel s:%i pid:%P to:%P",
-                                   ch.slot, ch.pid, ngx_processes[n].pid);
+                    ngx_log_debug3(NGX_LOG_DEBUG_CORE, cycle->log, 0, "pass close channel s:%i pid:%P to:%P", ch.slot, ch.pid, ngx_processes[n].pid);
 
                     /* TODO: NGX_AGAIN */
 
-                    ngx_write_channel(ngx_processes[n].channel[0],
-                                      &ch, sizeof(ngx_channel_t), cycle->log);
+                    ngx_write_channel(ngx_processes[n].channel[0], &ch, sizeof(ngx_channel_t), cycle->log);
                 }
             }
 
-            if (ngx_processes[i].respawn
-                && !ngx_processes[i].exiting
-                && !ngx_terminate
-                && !ngx_quit)
-            {
-                if (ngx_spawn_process(cycle, ngx_processes[i].proc,
-                                      ngx_processes[i].data,
-                                      ngx_processes[i].name, i)
-                    == NGX_INVALID_PID)
-                {
-                    ngx_log_error(NGX_LOG_ALERT, cycle->log, 0,
-                                  "could not respawn %s",
-                                  ngx_processes[i].name);
+            if (ngx_processes[i].respawn && !ngx_processes[i].exiting && !ngx_terminate && !ngx_quit) {
+                if (ngx_spawn_process(cycle, ngx_processes[i].proc, ngx_processes[i].data, ngx_processes[i].name, i) == NGX_INVALID_PID) {
+                    ngx_log_error(NGX_LOG_ALERT, cycle->log, 0, "could not respawn %s", ngx_processes[i].name);
                     continue;
                 }
 
@@ -611,17 +590,10 @@ ngx_reap_children(ngx_cycle_t *cycle)
 
             if (ngx_processes[i].pid == ngx_new_binary) {
 
-                ccf = (ngx_core_conf_t *) ngx_get_conf(cycle->conf_ctx,
-                                                       ngx_core_module);
+                ccf = (ngx_core_conf_t *) ngx_get_conf(cycle->conf_ctx, ngx_core_module);
 
-                if (ngx_rename_file((char *) ccf->oldpid.data,
-                                    (char *) ccf->pid.data)
-                    != NGX_OK)
-                {
-                    ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
-                                  ngx_rename_file_n " %s back to %s failed "
-                                  "after the new binary process \"%s\" exited",
-                                  ccf->oldpid.data, ccf->pid.data, ngx_argv[0]);
+                if (ngx_rename_file((char *) ccf->oldpid.data, (char *) ccf->pid.data) != NGX_OK) {
+                    ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno, ngx_rename_file_n " %s back to %s failed " "after the new binary process \"%s\" exited", ccf->oldpid.data, ccf->pid.data, ngx_argv[0]);
                 }
 
                 ngx_new_binary = 0;
@@ -698,52 +670,6 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
     ngx_worker_process_init(cycle, 1);
 
     ngx_setproctitle("worker process");
-
-#if (NGX_THREADS)
-    {
-    ngx_int_t         n;
-    ngx_err_t         err;
-    ngx_core_conf_t  *ccf;
-
-    ccf = (ngx_core_conf_t *) ngx_get_conf(cycle->conf_ctx, ngx_core_module);
-
-    if (ngx_threads_n) {
-        if (ngx_init_threads(ngx_threads_n, ccf->thread_stack_size, cycle)
-            == NGX_ERROR)
-        {
-            /* fatal */
-            exit(2);
-        }
-
-        err = ngx_thread_key_create(&ngx_core_tls_key);
-        if (err != 0) {
-            ngx_log_error(NGX_LOG_ALERT, cycle->log, err,
-                          ngx_thread_key_create_n " failed");
-            /* fatal */
-            exit(2);
-        }
-
-        for (n = 0; n < ngx_threads_n; n++) {
-
-            ngx_threads[n].cv = ngx_cond_init(cycle->log);
-
-            if (ngx_threads[n].cv == NULL) {
-                /* fatal */
-                exit(2);
-            }
-
-            if (ngx_create_thread((ngx_tid_t *) &ngx_threads[n].tid,
-                                  ngx_worker_thread_cycle,
-                                  (void *) &ngx_threads[n], cycle->log)
-                != 0)
-            {
-                /* fatal */
-                exit(2);
-            }
-        }
-    }
-    }
-#endif
 
     for ( ;; ) {
 
@@ -949,12 +875,6 @@ ngx_worker_process_exit(ngx_cycle_t *cycle)
     ngx_uint_t         i;
     ngx_connection_t  *c;
 
-#if (NGX_THREADS)
-    ngx_terminate = 1;
-
-    ngx_wakeup_worker_threads(cycle);
-#endif
-
     for (i = 0; ngx_modules[i]; i++) {
         if (ngx_modules[i]->exit_process) {
             ngx_modules[i]->exit_process(cycle);
@@ -1072,134 +992,6 @@ ngx_channel_handler(ngx_event_t *ev)
         }
     }
 }
-
-
-#if (NGX_THREADS)
-
-static void
-ngx_wakeup_worker_threads(ngx_cycle_t *cycle)
-{
-    ngx_int_t   i;
-    ngx_uint_t  live;
-
-    for ( ;; ) {
-
-        live = 0;
-
-        for (i = 0; i < ngx_threads_n; i++) {
-            if (ngx_threads[i].state < NGX_THREAD_EXIT) {
-                if (ngx_cond_signal(ngx_threads[i].cv) == NGX_ERROR) {
-                    ngx_threads[i].state = NGX_THREAD_DONE;
-
-                } else {
-                    live = 1;
-                }
-            }
-
-            if (ngx_threads[i].state == NGX_THREAD_EXIT) {
-                ngx_thread_join(ngx_threads[i].tid, NULL);
-                ngx_threads[i].state = NGX_THREAD_DONE;
-            }
-        }
-
-        if (live == 0) {
-            ngx_log_debug0(NGX_LOG_DEBUG_CORE, cycle->log, 0,
-                           "all worker threads are joined");
-
-            /* STUB */
-            ngx_done_events(cycle);
-            ngx_mutex_destroy(ngx_event_timer_mutex);
-            ngx_mutex_destroy(ngx_posted_events_mutex);
-
-            return;
-        }
-
-        ngx_sched_yield();
-    }
-}
-
-
-static ngx_thread_value_t
-ngx_worker_thread_cycle(void *data)
-{
-    ngx_thread_t  *thr = data;
-
-    sigset_t          set;
-    ngx_err_t         err;
-    ngx_core_tls_t   *tls;
-    ngx_cycle_t      *cycle;
-
-    cycle = (ngx_cycle_t *) ngx_cycle;
-
-    sigemptyset(&set);
-    sigaddset(&set, ngx_signal_value(NGX_RECONFIGURE_SIGNAL));
-    sigaddset(&set, ngx_signal_value(NGX_REOPEN_SIGNAL));
-    sigaddset(&set, ngx_signal_value(NGX_CHANGEBIN_SIGNAL));
-
-    err = ngx_thread_sigmask(SIG_BLOCK, &set, NULL);
-    if (err) {
-        ngx_log_error(NGX_LOG_ALERT, cycle->log, err,
-                      ngx_thread_sigmask_n " failed");
-        return (ngx_thread_value_t) 1;
-    }
-
-    ngx_log_debug1(NGX_LOG_DEBUG_CORE, cycle->log, 0,
-                   "thread " NGX_TID_T_FMT " started", ngx_thread_self());
-
-    ngx_setthrtitle("worker thread");
-
-    tls = ngx_calloc(sizeof(ngx_core_tls_t), cycle->log);
-    if (tls == NULL) {
-        return (ngx_thread_value_t) 1;
-    }
-
-    err = ngx_thread_set_tls(ngx_core_tls_key, tls);
-    if (err != 0) {
-        ngx_log_error(NGX_LOG_ALERT, cycle->log, err,
-                      ngx_thread_set_tls_n " failed");
-        return (ngx_thread_value_t) 1;
-    }
-
-    ngx_mutex_lock(ngx_posted_events_mutex);
-
-    for ( ;; ) {
-        thr->state = NGX_THREAD_FREE;
-
-        if (ngx_cond_wait(thr->cv, ngx_posted_events_mutex) == NGX_ERROR) {
-            return (ngx_thread_value_t) 1;
-        }
-
-        if (ngx_terminate) {
-            thr->state = NGX_THREAD_EXIT;
-
-            ngx_mutex_unlock(ngx_posted_events_mutex);
-
-            ngx_log_debug1(NGX_LOG_DEBUG_CORE, cycle->log, 0,
-                           "thread " NGX_TID_T_FMT " is done",
-                           ngx_thread_self());
-
-            return (ngx_thread_value_t) 0;
-        }
-
-        thr->state = NGX_THREAD_BUSY;
-
-        if (ngx_event_thread_process_posted(cycle) == NGX_ERROR) {
-            return (ngx_thread_value_t) 1;
-        }
-
-        if (ngx_event_thread_process_posted(cycle) == NGX_ERROR) {
-            return (ngx_thread_value_t) 1;
-        }
-
-        if (ngx_process_changes) {
-            if (ngx_process_changes(cycle, 1) == NGX_ERROR) {
-                return (ngx_thread_value_t) 1;
-            }
-        }
-    }
-}
-
-#endif
 
 
 static void
