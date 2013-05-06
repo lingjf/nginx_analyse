@@ -85,6 +85,14 @@ code {
 	padding:3px 5px;
 }
 
+directive {
+	color: #00a000 ;
+}
+
+arguments {
+	color: #a00000 ;
+}
+
 
 .table002 {
 	width: 70%;

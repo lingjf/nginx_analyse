@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<title>Nginx Process Model</title>
+	<title>Nginx Module Model</title>
 	<link rel="stylesheet" type="text/css" href="Style/nginx_analyse.css">
 	<META HTTP-EQUIV="content-type" CONTENT="text/html; charset=utf8">
 </head>
@@ -10,8 +10,68 @@
 <body>
 
 <h1> 1 - 概述  </h1>
+	<p> Nginx提供的功能都由模块来实现，和Apache不同Nginx的模块不能运行时安装，只能在编译时静态链接进入。
+	<p> Nginx模块类型分为四类：
+	<ul>
+		<li>CORE ：总管理模块，共有三个具体模块 core、events、http </li>
+		<li>CONF ：配置模块，只有conf </li>
+		<li>EVENT ：事件模块，有event_core和select、epoll、poll、kqueue等 </li>
+		<li>HTTP ：HTTP处理模块，有http_core和http_upstream、http_static等 </li>
+	</ul>
+<h1> 2 - 模块定义  </h1>			
+	<p> <img src="Graph/module_model/ngx_module.png">
+	<p> ngx_module_t 是一个公共的结构体，每个模块都有它的一个实例(全局变量)。但是四类模块又有自已特有的属性，于是在ngx_module_t开发了一个ctx指针指向各类模块特有的数据结构。
+	<ul>
+		<li>CORE ：ngx_core_module_t </li>
+		<li>CONF ：没有 </li>
+		<li>EVENT ：ngx_event_module_t </li>
+		<li>HTTP ：ngx_http_module_t </li>
+	</ul>
+	
+	<h3> ngx_module_t  </h3>	
+	<ul>
+		<li>type</li>
+		模块的类型（CORE、CONF、EVENT、HTTP）
+		<li>index</li>
+		所有模块间的索引
+		<li>ctx_index</li>
+		同类模块间的索引
+		<li>ctx</li>
+		各类模块特有的数据结构
+		<li>init_master()</li>
+		初始化Master时，回调该函数
+		<li>init_module()</li>
+		初始化Module时，回调该函数
+		<li>init_process()</li>
+		初始化Worker时，回调该函数
+		<li>exit_process()</li>
+		退出Worker时，回调该函数
+		<li>exit_master()</li>
+		退出Master时，回调该函数
+	</ul>
+	
+<h1> 3 - 模块组织  </h1>	
+	<p> <img src="Graph/module_model/ngx_modules.png">
+	<p> 在 <code>objs/ngx_modules.c</code> 文件中定义了全局数组变量 <code>ngx_modules[]</code>，所有的模块都被<code>auto/modules</code>添加到了这个数组中。
 
-					
+<h1> 4 - 模块运作  </h1>	
+	<p> 在 <code>init_master()/init_module()/init_process()</code> 等回调函数中，注册业务回调函数，在业务回调函数中处理业务。
+
+
+<h1> 5 - 自定义外部模块  </h1>	
+	<p>参见Nginx HTTP Core / External Phase Handler Module
+	<p>参见Nginx HTTP Core / External Filter Module
+
+
+<h1> 6 - Prototype  </h1>	
+	<p> <a href="https://github.com/lingjf/nginx_analyse/tree/master/prototype/nginx_configure"> https://github.com/lingjf/nginx_analyse/tree/master/prototype/nginx_configure </a>
+
+	<p> Prototype删除了和进程模型不相关的功能，以及出错处理等代码。
+	
+<h1> 7 - Latest Version  </h1>			
+	<p> <a href="https://github.com/lingjf/nginx_analyse/tree/master/doc/05CN_Nginx_Module_Model.html"> https://github.com/lingjf/nginx_analyse/tree/master/doc/05CN_Nginx_Module_Model.html </a>
+
+	<p> Ling Jianfa  lingjf@gmail.com   <a href="https://github.com/lingjf"> https://github.com/lingjf </a>		
 </body>
 
 </html>

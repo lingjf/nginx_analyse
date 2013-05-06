@@ -3,45 +3,50 @@ digraph ngx_module {
    node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
    edge [color=forestgreen, fontname="Verdana", fontsize=10];
 
-   ngx_modules [label="ngx_module_t\nngx_modules[]|<core>core_module|<events>events_module|<http>http_module|<conf>conf_module|<eventcore>event_core_module|<epoll>epoll_module|<httpcore>http_core_module|http_upstream_module|......", height=6];
+   ngx_modules [shape="box3d", label="ngx_modules"];
+   ngx_module_t [label="<head>ngx_module_t[]|<core>core_module|<events>events_module|<http>http_module|<conf>conf_module|<eventcore>event_core_module|<epoll>epoll_module|<httpcore>http_core_module|http_upstream_module|......", height=6];
    
-   ngx_core_module[label="ngx_module_t\{\}|type=CORE|<commands>commands"];
-   ngx_core_commands[label="ngx_command_t[]|<daemon>daemon|worker_processes|..."];
-   ngx_daemon_command[label="ngx_command_t\{\}|name=daemon|type=main,direct,flag|ngx_conf_set_flag_slot|ngx_core_conf_t::daemon"];
-   ngx_modules:core -> ngx_core_module:nw;
-   ngx_core_module:commands -> ngx_core_commands:nw;
-   ngx_core_commands:daemon -> ngx_daemon_command:nw;
+   ngx_modules -> ngx_module_t:head;
 
-   ngx_events_module[label="ngx_module_t\{\}|type=CORE|<commands>commands"];
-   ngx_events_commands[label="ngx_command_t[]|<events>events"];
-   ngx_events_command[label="ngx_command_t\{\}|name=events|type=main,block,noargs|ngx_events_block|0..."];
-   ngx_modules:events -> ngx_events_module:nw;
-   ngx_events_module:commands -> ngx_events_commands:nw;
-   ngx_events_commands:events -> ngx_events_command:nw;
+   {rank=same;ngx_modules;ngx_module_t};
 
-   ngx_http_module[label="ngx_module_t\{\}|type=CORE|<commands>commands"];
-   ngx_http_commands[label="ngx_command_t[]|<http>http"];
-   ngx_http_command[label="ngx_command_t\{\}|name=http|type=main,block,noargs|ngx_http_block|0..."];
-   ngx_modules:http -> ngx_http_module:nw;
-   ngx_http_module:commands -> ngx_http_commands:nw;
-   ngx_http_commands:http -> ngx_http_command:nw;
+   ngx_core_module[label="<head>ngx_module_t\{\}|type=CORE|<commands>commands"];
+   ngx_core_commands[label="<head>ngx_command_t[]|<daemon>daemon|worker_processes|..."];
+   ngx_daemon_command[label="<head>ngx_command_t\{\}|name=daemon|type=main,direct,flag|ngx_conf_set_flag_slot|ngx_core_conf_t::daemon"];
+   ngx_module_t:core -> ngx_core_module:head;
+   ngx_core_module:commands -> ngx_core_commands:head;
+   ngx_core_commands:daemon -> ngx_daemon_command:head;
 
-   ngx_conf_module[label="ngx_module_t\{\}|type=CONF|<commands>commands"];
-   ngx_conf_commands[label="ngx_command_t[]|include"];
-   ngx_modules:conf -> ngx_conf_module:nw;
-   ngx_conf_module:commands -> ngx_conf_commands:nw;
+   ngx_events_module[label="<head>ngx_module_t\{\}|type=CORE|<commands>commands"];
+   ngx_events_commands[label="<head>ngx_command_t[]|<events>events"];
+   ngx_events_command[label="<head>ngx_command_t\{\}|name=events|type=main,block,noargs|ngx_events_block|0..."];
+   ngx_module_t:events -> ngx_events_module:head;
+   ngx_events_module:commands -> ngx_events_commands:head;
+   ngx_events_commands:events -> ngx_events_command:head;
 
-   ngx_event_core_module[label="ngx_module_t\{\}|type=EVENT|<commands>commands"];
-   ngx_event_core_commands[label="ngx_command_t[]|<cn>connections|<am>accept_mutex|..."];
-   ngx_accept_mutex_command[label="ngx_command_t\{\}|name=accept_mutex|type=event,flag|ngx_conf_set_flag_slot|ngx_event_conf_t::accept_mutex"];
-   ngx_modules:eventcore -> ngx_event_core_module:nw;
-   ngx_event_core_module:commands -> ngx_event_core_commands:nw;
-   ngx_event_core_commands:am -> ngx_accept_mutex_command:nw;
+   ngx_http_module[label="<head>ngx_module_t\{\}|type=CORE|<commands>commands"];
+   ngx_http_commands[label="<head>ngx_command_t[]|<http>http"];
+   ngx_http_command[label="<head>ngx_command_t\{\}|name=http|type=main,block,noargs|ngx_http_block|0..."];
+   ngx_module_t:http -> ngx_http_module:head;
+   ngx_http_module:commands -> ngx_http_commands:head;
+   ngx_http_commands:http -> ngx_http_command:head;
 
-   ngx_http_core_module[label="ngx_module_t\{\}|type=HTTP|<commands>commands"];
-   ngx_http_core_commands[label="ngx_command_t[]|server|<listen>listen|location|..."];
-   ngx_listen_command[label="ngx_command_t\{\}|name=listen|type=http_srv_conf,1more|ngx_http_core_listen|conf=NGX_HTTP_SRV_CONF_OFFSET|offset=0|post=null"];
-   ngx_modules:httpcore -> ngx_http_core_module:nw;
-   ngx_http_core_module:commands -> ngx_http_core_commands:nw;
-   ngx_http_core_commands:listen -> ngx_listen_command:nw;
+   ngx_conf_module[label="<head>ngx_module_t\{\}|type=CONF|<commands>commands"];
+   ngx_conf_commands[label="<head>ngx_command_t[]|include"];
+   ngx_module_t:conf -> ngx_conf_module:head;
+   ngx_conf_module:commands -> ngx_conf_commands:head;
+
+   ngx_event_core_module[label="<head>ngx_module_t\{\}|type=EVENT|<commands>commands"];
+   ngx_event_core_commands[label="<head>ngx_command_t[]|<cn>connections|<am>accept_mutex|..."];
+   ngx_accept_mutex_command[label="<head>ngx_command_t\{\}|name=accept_mutex|type=event,flag|ngx_conf_set_flag_slot|ngx_event_conf_t::accept_mutex"];
+   ngx_module_t:eventcore -> ngx_event_core_module:head;
+   ngx_event_core_module:commands -> ngx_event_core_commands:head;
+   ngx_event_core_commands:am -> ngx_accept_mutex_command:head;
+
+   ngx_http_core_module[label="<head>ngx_module_t\{\}|type=HTTP|<commands>commands"];
+   ngx_http_core_commands[label="<head>ngx_command_t[]|server|<listen>listen|location|..."];
+   ngx_listen_command[label="<head>ngx_command_t\{\}|name=listen|type=http_srv_conf,1more|ngx_http_core_listen|conf=NGX_HTTP_SRV_CONF_OFFSET|offset=0|post=null"];
+   ngx_module_t:httpcore -> ngx_http_core_module:head;
+   ngx_http_core_module:commands -> ngx_http_core_commands:head;
+   ngx_http_core_commands:listen -> ngx_listen_command:head;
 }
