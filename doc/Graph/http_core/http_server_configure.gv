@@ -1,0 +1,65 @@
+digraph ngx_http_server_configure {
+
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=green3, fontname="Verdana", fontsize=10];
+
+   // L0
+   ngx_cycle [shape="box3d", label="ngx_cycle"];
+   ngx_cycle_t [label="<head>ngx_cycle_t\{\}|...|{conf_ctx|{<core>core|<events>events|<http>http|...}}"];
+
+   ngx_cycle -> ngx_cycle_t:head;
+
+   {rank=same; ngx_cycle; ngx_cycle_t};
+  
+   // L1
+   ngx_http_conf_ctx_t [label="<head>ngx_http_conf_ctx_t\{A\}|{{main_conf|srv_conf|loc_conf}|{<m1>http_core|<m2>http_proxy|<m3>void *|...|<s1>http_core|<s2>http_proxy|<s3>void *|...|<l1>http_core|<l2>http_proxy|<l3>void *|...}}"];
+   
+   ngx_cycle:e -> ngx_http_conf_ctx_t:head [weight=9, color=none];
+   
+   ngx_cycle_t:http -> ngx_http_conf_ctx_t:head;
+
+   ngx_http_core_main_conf_t [label="<head>ngx_http_core_main_conf_t\{\}|<servers>servers|"];
+   ngx_http_proxy_main_conf_t [label="<head>ngx_http_proxy_main_conf_t\{\}|"];
+
+   ngx_http_conf_ctx_t:m1 -> ngx_http_core_main_conf_t:head ;
+   ngx_http_conf_ctx_t:m2 -> ngx_http_proxy_main_conf_t:head ;
+
+   ngx_http_core_srv_conf_t [label="<head>ngx_http_core_srv_conf_t\{A\}|<ctx>ctx"];
+   ngx_http_conf_ctx_t:s1 -> ngx_http_core_srv_conf_t:head ;
+
+   ngx_http_core_loc_conf_t [label="<head>ngx_http_core_loc_conf_t\{\}|"];
+   ngx_http_conf_ctx_t:l1 -> ngx_http_core_loc_conf_t:head ;
+
+   ngx_http_proxy_loc_conf_t [label="<head>ngx_http_proxy_loc_conf_t\{\}|"];
+   ngx_http_conf_ctx_t:l2 -> ngx_http_proxy_loc_conf_t:head ;
+   
+   // L2
+   
+   ngx_http_core_srv_conf_t1 [label="<head>ngx_http_core_srv_conf_t\{B\}|<ctx>ctx"];
+   ngx_http_core_srv_conf_t2 [label="<head>ngx_http_core_srv_conf_t\{C\}|<ctx>ctx"];
+   
+   ngx_http_core_main_conf_t:servers -> ngx_http_core_srv_conf_t1:head [weight=9];
+   ngx_http_core_srv_conf_t1:head -> ngx_http_core_srv_conf_t2:head [weight=9];
+   
+   
+   ngx_http_conf_ctx_t1 [label="<head>ngx_http_conf_ctx_t\{B\}|{{main_conf|srv_conf|loc_conf}|{<m1>http_core||<s1>http_core||<l1>http_core|}}"];
+   ngx_http_conf_ctx_t2 [label="<head>ngx_http_conf_ctx_t\{C\}|{{main_conf|srv_conf|loc_conf}|{<m1>http_core||<s1>http_core||<l1>http_core|}}"];
+   ngx_http_core_loc_conf_t:head -> ngx_http_conf_ctx_t1:head [weight=9, color=none];
+   ngx_http_conf_ctx_t1:head -> ngx_http_conf_ctx_t2:head [weight=9, color=none];
+   
+   {rank=same; ngx_http_conf_ctx_t1; ngx_http_core_srv_conf_t1};
+   {rank=same; ngx_http_conf_ctx_t2; ngx_http_core_srv_conf_t2};
+
+   ngx_http_core_srv_conf_t1:ctx -> ngx_http_conf_ctx_t1:head:w;
+   ngx_http_core_srv_conf_t2:ctx -> ngx_http_conf_ctx_t2:head:w;
+   
+   ngx_http_core_srv_conf_t:head -> ngx_http_core_srv_conf_t1:ctx:w [label="merge"];
+   ngx_http_core_srv_conf_t:head -> ngx_http_core_srv_conf_t2:ctx:w [label="merge"];
+   
+}
+
+
+
+
+

@@ -5,7 +5,7 @@ digraph ngx_array {
 
    ngx_cycle [shape="box3d", label="ngx_cycle"];
    ngx_http_core_main_conf_t [label="<head>ngx_http_core_main_conf_t\{\}|<servers>servers|..."];
-   ngx_http_core_srv_conf_t_array [label="<head>ngx_http_core_srv_conf_t*\[\]|<n1>ngx_http_core_srv_conf_t*|<n2>ngx_http_core_srv_conf_t*|..."];
+   ngx_http_core_srv_conf_t_array [label="<head>ngx_http_core_srv_conf_t*\[\]|<n1>ngx_http_core_srv_conf_t\{B\}|<n2>ngx_http_core_srv_conf_t\{C\}|..."];
   
    ngx_cycle:e -> ngx_http_core_main_conf_t:head:nw [style="dashed"];
    ngx_http_core_main_conf_t:servers -> ngx_http_core_srv_conf_t_array:head;

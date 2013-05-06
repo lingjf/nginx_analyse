@@ -23,7 +23,21 @@
 		<p> 一个Server对应的多个数据结构如下表示：
 		<p> <img src="Graph/http_core/http_server_structure.png">
 		<p> <code>ngx_http_???_srv_conf_t[]</code>数组管理所有HTTP Module对应的Server数据结构指针，如果模块没有Server数据结构则指针为空。
-		<p> 多个Server以如下方式管理：
+		<p> 从Server的<code>ngx_http_core_srv_conf_t</code>出发通过ctx，ngx_http_ctx_t，ngx_http_???_srv_conf_t[]可以找到任一模块的Server数据结构。
+		<p> 多个Server 配置解析完成后以如下方式组织：
+		<p> <img src="Graph/http_core/http_server_configure.png">
+		<h3> Configure </h3>
+			<p> 解析<code>http</code>配置指令后，创建<code>ngx_http_conf_ctx_t{A}</code>和<code>ngx_http_core_srv_conf_t{A}</code>，配置上下文指向<code>ngx_http_conf_ctx_t{A}</code>。
+			<p> 解析<code>server</code>配置指令后，创建<code>ngx_http_conf_ctx_t{B}</code>和<code>ngx_http_core_srv_conf_t{B}</code>，
+				配置上下文指向<code>ngx_http_conf_ctx_t{A}</code>，并将<code>ngx_http_core_srv_conf_t{B}</code>加入<code>ngx_http_core_main_conf_t::servers</code>数组。
+		<h3> Merge </h3>
+			<p> 配置指令 <code>request_pool_size</code> 配置Server下每个请求的内存池大小，保存在<code>ngx_http_core_srv_conf_t</code>。
+			<p> 通常 <code>request_pool_size</code> 配置在 <code>server{}</code> 之中，表示这是这个Server下所有请求的内存池大小。如果所有的Server都使用相同的值，即需要在每个Server中重复配置。
+			<p> 当 <code>request_pool_size</code> 配置在 <code>http{}</code> 之中时，表示这是所有Server下所有请求的内存池大小。
+			<p> 解析<code>http</code>配置指令后，进入<code>http{}</code>，解析<code>request_pool_size</code>后将值保存在<code>ngx_http_conf_ctx_t{A}</code>下的<code>ngx_http_core_srv_conf_t{A}</code>。
+			<p> 解析<code>server</code>配置指令后，进入<code>server{}</code>，解析<code>request_pool_size</code>后将值保存在后将值保存在<code>ngx_http_conf_ctx_t{B}</code>下的<code>ngx_http_core_srv_conf_t{B}</code>。
+			<p> Merge实际上是一个简单的过程，如果<code>server{}</code>没有配置<code>request_pool_size</code>而<code>http{}</code>有，则<code>ngx_http_core_srv_conf_t{B}</code>使用<code>ngx_http_core_srv_conf_t{A}</code>的<code>request_pool_size</code>。
+		<p> Merge之后多个Server以如下方式管理：
 		<p> <img src="Graph/http_core/http_server_manager.png">
 		<p> 从上述二图可以推出由全局变量<code>ngx_cycle</code>出发可以找到任何一个模块的Server数据结构。
 	<h2> 2.2 - Address/Port 管理 </h2>	
