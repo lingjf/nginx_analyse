@@ -1,0 +1,22 @@
+digraph ngx_queue {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+
+   ngx_queue_t_1 [label="<h>ngx_queue_t\{\}|<n>next|<p>prev"];
+   ngx_queue_t_2 [label="<h>ngx_queue_t\{\}|<n>next|<p>prev"];
+   ngx_queue_t_3 [label="<h>ngx_queue_t\{\}|<n>next|<p>prev"];
+
+   //{rank=same;ngx_queue_t_2;ngx_queue_t_3};
+
+   ngx_queue_t_1:n -> ngx_queue_t_2:h;
+   ngx_queue_t_2:n -> ngx_queue_t_3:h;
+   //ngx_queue_t_3:n -> ngx_queue_t_1:h;
+
+
+   //ngx_queue_t_1:p -> ngx_queue_t_3:h;
+   ngx_queue_t_2:p -> ngx_queue_t_1:h;
+   ngx_queue_t_3:p -> ngx_queue_t_2:h;
+
+}

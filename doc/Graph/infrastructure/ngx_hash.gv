@@ -5,17 +5,17 @@ digraph ngx_hash {
 
    ngx_hash_t [label="<head>ngx_hash_t\{\}|<buckets>buckets|<size>size"];
 
-   buckets_normal [label="<n1>ngx_hash_elt_t *|<n2>ngx_hash_elt_t *|<n3>ngx_hash_elt_t *|<n4>ngx_hash_elt_t *|..."];
-   ngx_hash_t:buckets -> buckets_normal:nw;
+   buckets_normal [label="<head>ngx_hash_elt_t*[]|<n1>ngx_hash_elt_t *|<n2>ngx_hash_elt_t *|<n3>ngx_hash_elt_t *|<n4>ngx_hash_elt_t *|..."];
+   ngx_hash_t:buckets -> buckets_normal:head;
 
-   elts_simple1 [label="{1|ngx_hash_elt_t}|{2|ngx_hash_elt_t}|......|{n|ngx_hash_elt_t}"];
-   buckets_normal:n1 -> elts_simple1:nw;
+   elts_simple1 [label="{<n1>1|ngx_hash_elt_t}|{2|ngx_hash_elt_t}|......|{n|ngx_hash_elt_t}"];
+   buckets_normal:n1 -> elts_simple1:n1;
 
-   elts_simple2 [label="ngx_hash_elt_t|ngx_hash_elt_t|..."];
-   buckets_normal:n2 -> elts_simple2:nw;
+   elts_simple2 [label="{<n1>1|ngx_hash_elt_t}|{2|ngx_hash_elt_t}|......|{n|ngx_hash_elt_t}"];
+   buckets_normal:n2 -> elts_simple2:n1;
 
-   elts_simple3 [label="ngx_hash_elt_t|ngx_hash_elt_t|..."];
-   buckets_normal:n3 -> elts_simple3:nw;
+   elts_simple3 [label="{<n1>1|ngx_hash_elt_t}|{2|ngx_hash_elt_t}|......|{n|ngx_hash_elt_t}"];
+   buckets_normal:n3 -> elts_simple3:n1;
 
    elts_complex [label="{<e1>1|{{value|len}|name[...]}}|{<e2>2|{{value|len}|name[...]}}|......|{n|{{value\n=null|len}|name[...]}}"];
    elts_simple1:ne -> elts_complex:nw [weight=10, style=dashed, dir=none];

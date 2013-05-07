@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<title>Nginx Process Model</title>
+	<title>Nginx Infrastructure</title>
 	<link rel="stylesheet" type="text/css" href="Style/nginx_analyse.css">
 	<META HTTP-EQUIV="content-type" CONTENT="text/html; charset=utf8">
 </head>
@@ -10,8 +10,83 @@
 <body>
 
 <h1> 1 - 概述  </h1>
+<h1> 2 - ngx_str_t </h1>
+	<p> 实现一个字符串。
+	<p> <img src="Graph/infrastructure/ngx_str.png"> 
 
-					
+	<h3> len </h3>
+		<p> 字符串的长度，不包含结尾NULL。有了这个字段，就不用每次调用strlen()计算字符串的长度。 这是提高性能的PREPROCESS原则的应用。
+	<h3> data </h3>
+		<p> 指向字符串，不保证字符串以NULL结尾。 它通常是大字符串中的一个子串，为了减少或避免内存Copy，只是指针引用，所以不能保证以NULL结尾。
+	
+<h1> 3 - ngx_array_t </h1>
+	<p> <img src="Graph/infrastructure/ngx_array.png"> 
+	<p> 实现一个数组，优点是下标寻址速度快，缺点是当已申请的空间不足时，需整体重新申请整体复制。
+	<h3> elts </h3>
+		<p> 指向数组内存空间。
+	<h3> nelts </h3>
+		<p> 数组中已经保存元素个数。
+	<h3> size </h3>
+		<p> 单个元素大小。
+	<h3> nalloc </h3>
+		<p> 预申请空间的元素个数。
+	<h3> pool </h3>
+		<p> 内存池。
+		
+<h1> 4 - ngx_list_t </h1>
+	<p> <img src="Graph/infrastructure/ngx_list.png"> 
+	<p> 这个数据结构并不是通常的链表，它只支持末尾加元素，不支持插入和删除元素，当已申请的空间不足时，不需整体重新申请整体复制。但它又没有数组的下标索引。
+	<h3> elts </h3>
+		<p> 指向内存空间。
+	<h3> nelts </h3>
+		<p> ngx_list_part_t中已经保存元素个数。
+	<h3> size </h3>
+		<p> 单个元素大小。
+	<h3> nalloc </h3>
+		<p> 每个ngx_list_part_t预申请空间的元素个数。
+	<h3> pool </h3>
+		<p> 内存池。
+
+<h1> 5 - ngx_queue_t </h1>
+	<p> <img src="Graph/infrastructure/ngx_queue.png"> 
+	<p> 实现双向循环链表数据结构。和Linux Kernel中的list_head原理是一样的。宿主数据结构通过ngx_queue_t域成员加入链表。
+	由ngx_queue_t域成员在宿主结构中的偏移，已知ngx_queue_t可以得到宿主。
+	<p> <img src="Graph/infrastructure/ngx_queue_host.png"> 
+
+<h1> 6 - ngx_buf_t </h1>
+	<p> <img src="Graph/infrastructure/ngx_buf.png"> 
+	<p> 实现一个缓冲区。
+	<h3> start / end </h3>
+		start指向缓冲区内存的开始（闭区间），end指向结尾（开区间）。
+	<h3> pos </h3>
+		pos指向已处理的结尾。
+	<h3> last </h3>
+		last指向已读入的结尾。
+		
+		
+<h1> 7 - ngx_chain_t </h1>
+	<p> <img src="Graph/infrastructure/ngx_chain.png"> 
+
+
+<h1> 8 - ngx_hash_t </h1>
+	<p> <img src="Graph/infrastructure/ngx_hash.png"> 
+	<p> ngx_hash_t实现一个静态HASH表。所谓表态HASH表是指一经创建，就不能再增加或删除元素。
+	<h3> buckets </h3>
+		指向HASH数组
+	<h3> size </h3>
+		HASH数组的大小
+	<p> ngx_hash_elt_t表示一个元素。
+	<h3> value </h3>
+		元素值。NULL值有特殊的含义，表示KLV结束。
+	<h3> len </h3>
+		Name的长度
+	<h3> name </h3>
+		可变长度的字符串Key
+	
+	<p> Nginx HASH表的实现不采用通常的单向链表的方式，而是采用KLV（key-length-value）方式。相比于链表方式，KLV可以减少TLB计算量。	
+
+<h1> 9 - ngx_hash_wildcard_t </h1>	
+	<p> <img src="Graph/infrastructure/ngx_hash_wildcard.png"> 						
 </body>
 
 </html>
