@@ -83,7 +83,8 @@
 	<h3> name </h3>
 		可变长度的字符串Key
 	
-	<p> Nginx HASH表的实现不采用通常的单向链表的方式，而是采用KLV（key-length-value）方式。相比于链表方式，KLV可以减少TLB计算量。	
+	<p> Nginx HASH表的实现不采用通常的单向链表的方式，而是采用KLV（key-length-value）方式。相比于链表方式，KLV可以减少TLB计算量。	下图是一个具体例子：
+	<p> <img src="Graph/infrastructure/ngx_hash_example.png"> 
 
 <h1> 9 - ngx_hash_wildcard_t </h1>	
 	<p> <img src="Graph/infrastructure/ngx_hash_wildcard.png"> 						

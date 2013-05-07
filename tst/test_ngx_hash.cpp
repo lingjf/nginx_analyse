@@ -47,8 +47,12 @@ H2CASE(ngx_hash_normal,"init")
 
    H2EQUAL_STRCMP("ngx_hash_t{2, 0)b:B 1)a:A c:C } ", jeff_hash_tustring(hinit.hash, (u_char*(*)(void*))jeff_tustring));
 
-   void * data = ngx_hash_find(hinit.hash,ut_normal_hash_key((u_char*)"c", 2), (u_char*)"c", 2);
-   H2EQUAL_STRCMP((char*)"C", (char*)data);
+   void * va = ngx_hash_find(hinit.hash,ut_normal_hash_key((u_char*)"a", 2), (u_char*)"a", 2);
+   H2EQUAL_STRCMP((char*)"A", (char*)va);
+   void * vb = ngx_hash_find(hinit.hash,ut_normal_hash_key((u_char*)"b", 2), (u_char*)"b", 2);
+   H2EQUAL_STRCMP((char*)"B", (char*)vb);
+   void * vc = ngx_hash_find(hinit.hash,ut_normal_hash_key((u_char*)"c", 2), (u_char*)"c", 2);
+   H2EQUAL_STRCMP((char*)"C", (char*)vc);
 }
 
 H2UNIT(ngx_hash_wildcard)
@@ -330,4 +334,77 @@ H2CASE(ngx_hash_keys_arrays,"error case : add key wildcard *..com")
    int rv = ngx_hash_add_key(&ka, &v1, d1, NGX_HASH_WILDCARD_KEY);
    H2EQUAL_INTEGER(NGX_DECLINED, rv);
 }
+
+H2UNIT(ngx_hash_combined)
+{
+   ngx_pool_t * pool;
+   ngx_hash_keys_arrays_t ka;
+   void setup()
+   {
+      ngx_cacheline_size = 16;
+      pool = ngx_create_pool(4000, NULL);
+
+
+      ka.pool = pool;
+      ka.temp_pool = pool;
+      int rv = ngx_hash_keys_array_init(&ka, 0);
+      H2EQUAL_INTEGER(NGX_OK, rv);
+   }
+
+   void teardown()
+   {
+      ngx_destroy_pool(pool);
+   }
+};
+
+H2CASE(ngx_hash_combined,"hi")
+{
+   int rv;
+
+   char c1[] = "*.abc.com";
+   ngx_str_t k1 = {strlen(c1), (u_char*)c1};
+   char v1[] = "A";
+
+   rv = ngx_hash_add_key(&ka, &k1, v1, NGX_HASH_WILDCARD_KEY);
+   H2EQUAL_INTEGER(NGX_OK, rv);
+
+   char c2[] = "*.bbc.com";
+   ngx_str_t k2 = {strlen(c2), (u_char*)c2};
+   char v2[] = "B";
+
+   rv = ngx_hash_add_key(&ka, &k2, v2, NGX_HASH_WILDCARD_KEY);
+   H2EQUAL_INTEGER(NGX_OK, rv);
+
+   ngx_hash_init_t             hash;
+
+   hash.key = ngx_hash_key_lc;
+   hash.max_size = 4;
+   hash.bucket_size = 40;
+   hash.name = "hello";
+   hash.pool = pool;
+   hash.temp_pool = pool;
+
+   hash.hash = NULL;
+
+   rv = ngx_hash_wildcard_init(&hash, (ngx_hash_key_t*)ka.dns_wc_head.elts, ka.dns_wc_head.nelts);
+   H2EQUAL_INTEGER(NGX_OK, rv);
+   ngx_hash_wildcard_t *wc_head = (ngx_hash_wildcard_t *) hash.hash;
+   H2CHECK(wc_head);
+
+   //H2EQUAL_STRCMP("ngx_hash_wildcard_t{0)com:{0)abc:A } } } ",
+   //      jeff_hash_wildcard_tustring(wc_head, (u_char*(*)(void*))jeff_tustring));
+
+   char n1[] = "www.abc.com";
+   void * r1 = ngx_hash_find_wc_head(wc_head, (u_char*)n1, strlen(n1));
+
+   H2EQUAL_STRCMP((char*)"A", (char*)r1);
+
+
+   //char n2[] = "www.bbc.com";
+   //void * r2 = ngx_hash_find_wc_head(wc_head, (u_char*)n2, strlen(n2));
+
+   //H2EQUAL_STRCMP((char*)"B", (char*)r2);
+
+}
+
 

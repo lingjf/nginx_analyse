@@ -1,0 +1,18 @@
+digraph ngx_hash_example {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_hash_t [label="<head>ngx_hash_t\{\}|<buckets>buckets|<size>size=4"];
+
+   buckets_normal [label="<head>ngx_hash_elt_t*[4]|<n1>ngx_hash_elt_t *|<n2>ngx_hash_elt_t *|<n3>ngx_hash_elt_t *|<n4>ngx_hash_elt_t *"];
+   ngx_hash_t:buckets -> buckets_normal:head;
+
+   ngx_hash_elt_t1 [label="{<e1>1|{{value=1000|len=3|abc}}}|{<e2>2|{{value=2000|len=3|xyz}}}|......|{n|{{value = null|len=3|opq}}}"];
+   buckets_normal:n1 -> ngx_hash_elt_t1:nw;
+
+   ngx_hash_elt_t3 [label="{<e1>1|{{value=3001|len=3|ust}}}|{<e2>2|{{value=4001|len=3|stu}}}|......|{n|{{value = null|len=3|mno}}}"];
+   buckets_normal:n3 -> ngx_hash_elt_t3:nw;
+
+
+}

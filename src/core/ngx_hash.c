@@ -192,7 +192,7 @@ ngx_hash_find_combined(ngx_hash_combined_t *hash, ngx_uint_t key, u_char *name, 
     return NULL;
 }
 
-/* ¸ù¾İ ngx_hash_key_t Ëã³ö ngx_hash_elt_t µÄ´óĞ¡(¶ÔÆë) */
+/* æ ¹æ® ngx_hash_key_t ç®—å‡º ngx_hash_elt_t çš„å¤§å°(å¯¹é½) */
 #define NGX_HASH_ELT_SIZE(name) (sizeof(void *) + ngx_align((name)->key.len + 2, sizeof(void *)))
 
 ngx_int_t
@@ -205,13 +205,14 @@ ngx_hash_init(ngx_hash_init_t *hinit, ngx_hash_key_t *names, ngx_uint_t nelts)
     ngx_hash_elt_t  *elt, **buckets;
 
     for (n = 0; n < nelts; n++) {
-        /* ¼ì²éÒ»¸öbucketÄÜ´æÏÂÈÎºÎÒ»¸ökey */
-        if (hinit->bucket_size < NGX_HASH_ELT_SIZE(&names[n]) + sizeof(void *)/*µ¥¸ökey½áÊø±êÖ¾,²Î¼ûfindº¯Êı*/) {
+        /* æ£€æŸ¥ä¸€ä¸ªbucketèƒ½å­˜ä¸‹ä»»ä½•ä¸€ä¸ªkey */
+        if (hinit->bucket_size < NGX_HASH_ELT_SIZE(&names[n]) + sizeof(void *)/*å•ä¸ªkeyç»“æŸæ ‡å¿—,å‚è§findå‡½æ•°*/) {
             ngx_log_error(NGX_LOG_EMERG, hinit->pool->log, 0, "could not build the %s, you should " "increase %s_bucket_size: %i", hinit->name, hinit->name, hinit->bucket_size);
             return NGX_ERROR;
         }
     }
-
+    /* ä¸å‘å†…å­˜æ± ç”³è¯·å†…å­˜ï¼Œè€Œç›´æ¥å‘ç³»ç»Ÿç”³è¯·å†…å­˜çš„åŸå› æ˜¯ï¼šè¿™å—å†…å­˜æ˜¯ä¸´æ—¶å†…å­˜è¿™ä¸ªå‡½æ•°å†…ç”¨å®Œåå³æ— ç”¨éœ€è¦é‡Šæ”¾ã€‚
+     * å¦‚æœå‘å†…å­˜æ± (ngx_cycleçš„å†…å­˜æ± )ç”³è¯·çš„è¯ï¼Œå°±ä¸ä¼šé‡Šæ”¾äº†é€ æˆæµªè´¹ã€‚ */
     test = ngx_alloc(hinit->max_size * sizeof(u_short), hinit->pool->log);
     if (test == NULL) {
         return NGX_ERROR;
@@ -219,7 +220,11 @@ ngx_hash_init(ngx_hash_init_t *hinit, ngx_hash_key_t *names, ngx_uint_t nelts)
 
     bucket_size = hinit->bucket_size - sizeof(void *);
 
-    /* start Îª×îĞ¡bucketÊıÁ¿ */
+    /* start ä¸ºæœ€å°bucketæ•°é‡(HASHæ•°ç»„å¤§å°)
+     * NGX_HASH_ELT_SIZEçš„æœ€å°å€¼æ˜¯ 2 * sizeof(void *)
+     * start = nelts * (2 * sizeof(void *)) / bucket_size
+     *       = nelts / (bucket_size / (2 * sizeof(void *)))
+     */
     start = nelts / (bucket_size / (2 * sizeof(void *)));
     start = start ? start : 1;
 
@@ -227,6 +232,7 @@ ngx_hash_init(ngx_hash_init_t *hinit, ngx_hash_key_t *names, ngx_uint_t nelts)
         start = hinit->max_size - 1000;
     }
 
+    /* æ¢æµ‹å°†å…¨éƒ¨å…ƒç´ å­˜ä¸‹çš„æœ€å°bucketæ•°é‡ */
     for (size = start; size <= hinit->max_size; size++) {
         ngx_memzero(test, size * sizeof(u_short));
         for (n = 0; n < nelts; n++) {
@@ -275,7 +281,7 @@ found:
         test[i] = (u_short) (ngx_align(test[i], ngx_cacheline_size));
         len += test[i];
     }
-    /* ·ÖÅähashÊı×é */
+
     if (hinit->hash == NULL) {
         hinit->hash = ngx_pcalloc(hinit->pool, sizeof(ngx_hash_wildcard_t) + size * sizeof(ngx_hash_elt_t *));
         if (hinit->hash == NULL) {
@@ -290,7 +296,7 @@ found:
             return NGX_ERROR;
         }
     }
-    /* ·ÖÅä×ÜµÄbucketÄÚ´æ */
+
     elts = ngx_palloc(hinit->pool, len + ngx_cacheline_size);
     if (elts == NULL) {
         ngx_free(test);
@@ -298,7 +304,7 @@ found:
     }
 
     elts = ngx_align_ptr(elts, ngx_cacheline_size);
-    /* ÇĞ·ÖÄÚ´æµ½¸÷¸öbucket */
+    /* åˆ‡åˆ†å†…å­˜åˆ°å„ä¸ªbucket */
     for (i = 0; i < size; i++) {
         if (test[i] == sizeof(void *)) {
             continue;
@@ -310,7 +316,8 @@ found:
     for (i = 0; i < size; i++) {
         test[i] = 0;
     }
-    /* ²åÈëÊı¾İ */
+
+    /* æ’å…¥å…ƒç´ æ•°æ•°æ® */
     for (n = 0; n < nelts; n++) {
         if (names[n].key.data == NULL) {
             continue;
@@ -326,7 +333,7 @@ found:
         test[key] = (u_short) (test[key] + NGX_HASH_ELT_SIZE(&names[n]));
     }
 
-    /* ÔÚÃ¿¸öbucket×îºó¼ÓÒ»¸öNULL±íÊ¾Ò»¸öbucket½áÊø */
+    /* åœ¨æ¯ä¸ªbucketæœ€ååŠ ä¸€ä¸ªNULLè¡¨ç¤ºä¸€ä¸ªbucketç»“æŸ */
     for (i = 0; i < size; i++) {
         if (buckets[i] == NULL) {
             continue;
@@ -576,7 +583,7 @@ ngx_hash_add_key(ngx_hash_keys_arrays_t *ha, ngx_str_t *key, void *value, ngx_ui
         n = 0;
         for (i = 0; i < key->len; i++) {
             if (key->data[i] == '*') {
-                if (++n > 1) { /* ²»ÄÜÓĞ2¸öĞÇ */
+                if (++n > 1) { /* ä¸èƒ½æœ‰2ä¸ªæ˜Ÿ */
                     return NGX_DECLINED;
                 }
             }
@@ -605,7 +612,7 @@ ngx_hash_add_key(ngx_hash_keys_arrays_t *ha, ngx_str_t *key, void *value, ngx_ui
             }
         }
 
-        if (n) { /* ÖĞ¼äÓĞ*µÄÇé¿ö */
+        if (n) { /* ä¸­é—´æœ‰*çš„æƒ…å†µ */
             return NGX_DECLINED;
         }
     }

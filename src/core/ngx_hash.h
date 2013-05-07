@@ -12,9 +12,6 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 
-/*
- * ��ֻ̬��HASH��
- */
 
 typedef struct {
     void             *value;
@@ -51,8 +48,8 @@ typedef struct {
     ngx_hash_t       *hash;
     ngx_hash_key_pt   key;
 
-    ngx_uint_t        max_size;
-    ngx_uint_t        bucket_size;
+    ngx_uint_t        max_size; /* 配置的最大HASH数组大小，即bucket数量 */
+    ngx_uint_t        bucket_size; /* 配置的HASH数组项大小 */
 
     char             *name;
     ngx_pool_t       *pool;
