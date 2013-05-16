@@ -18,7 +18,7 @@
 
 <h1> 2 - Nginx Master/Worker </h1>
 	<p>
-	<a href="Graph/process_model/master_worker.gv"> <img src="Graph/process_model/master_worker.png"> </a>
+	<img src="Graph/process_model/master_worker.png">
 	<p>
 	在启动时，Master进程打开Listen Socket(s)并创建若干个子进程Worker。Master此后负责监控Worker，而不处理具体的业务。
 	Worker同时监听Listen Socket(s)和Accepted Socket(s)，并且以异步非阻塞的方式接受新连接和处理请求。
