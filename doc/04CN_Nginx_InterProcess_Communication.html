@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<title>Nginx Process Model</title>
+	<title>Nginx InterProcess Communication</title>
 	<link rel="stylesheet" type="text/css" href="Style/nginx_analyse.css">
 	<META HTTP-EQUIV="content-type" CONTENT="text/html; charset=utf8">
 </head>
@@ -10,8 +10,135 @@
 <body>
 
 <h1> 1 - 概述  </h1>
+<h1> 2 - 共享内存  </h1>
+	<p> <img src="Graph/interprocess/share_memory.png">
+	<p> 共享内存是最高效的进程内通信方式。
+	
+	<h3> ngx_shm_zone_t </h3>
+		<p> 管理一块共享内存。
+		<ul>
+			<li> data </li>
+				用户自定义数据。
+			<li> init </li>
+				共享内存初始化函数。
+			<li> tag </li>
+				通常是用户的标枳。
+		</ul>
+	<h3> ngx_shm_t </h3>
+		<p> 管理由mmap()或shmget()创建的共享内存空间。
+		<ul>
+			<li> addr </li>
+				共享内存的起始地址。
+			<li> size </li>
+				共享内存大少。
+			<li> name </li>
+				共享内存名称
+		</ul>
 
-					
+<h1> 3 - 锁 </h1>
+	<p> Nginx的进程间锁分为原子锁和文件锁这二种实现。编译时根据系统特性选择其中一种。
+	<p> 在用户空间进程间锁实现的原理很简单，通过控制各个进程都能访问的对象来实现进程的互斥。
+	<p> 原子锁控制的对象是共享内存；文件锁控制的对象是文件句柄。
+				
+	<h2> 3.1 - 原子锁 </h2>
+		<p> <img src="Graph/interprocess/atomic_lock.png">
+		<p> ngx_shmtx_t实现了一个原子锁，其中lock指向一个共享内存中的一个int变量。各个进程操作这个共享变量lock来实现加锁和解锁等操作。
+		<ul>
+			<li>	ngx_shmtx_trylock：尝试加锁，如果加锁成功则返回true，否则返回false而不等待。 </li>
+			<li>	ngx_shmtx_lock：加锁，如果已被其它进程加锁，则等待。 </li>
+			<li>	ngx_shmtx_unlock：解锁，只可解由本进程加锁的锁。 </li>
+			<li>	ngx_shmtx_force_unlock：强制解锁，即可以解由其它进程加锁的锁。 </li>
+		</ul>
+			<h3> 非原子实现 </h3>
+				<p> 我们先实现一个ngx_shmtx_trylock：
+				<pre>
+1)	bool ngx_shmtx_trylock(ngx_shmtx_t *tx) {
+2)	    if (*tx->lock == 0) {
+3)	        *tx->lock = my_pid;
+4)	        return true;
+5)	    }
+6)	    return false;
+7)	} </pre>
+				<p> 这个实现是有问题的。假设初始状态该锁没有被任何进程加锁，即lock为0。
+				<ul>
+					<li>	进程A执行完2)在执行3)之前被切换到进程B。 </li>
+					<li>	进程B执行2)，此时lock仍然为0，所以接着执行3)将lock设为pid(B)，接着返回true。 </li>
+					<li>	进程B加锁成功。切换进程到进程A。 </li>
+					<li>	进程A执行3)将lock设为pid(A)，接着返回true。 </li>
+					<li>	进程A加锁成功。 </li>
+				</ul>
+				<p> 在上述的情况下，进程A和进程B都成功加锁。出错的原因是lock判断2)和赋值3)这二个操作之间插入其它操作，导致赋值的假设条件被破坏。 解决方案是使判断和赋值这二个操作不可打断的，原子性的。
+				
+			<h3> 原子实现 </h3>
+				<p>  <code>bool ngx_atomic_cmp_set(*lock, old, set)</code> 的实现或者是利用系统库的实现，或者是利用cmpxchgl汇编指令实现。
+				<ul>
+					<li> ngx_shmtx_trylock </li>
+					<pre>
+1)	bool ngx_shmtx_trylock(ngx_shmtx_t *tx) {
+2)	    return *tx == 0 && ngx_atomic_cmp_set(tx->lock, 0, my_pid);
+3)	} </pre>
+					<li> ngx_shmtx_lock </li>
+					<pre>
+1)	void ngx_shmtx_lock(ngx_shmtx_t *tx) {
+2)	    while (true) {
+3)	        if (ngx_shmt_trylock(tx)) return;
+4)	        if (ncpu > 1) { // 单CPU不能自旋
+5)	            for (n = 1, 2, 4 , 8 , 16, …, 2048) { // 自旋由短到长
+6)	                for (i = 1, 2, 3, 4, 5, …, n) { // 自旋操作
+7)	                    ngx_cpu_pause();
+8)	                }
+9)	                if (ngx_shmt_trylock(tx)) return;
+10)	            }
+11)	        }
+12)	        yield(); // 自动放弃CPU，挂入进程执行队列的末尾
+13)	    }
+14)	} </pre>
+					<li> ngx_shmtx_unlock </li>
+					<pre>
+1)	void ngx_shmtx_unlock(ngx_shmtx_t *tx) {
+2)	    ngx_atomic_cmp_set(tx->lock, my_pid, 0);
+3)	} </pre>
+
+					<li> ngx_shmtx_force_unlock </li>
+					<pre>
+1)	void ngx_shmtx_force_unlock(ngx_shmtx_t *tx, any_pid) {
+2)	    ngx_atomic_cmp_set(tx->lock, any_pid, 0);
+3)	} </pre>
+				</ul>
+			
+			<h3> 信号量实现 </h3>
+				<p> 当长时间自旋后，仍然加锁不成功。上述的策略是自动放弃CPU，并挂入进程执行队列的末尾。 这里的策略是加入信号量等待队列，并从进程执行队列移除。当其它进程解锁时，释放一个信号，并唤醒所有等待的进程。
+				<ul>
+					<li> ngx_shmtx_lock </li>
+						<pre>
+1)	void ngx_shmtx_lock(ngx_shmtx_t *tx) {
+2)	    while (true) {
+3)	        if (ngx_shmt_trylock(tx)) return;
+4)	        if (ncpu > 1) { // 单CPU不能自旋
+5)	            for (n = 1, 2, 4 , 8 , 16, …, 2048) { // 自旋由短到长
+6)	                for (i = 1, 2, 3, 4, 5, …, n) { // 自旋操作
+7)	                    ngx_cpu_pause();
+8)	                }
+9)	                if (ngx_shmt_trylock(tx)) return;
+10)	            }
+11)	        }
+12)	        sem_wait(tx->semaphore);
+13)	    }
+14)	} </pre>
+				</ul>
+				
+				
+		<h2> 3.2 - 文件锁 </h2>
+			<p> 利用系统调用fcntl()实现锁操作。 ngx_trylock_fd()、ngx_lock_fd()、ngx_unlock_fd()
+						
+		<h2> 3.3 - 死锁恢复 </h2>
+			<p> 当某个Worker对成功加锁后，在没有解锁之前，Worker进程异常退出。这种情况就会造成死锁。Nginx是如何处理这种情况的呢？
+			<p> Worker异常退出，Master会收到SIGCHLD信号，在SIGCHLD信号处理函数中，调用waitpid()得到Worker的pid，用这个pid调用 ngx_shmtx_force_unlock()解锁。死锁得以恢复。
+
+
+<h1> 4 - UNIX域Socket  </h1>
+	[TODO]
+							
 </body>
 
 </html>
