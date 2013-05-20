@@ -50,6 +50,30 @@
 		<p>	当收到请求后，需要根据Address Port URL Host找到所属的Server。
 		<p> 在<code>ngx_http_init_request()</code>中根据上图先找到默认的Server，当URL Host得到后再通过<code>ngx_http_find_virtual_server()</code>重新查找所属的Server。
 <h1> 3 - Location </h1>
+	<p> 一个Location对应于配置文件中的一个location指令。[TODO]what is location?
+	<h2> 2.1 - Location 管理 </h2>	
+	<p> 每个模块可以有专有的数据结构来表示，并用模块的回调函数 <code>create_loc_conf</code> 来创建。
+		<ul>
+			<li>HTTP Core 模块对应的数据结构为：<code>ngx_http_core_loc_conf_t</code></li>
+			<li>HTTP Index 模块对应的数据结构为：<code>ngx_http_index_loc_conf_t</code> </li>
+			<li>... </li>
+		</ul>
+		<p> 一个Location对应的多个数据结构如下表示：
+		<p> <img src="Graph/http_core/http_location_structure.png">
+		<p> <code>ngx_http_???_loc_conf_t[]</code> 数组管理所有HTTP Module对应的Location数据结构指针，如果模块没有Location数据结构则指针为空。
+		<p> 从 <code>ngx_http_core_loc_conf_t</code> 出发通过loc_conf，ngx_http_???_loc_conf_t[]可以找到任一模块的Location数据结构。
+		<p> 一个Server下多个Location 配置解析完成后以如下方式组织：
+		<p> <img src="Graph/http_core/http_location_server.png">
+		<ul>
+			<li> Named Location </li>
+				Named Location 直接以数组方式组织在 <code>ngx_http_core_srv_conf_t::named_locations </code>。
+			<li> Static Location </li>
+				以<a href="http://en.wikipedia.org/wiki/Trie"> Prefix Tree </a>算法组织在static_locations.
+			<li> Regex Location </li>
+				依据配置文件中出现的顺序，以数组方式组织在 regex_locations。
+		</ul>
+	<h2> 2.2 - Location 查找 </h2>		
+		<p> 已知Server的情况下，根据URL查找Location。 <code> ngx_http_core_find_location() </code>
 <h1> 4 - Request </h1>
 <h1> 5 - Phase Handler </h1>
 	<p> Nginx对Request的处理划分为10个阶段(Phase)。
@@ -101,8 +125,7 @@ static ngx_int_t ngx_http_static_init(ngx_conf_t *cf)
     *h = ngx_http_static_handler;
 
     return NGX_OK;
-}		
-		</pre>
+} </pre>
 		<p> 注册完成后如下图的phases所管理二维数组所示：
 		<p> <img src="Graph/http_core/http_phase_table.png">
 		<p> 因为是在模块的postconfiguration回调函数注册的，所以各个模块的次序决定了各个阶段处理函的次序。

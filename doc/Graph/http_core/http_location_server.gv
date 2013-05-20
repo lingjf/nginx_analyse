@@ -1,0 +1,31 @@
+digraph ngx_http_location_server {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_http_conf_ctx_t [label="<head>ngx_http_conf_ctx_t\{\}|<main>main_conf|<srv>srv_conf|<loc>loc_conf"];
+   
+   srv_conf_array [label="<head>ngx_http_???_srv_conf_t*\[\]|<core>http_core|..."];
+   loc_conf_array [label="<head>ngx_http_???_loc_conf_t*\[\]|<core>http_core|..."];
+   ngx_http_conf_ctx_t:srv -> srv_conf_array:head;
+   ngx_http_conf_ctx_t:loc -> loc_conf_array:head;
+
+
+   ngx_http_core_srv_conf_t [label="<head>ngx_http_core_srv_conf_t\{\}|<ctx>ctx|<named>named_locations|..."];
+   
+
+   srv_conf_array:core -> ngx_http_core_srv_conf_t:head;
+   ngx_http_core_srv_conf_t:ctx -> ngx_http_conf_ctx_t:head;
+
+   core_loc_conf_named [label="<head>ngx_http_core_loc_conf_t*\[\]|<n1>ngx_http_core_loc_conf_t*|<n2>ngx_http_core_loc_conf_t*|..."];
+   ngx_http_core_srv_conf_t:named -> core_loc_conf_named:head;
+
+   ngx_http_core_loc_conf_t [label="<head>ngx_http_core_loc_conf_t\{\}|<static>static_locations|<regex>regex_locations|"];
+   loc_conf_array:core -> ngx_http_core_loc_conf_t:head;
+
+   core_loc_conf_set [label="<head>ngx_http_core_loc_conf_t*\<\>|<n1>ngx_http_core_loc_conf_t*|<n2>ngx_http_core_loc_conf_t*|..."];
+   ngx_http_core_loc_conf_t:static -> core_loc_conf_set:head;
+
+   core_loc_conf_list [label="<head>ngx_http_core_loc_conf_t*\[\]|<n1>ngx_http_core_loc_conf_t*|<n2>ngx_http_core_loc_conf_t*|..."];
+   ngx_http_core_loc_conf_t:regex -> core_loc_conf_list:head;
+}

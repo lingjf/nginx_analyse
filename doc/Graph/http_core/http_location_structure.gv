@@ -1,0 +1,20 @@
+digraph ngx_http_location_structure {
+   rankdir=LR;
+   node [shape=record, color=skyblue, fontname="Verdana", fontsize=10];
+   edge [color=forestgreen, fontname="Verdana", fontsize=10];
+
+   ngx_http_conf_ctx_t [label="<head>ngx_http_conf_ctx_t\{\}|<main>main_conf|<srv>srv_conf|<loc>loc_conf"];
+
+   loc_conf_array [label="<head>ngx_http_???_loc_conf_t*\[\]|<core>http_core|...|<index>http_index|..."];
+   ngx_http_conf_ctx_t:loc -> loc_conf_array:head;
+
+
+   ngx_http_core_loc_conf_t [label="<head>ngx_http_core_loc_conf_t\{\}|root|handler|<loc_conf>loc_conf|..."];
+   loc_conf_array:core -> ngx_http_core_loc_conf_t:head;
+   ngx_http_core_loc_conf_t:loc_conf -> loc_conf_array:head;
+
+
+   ngx_http_index_loc_conf_t [label="<head>ngx_http_index_loc_conf_t\{\}|indices|max_index_len"];
+   loc_conf_array:index -> ngx_http_index_loc_conf_t:head;
+
+}
