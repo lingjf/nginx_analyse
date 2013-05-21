@@ -75,6 +75,7 @@
 	<h2> 2.2 - Location 查找 </h2>		
 		<p> 已知Server的情况下，根据URL查找Location。 <code> ngx_http_core_find_location() </code>
 <h1> 4 - Request </h1>
+	<p> <img src="Graph/http_core/http_request.png">
 <h1> 5 - Phase Handler </h1>
 	<p> Nginx对Request的处理划分为10个阶段(Phase)。
 	<ul>
@@ -278,7 +279,7 @@ static ngx_int_t ngx_http_not_modified_filter_init(ngx_conf_t *cf)
 		</ul>
 		<p> Body同理。
 		
-	<h2> 5.3 - External Filter Module </h2>
+	<h2> 6.3 - External Filter Module </h2>
 	<p> 参考 <code> http_copyleft_module </code>
 	<ul>
 		<li> 将模块源文件加入宏NGX_ADDON_SRCS，使得模块源代码可以进入编译链接。</li>
