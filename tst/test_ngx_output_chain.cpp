@@ -36,12 +36,12 @@ H2CASE(ngx_output_chain,"update chains")
    buf_in_2->last += 64; // buf_in_2 has 60 bytes
    buf_in_3->last += 20; // buf_in_3 has 20 bytes
 
-   H2EQUAL_STRCMP("ngx_chain_t{ngx_buf_t{pos/last/end=64/64/64,temporary},ngx_buf_t{pos/last/end=4/64/64,temporary},ngx_buf_t{pos/last/end=0/20/64,temporary},}", jeff_chain_tustring(occ.in));
-   H2EQUAL_STRCMP("NULL", jeff_chain_tustring(occ.busy));
-   H2EQUAL_STRCMP("NULL", jeff_chain_tustring(occ.free));
+   H2EQ_STRCMP("ngx_chain_t{ngx_buf_t{pos/last/end=64/64/64,temporary},ngx_buf_t{pos/last/end=4/64/64,temporary},ngx_buf_t{pos/last/end=0/20/64,temporary},}", jeff_chain_tustring(occ.in));
+   H2EQ_STRCMP("NULL", jeff_chain_tustring(occ.busy));
+   H2EQ_STRCMP("NULL", jeff_chain_tustring(occ.free));
 
    ngx_chain_update_chains(pool, &occ.free, &occ.busy, &occ.in, 0);
-   H2EQUAL_STRCMP("NULL", jeff_chain_tustring(occ.in));
-   H2EQUAL_STRCMP("ngx_chain_t{ngx_buf_t{pos/last/end=4/64/64,temporary},ngx_buf_t{pos/last/end=0/20/64,temporary},}", jeff_chain_tustring(occ.busy));
-   H2EQUAL_STRCMP("ngx_chain_t{ngx_buf_t{pos/last/end=0/0/64,temporary},}", jeff_chain_tustring(occ.free));
+   H2EQ_STRCMP("NULL", jeff_chain_tustring(occ.in));
+   H2EQ_STRCMP("ngx_chain_t{ngx_buf_t{pos/last/end=4/64/64,temporary},ngx_buf_t{pos/last/end=0/20/64,temporary},}", jeff_chain_tustring(occ.busy));
+   H2EQ_STRCMP("ngx_chain_t{ngx_buf_t{pos/last/end=0/0/64,temporary},}", jeff_chain_tustring(occ.free));
 }

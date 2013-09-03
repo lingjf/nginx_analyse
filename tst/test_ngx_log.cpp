@@ -23,7 +23,7 @@ H2UNIT(ngx_log)
 H2CASE(ngx_log,"init")
 {
    ngx_log_t *log = ngx_log_init(NULL);
-	H2EQUAL_STRCMP("ngx_log_t{file=}", jeff_log_tustring(log));
+	H2EQ_STRCMP("ngx_log_t{file=}", jeff_log_tustring(log));
 }
 
 

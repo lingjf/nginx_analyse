@@ -24,5 +24,5 @@ H2UNIT(ngx_cycle)
 H2CASE(ngx_cycle,"init")
 {
    ngx_cycle_t * c = setup_nginx_runtime();
-   H2EQUAL_WILDCARD("ngx_cycle_t{prefix=*/nginx_analyse/objs/,conf_prefix=*/nginx_analyse/objs/conf/,conf_file=*/nginx_analyse/objs/conf/nginx.conf}", jeff_cycle_tustring(c));
+   H2EQ_WILDCARD("ngx_cycle_t{prefix=*/nginx_analyse/objs/,conf_prefix=*/nginx_analyse/objs/conf/,conf_file=*/nginx_analyse/objs/conf/nginx.conf}", jeff_cycle_tustring(c));
 }

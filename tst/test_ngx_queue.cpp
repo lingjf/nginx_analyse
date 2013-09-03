@@ -24,13 +24,14 @@ H2CASE(ngx_queue,"queue init")
 {
    ngx_queue_t queue;
    ngx_queue_init(&queue);
-   H2EQUAL_INTEGER(&queue, queue.prev);
-   H2EQUAL_INTEGER(&queue, queue.next);
+   H2EQ_TRUE(&queue == queue.prev);
+   H2EQ_TRUE(&queue == queue.next);
 }
 
 H2CASE(ngx_queue,"queue empty")
 {
    ngx_queue_t queue;
    ngx_queue_init(&queue);
-   H2CHECK(ngx_queue_empty(&queue));
+   H2EQ_TRUE(ngx_queue_empty(&queue));
 }
+

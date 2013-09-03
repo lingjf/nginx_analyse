@@ -28,6 +28,6 @@ H2UNIT(ngx_times)
 
 H2CASE(ngx_times,"http time")
 {
-   H2EQUAL_INTEGER(1234567890, ngx_time());
-   H2EQUAL_STRCMP("Fri, 13 Feb 2009 23:31:30 GMT", jeff_str_tustring((ngx_str_t*)&ngx_cached_http_time));
+   H2EQ_MATH(1234567890, ngx_time());
+   H2EQ_STRCMP("Fri, 13 Feb 2009 23:31:30 GMT", jeff_str_tustring((ngx_str_t*)&ngx_cached_http_time));
 }

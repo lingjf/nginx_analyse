@@ -38,8 +38,8 @@ H2CASE(ngx_conf_file,"set flag slot")
 
    result = NGX_CONF_UNSET;
    rv = ngx_conf_set_flag_slot(&cf, &cmd, (void*)&result);
-   H2EQUAL_INTEGER(NGX_CONF_OK, rv);
-   H2EQUAL_INTEGER(1, result);
+   H2EQ_MATH(NGX_CONF_OK, rv);
+   H2EQ_MATH(1, result);
 
    // off
    cf.args = ngx_array_create(pool, 3, sizeof(ngx_str_t));
@@ -50,8 +50,8 @@ H2CASE(ngx_conf_file,"set flag slot")
 
    result = NGX_CONF_UNSET;
    rv = ngx_conf_set_flag_slot(&cf, &cmd, (void*)&result);
-   H2EQUAL_INTEGER(NGX_CONF_OK, rv);
-   H2EQUAL_INTEGER(0, result);
+   H2EQ_MATH(NGX_CONF_OK, rv);
+   H2EQ_MATH(0, result);
 }
 
 H2CASE(ngx_conf_file,"set str slot")
@@ -69,8 +69,8 @@ H2CASE(ngx_conf_file,"set str slot")
    ngx_str_set(s, "world");
 
    rv = ngx_conf_set_str_slot(&cf, &cmd, (void*)&result);
-   H2EQUAL_INTEGER(NGX_CONF_OK, rv);
-   H2EQUAL_STRCMP("world", jeff_str_tustring(&result));
+   H2EQ_MATH(NGX_CONF_OK, rv);
+   H2EQ_STRCMP("world", jeff_str_tustring(&result));
 }
 
 H2CASE(ngx_conf_file,"set slot")

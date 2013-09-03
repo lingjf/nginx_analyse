@@ -23,6 +23,6 @@ H2UNIT(ngx_string)
 H2CASE(ngx_string,"array create")
 {
    ngx_array_t * array = ngx_array_create(pool, 10, 40);
-   H2EQUAL_STRCMP("ngx_array_t{size=40,nelts/alloc=0/10}", jeff_array_tustring(array, NULL));
+   H2EQ_STRCMP("ngx_array_t{size=40,nelts/alloc=0/10}", jeff_array_tustring(array, NULL));
    ngx_array_destroy(array);
 }

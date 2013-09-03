@@ -21,7 +21,7 @@ H2CASE(ngx_slab,"slab init")
 {
 	ngx_slab_pool_t slab;
 	//ngx_slab_init(&slab);
-	H2EQUAL_STRCMP("", jeff_slab_tustring(&slab));
+	H2EQ_STRCMP("", jeff_slab_tustring(&slab));
 }
 
 H2CASE(ngx_slab,"slab alloc")
@@ -30,6 +30,6 @@ H2CASE(ngx_slab,"slab alloc")
 	//ngx_slab_init(&slab);
 	//void *data1 = ngx_slab_alloc(&slab, 100);
 	//H2CHECK(data1 != NULL);
-	H2EQUAL_STRCMP("", jeff_slab_tustring(&slab));
+	H2EQ_STRCMP("", jeff_slab_tustring(&slab));
 }
 
